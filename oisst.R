@@ -1,20 +1,23 @@
 library(raster)
 library(ncdf4)
 
-oisst.file <- "data2/avhrr-only-v2.19810913.nc.nc"
-mask <- "data2/lsmask.oisst.v2.nc"
+source("OISST_function.R")
 
-# oisst.brick <- brick(oisst.file)
-# oisst.raster <- raster(oisst.file)
+url <- "https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/access/avhrr-only/201501/avhrr-only-v2.20150114.nc"
 
-source('OISST_function.R')
+download.file(url, destfile = "data/temp.nc")
 
-# test <- extractOISST1day(oisst.file, mask, 2.2, 2.2, 0.225, 0.225)
+oisst.file <- "data/temp.nc"
+mask <- "data/lsmask.oisst.v2.nc"
 
-extractOISST1day_bylocation <- function(long, lat){
+
+extractOISST1day_bylocation <- function(oisst.file, long, lat){
 	sst <- extractOISST1day(oisst.file, mask, long, long, lat, lat)
 	return(sst)
 }
 
-sst <- extractOISST1day_bylocation(2.2,0.225)
+sst <- extractOISST1day_bylocation(oisst.file, 2.2,0.225)
 sst
+
+
+
