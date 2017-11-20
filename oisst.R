@@ -1,3 +1,6 @@
+# Code to populate the HURDAT2 data with SST data from OISST
+# Author: Alfredo Hernández <aldomann.designs@gmail.com>
+
 library(raster)
 library(ncdf4)
 
