@@ -6,7 +6,7 @@ library(lubridate)
 library(raster)
 library(ncdf4)
 
-hurr.all.obs <- data.table::fread("data/hurdat2-all.csv")
+hurr.all.obs <- data.table::fread("data/hurdat2-all-oisst.csv")
 
 # Source OISST Function ------------------------------------
 
@@ -16,9 +16,11 @@ mask <- "data/lsmask.oisst.v2.nc"
 
 # Mine SST data from OISST ---------------------------------
 
+# awk 'FNR > 1 {fileid = substr($4, 1, 10); folderid = substr($4, 1, 7); gsub("-","", fileid); gsub("-","", folderid); print "wget -nc ", "https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/access/avhrr-only/", folderid, "/avhrr-only-v2.", fileid, ".nc", " ;"}' FS="," OFS="" hurdat2-all-oisst.csv | sort | uniq > ../oisst-data/download-oisst.sh
+
 hurr.all.obs.new <- hurr.all.obs %>%
 	mutate(date.time = ymd_hms(date.time)) %>%
-	dplyr::filter(date.time >= "1981-09-01")
+	mutate(file.id = paste0(year(date.time), sprintf("%02d", month(date.time)), sprintf("%02d", day(date.time))))
 
 get_oisst_by_date <- function(date, long, lat){
 	file.id = paste0(year(date),
@@ -35,8 +37,13 @@ get_oisst_by_date <- function(date, long, lat){
 	return(sst)
 }
 
-hurr.all.obs.small <- head(hurr.all.obs.new)
+populate_sst <- function(hurr.all.obs){
+	hurr.all.obs <- hurr.all.obs %>%
+		rowwise() %>%
+		mutate(sst = get_oisst_by_date(date.time, ifelse(long < 0, 360+long , long), lat))
 
-hurr.all.obs.small <- hurr.all.obs.small %>%
-	rowwise() %>%
-	mutate(sst = get_oisst_by_date(date.time, ifelse(long < 0, 360+long , long), lat))
+	return(hurr.all.obs)
+}
+
+hurr.all.obs.small <- populate_sst(head(hurr.all.obs.new))
+

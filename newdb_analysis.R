@@ -17,6 +17,9 @@ hurr.all.obs <- rbind(hurr.natl.obs, hurr.epac.obs)
 
 write_csv(hurr.all.obs, "data/hurdat2-all.csv")
 
+write_csv(hurr.all.obs %>% dplyr::filter(date.time >= "1981-09-01"),
+					"data/hurdat2-all-oisst.csv")
+
 # Reading the data set -------------------------------------
 
 hurr.all.obs.new <- data.table::fread("data/hurdat2-all.csv")
