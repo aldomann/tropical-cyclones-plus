@@ -19,18 +19,19 @@ BEGIN{
 	FS = ","
 	OFS = ""
 	print "# Script to download all needed OISST files to populate the HURDAT2."
-	print "# Author: Alfredo Hernández <aldomann.designs@gmail.com>"
+	print "# Author: Alfredo Hernández <aldomann.designs@gmail.com>\n"
 }
 FNR > 1 {
-	fileid = substr($4, 1, 10);
-	folderid = substr($4, 1, 7);
-	gsub("-","", fileid);
-	gsub("-","", folderid);
-	print "wget -nc ",
-		  "https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/access/avhrr-only/",
-		  folderid,
-		  "/avhrr-only-v2.",
-		  fileid,
-		  ".nc",
-		  " ;"
+	fileid = substr($4, 1, 10)
+	folderid = substr($4, 1, 7)
+	gsub("-","", fileid)
+	gsub("-","", folderid)
+	url = "wget -nc " "https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/access/avhrr-only/" folderid "/avhrr-only-v2." fileid ".nc" " ;"
+	unique[url]++
+}
+END {
+	if (NR > 3) {
+		for (url in unique)
+		print url
+	}
 }

@@ -15,7 +15,7 @@ mask <- "data/lsmask.oisst.v2.nc"
 
 # Mine SST data from OISST ---------------------------------
 
-system("awk -f get_oisst_urls.awk data/hurdat2-1981-2016.csv | sort -u > oisst-data/download_oisst_data.sh")
+system("awk -f get_oisst_urls.awk data/hurdat2-1981-2016.csv > oisst-data/download_oisst_data.sh")
 # Total time: 16h 45min
 
 hurr.all.obs.new <- hurr.all.obs %>%
