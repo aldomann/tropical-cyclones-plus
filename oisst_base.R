@@ -17,6 +17,7 @@ mask <- "data/lsmask.oisst.v2.nc"
 # Mine SST data from OISST ---------------------------------
 
 # awk 'FNR > 1 {fileid = substr($4, 1, 10); folderid = substr($4, 1, 7); gsub("-","", fileid); gsub("-","", folderid); print "wget -nc ", "https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/access/avhrr-only/", folderid, "/avhrr-only-v2.", fileid, ".nc", " ;"}' FS="," OFS="" hurdat2-all-oisst.csv | sort | uniq > ../oisst-data/download-oisst.sh
+# Total time: 16h 45min
 
 hurr.all.obs.new <- hurr.all.obs %>%
 	mutate(date.time = ymd_hms(date.time)) %>%
@@ -45,5 +46,10 @@ populate_sst <- function(hurr.all.obs){
 	return(hurr.all.obs)
 }
 
-hurr.all.obs.small <- populate_sst(head(hurr.all.obs.new))
+
+hurr.all.obs.full <- populate_sst(hurr.all.obs.new)
+# Elapsed time: 3.025 min
+
+write_csv(hurr.all.obs.full, "data/hurdat2-with-oisst.csv")
+
 
