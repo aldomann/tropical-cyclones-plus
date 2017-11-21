@@ -21,18 +21,16 @@ BEGIN{
 	print "# Script to download all needed OISST files to populate the HURDAT2."
 	print "# Author: Alfredo Hernández <aldomann.designs@gmail.com>"
 }
-{
-	if (NR!=1){
-		fileid = substr($4, 1, 10);
-		folderid = substr($4, 1, 7);
-		gsub("-","", fileid);
-		gsub("-","", folderid);
-		print "wget -nc ",
-		      "https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/access/avhrr-only/",
-		      folderid,
-		      "/avhrr-only-v2.",
-		      fileid,
-		      ".nc",
-		      " ;"
-	}
+FNR > 1 {
+	fileid = substr($4, 1, 10);
+	folderid = substr($4, 1, 7);
+	gsub("-","", fileid);
+	gsub("-","", folderid);
+	print "wget -nc ",
+		  "https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/access/avhrr-only/",
+		  folderid,
+		  "/avhrr-only-v2.",
+		  fileid,
+		  ".nc",
+		  " ;"
 }
