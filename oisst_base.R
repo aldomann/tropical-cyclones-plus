@@ -49,8 +49,7 @@ if (file.exists("data/hurdat2-1981-2016.csv") & !file.exists("data/hurdat2-oisst
 	hurr.all.obs <- fread("data/hurdat2-1981-2016.csv")
 
 	hurr.all.obs.new <- hurr.all.obs %>%
-		mutate(date.time = ymd_hms(date.time)) %>%
-		mutate(file.id = paste0(year(date.time), sprintf("%02d", month(date.time)), sprintf("%02d", day(date.time))))
+		mutate(date.time = ymd_hms(date.time))
 
 	hurr.all.obs.full <- populate_sst(hurr.all.obs.new)
 	# Elapsed time: 3.025 min
