@@ -1,10 +1,8 @@
-# Code to study the PDI dependence with the SST
+# Base code to prepare the HURDAT2 datasets to work with the OISST database
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 # Source base code -----------------------------------------
-# source("hadisst_base.R")
 source("hurdat2_base.R")
-# source("analysis_base.R")
 
 # Create PDI data frame ------------------------------------
 
@@ -18,9 +16,9 @@ hurr.all.obs <- rbind(hurr.natl.obs, hurr.epac.obs)
 write_csv(hurr.all.obs, "data/hurdat2-all.csv")
 
 write_csv(hurr.all.obs %>% dplyr::filter(date.time >= "1981-09-01"),
-					"data/hurdat2-all-oisst.csv")
+					"data/hurdat2-1981-2016.csv")
 
-# Reading the data set -------------------------------------
+# Testing the CSV files ------------------------------------
 
 hurr.all.obs.new <- data.table::fread("data/hurdat2-all.csv")
 

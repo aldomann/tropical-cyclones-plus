@@ -1,26 +1,18 @@
-# Code to populate the HURDAT2 data with SST data from OISST
+# Base code to populate the HURDAT2 data with SST data from OISST
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 library(tidyverse)
 library(lubridate)
 library(raster)
 library(ncdf4)
-
-hurr.all.obs <- data.table::fread("data/hurdat2-all-oisst.csv")
+library(data.table)
 
 # Source OISST Function ------------------------------------
 
 source("NOAA_OISST_ncdf4.R")
 mask <- "data/lsmask.oisst.v2.nc"
 
-# Mine SST data from OISST ---------------------------------
-
-system("awk -f get_oisst_urls.awk data/hurdat2-1981-2016.csv > oisst-data/download_oisst_data.sh")
-# Total time: 16h 45min
-
-hurr.all.obs.new <- hurr.all.obs %>%
-	mutate(date.time = ymd_hms(date.time)) %>%
-	mutate(file.id = paste0(year(date.time), sprintf("%02d", month(date.time)), sprintf("%02d", day(date.time))))
+# Functions ------------------------------------------------
 
 get_oisst_by_date <- function(date, long, lat){
 	file.id = paste0(year(date),
@@ -45,8 +37,27 @@ populate_sst <- function(hurr.all.obs){
 	return(hurr.all.obs)
 }
 
+# Mine SST data from OISST ---------------------------------
 
-hurr.all.obs.full <- populate_sst(hurr.all.obs.new)
-# Elapsed time: 3.025 min
+if (file.exists("data/hurdat2-1981-2016.csv") & !file.exists("oisst-data/download_oisst_data.sh")) {
+	system("awk -f get_oisst_urls.awk data/hurdat2-1981-2016.csv > oisst-data/download_oisst_data.sh")
+	# Total time: 16h 45min
+}
 
-write_csv(hurr.all.obs.full, "data/hurdat2-with-oisst.csv")
+if (file.exists("data/hurdat2-1981-2016.csv") & !file.exists("data/hurdat2-oisst-1981-2016.csv")) {
+	hurr.all.obs <- fread("data/hurdat2-1981-2016.csv")
+
+	hurr.all.obs.new <- hurr.all.obs %>%
+		mutate(date.time = ymd_hms(date.time)) %>%
+		mutate(file.id = paste0(year(date.time), sprintf("%02d", month(date.time)), sprintf("%02d", day(date.time))))
+
+	hurr.all.obs.full <- populate_sst(hurr.all.obs.new)
+	# Elapsed time: 3.025 min
+
+	write_csv(hurr.all.obs.full, "data/hurdat2-oisst-1981-2016.csv")
+}
+
+# hurr.all.obs <- fread("data/hurdat2-1981-2016.csv")
+# hurr.all.obs.full <- fread("data/hurdat2-oisst-1981-2016.csv")
+
+# write_csv(hurr.all.obs.full %>% filter(storm.id == "AL122005"), "data/katrina-oisst-clean.csv")
