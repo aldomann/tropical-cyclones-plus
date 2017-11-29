@@ -9,6 +9,7 @@ library(data.table)
 
 # Source OISST Function ------------------------------------
 
+# SRC: https://github.com/millerlp/Misc_R_scripts/blob/master/NOAA_OISST_ncdf4.R
 source("NOAA_OISST_ncdf4.R")
 mask <- "data/lsmask.oisst.v2.nc"
 
