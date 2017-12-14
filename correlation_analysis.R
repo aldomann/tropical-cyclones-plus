@@ -25,12 +25,38 @@ hurr.all.obs.anomalies <- hurr.all.obs.full %>%
 	mutate(wind.anomaly = wind - mean(wind)) %>%
 	mutate(sst.anomaly = sst - mean(sst))
 
-ggplot(hurr.all.obs.full, aes(x = conv_unit(wind, "knot", "m_per_sec"), y = sst)) +
-	geom_point() +
-	scale_x_log10() +
-	scale_y_log10()
 
-ggplot(hurr.all.obs.anomalies, aes(x = conv_unit(wind.anomaly, "knot", "m_per_sec"), y = sst.anomaly)) +
-	geom_point() +
-	scale_x_log10() +
-	scale_y_log10()
+# Data visualisation ---------------------------------------
+
+ggplot(hurr.all.obs.full) +
+	geom_point(aes(y = wind, x =  sst),
+						 size = 0.1) +
+	labs(title = "v vs SST") +
+	theme_bw() + theme(legend.position = c(0.13, 0.67)) + ggsave(filename = "1.pdf", width = 6.5, height = 4, dpi = 96, device = cairo_pdf)
+
+# ggplot(hurr.all.obs.full) +
+# 	geom_point(aes(y = wind, x =  max(hurr.all.obs.full$sst, na.rm = TRUE) - sst),
+# 						 size = 0.1) +
+# 	labs(title = "v vs max(SST) - SST") +
+# 	theme_bw() + theme(legend.position = c(0.13, 0.67)) + ggsave(filename = "1.pdf", width = 6.5, height = 4, dpi = 96, device = cairo_pdf)
+
+ggplot(hurr.all.obs.anomalies) +
+	geom_point(aes(y = wind.anomaly, x = sst.anomaly),
+						 size = 0.1) +
+	labs(title = "mean(v) - v vs mean(SST) - SST, for each hurricane") +
+	theme_bw() + theme(legend.position = c(0.13, 0.67)) + ggsave(filename = "2.pdf", width = 6.5, height = 4, dpi = 96, device = cairo_pdf)
+
+ggplot(hurr.all.obs.full) +
+	stat_bin2d(aes(y = wind, x = sst)) +
+	scale_fill_gradient(high = "red", low = "blue",
+											limits = c(15,5000), trans = "log") +
+	theme_bw() + theme(legend.position = c(0.13, 0.67)) + ggsave(filename = "3.pdf", width = 6.5, height = 4, dpi = 96, device = cairo_pdf)
+
+ggplot(hurr.all.obs.anomalies) +
+	stat_bin2d(aes(y = wind.anomaly, x = sst.anomaly)) +
+	scale_fill_gradient(high = "red", low = "blue",
+											limits = c(15,5000), trans = "log") +
+	labs(title = "mean(v) - v vs mean(SST) - SST, for each hurricane") +
+	theme_bw() + theme(legend.position = c(0.13, 0.67)) + ggsave(filename = "4.pdf", width = 6.5, height = 4, dpi = 96, device = cairo_pdf)
+
+

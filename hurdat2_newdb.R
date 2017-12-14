@@ -1,4 +1,4 @@
-# Base code to prepare the HURDAT2 datasets to work with the OISST database
+# Code to prepare the HURDAT2 datasets to work with the OISST database
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 # Source base code -----------------------------------------
