@@ -1,9 +1,10 @@
 # Code to populate the HURDAT2 data with SST data from OISST
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
-# Source OISST Functions -----------------------------------
-
+# Source base code -----------------------------------------
 source("oisst_base.R")
+
+# Source OISST Functions -----------------------------------
 
 # SRC: https://github.com/millerlp/Misc_R_scripts/blob/master/NOAA_OISST_ncdf4.R
 source("NOAA_OISST_ncdf4.R")

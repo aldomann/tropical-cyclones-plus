@@ -1,7 +1,6 @@
 # Code to study the PDI dependence with the SST
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
-
 # Libraries ------------------------------------------------
 
 library(data.table)

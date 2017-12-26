@@ -1,7 +1,6 @@
 # Code to analyse the correlation between hurricane and sea variables
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
-
 # Libraries ------------------------------------------------
 library(measurements) # Convert units
 
