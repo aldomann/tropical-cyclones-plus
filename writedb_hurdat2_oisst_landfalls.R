@@ -1,4 +1,4 @@
-# Base code to study the PDI of hurricane data from the National Hurricane Center (HURDAT)
+# Code to build data set focused on landfalls and in-land observations (using HURDAT2 + OISST data)
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 library(tidyverse)
