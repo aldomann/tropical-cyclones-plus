@@ -47,8 +47,6 @@ get_hurr_obs <- function(filename){
 	hurr.obs <- hurr.obs %>%
 		unite(date.time, date, time) %>%
 		mutate(date.time = ymd_hm(date.time))
-	# mutate(decade = substring(year(date.time), 1, 3),
-	# decade = paste0(decade, "0s"))
 
 	# Meaningful status names
 	storm.levels <- c("TD", "TS", "HU", "EX", "SD", "SS", "LO", "WV", "DB")
@@ -114,12 +112,6 @@ get_hurr_obs <- function(filename){
 
 	# Add useful info to data frame ----------------------------
 
-	# Add category 5 hurricanes boolean
-	# hurr.obs <- hurr.obs %>%
-	# 	group_by(storm.id) %>%
-	# 	mutate(cat.5 = max(wind) >= 137) %>%
-	# 	ungroup()
-
 	# Add storm.name and storm.year to hurr.obs
 	hurr.obs <- hurr.obs %>%
 		left_join(hurr.meta, by = "storm.id") %>%
@@ -134,13 +126,13 @@ get_hurr_obs <- function(filename){
 	hurr.obs <- hurr.obs[c("storm.id", "storm.name", "n.obs", "date.time",
 												 "status", "record.id", "lat", "long",
 												 "wind", "storm.year")]
-	# Unused variables
-	# 	"delta.t" after "date.time"
-	# 	"cat.5" after "wind"
-	#   "decade" after storm.year
 
 	return(hurr.obs)
 }
+
+# Read and clean data --------------------------------------
+
+source("oisst_base.R")
 
 # Read data
 hurr.all.obs <- get_hurr_obs('hurdat2-1851-2016-apr2017.txt')
@@ -151,22 +143,23 @@ hurr.all.obs.new <- hurr.all.obs %>%
 	dplyr::filter(date.time >= "1981-09-01")
 
 # Populate with OISST data
-# source("oisst_base.R")
 hurr.all.obs.full <- populate_sst(hurr.all.obs.new)
 
 # Find landfalls (L) and in-land (IL) records
-hurr.all.obs.test <- hurr.all.obs.full
-
-for (row in 2:length(hurr.all.obs.test$record.id)) {
-	if (is.na(hurr.all.obs.test[row, "sst"]) &&
-			!is.na(hurr.all.obs.test[row - 1, "record.id"]) &&
-			(hurr.all.obs.test[row - 1, "record.id"] == "L" ||
-			 hurr.all.obs.test[row - 1, "record.id"] == "IL")) {
-		hurr.all.obs.test[row, "record.id"] = "IL"
+for (row in 2:length(hurr.all.obs.full$record.id)) {
+	if (is.na(hurr.all.obs.full[row, "sst"]) &&
+			!is.na(hurr.all.obs.full[row - 1, "record.id"]) &&
+			(hurr.all.obs.full[row - 1, "record.id"] == "L" ||
+			 hurr.all.obs.full[row - 1, "record.id"] == "IL")) {
+		hurr.all.obs.full[row, "record.id"] = "IL"
 	}
 }
 
-hurr.landfalls <- hurr.all.obs.test %>%
+hurr.landfalls <- hurr.all.obs.full %>%
 	dplyr::filter((record.id == "L" || record.id == "IL" ))
 
-write_csv(hurr.landfalls, "data/hurdat2-landfalls.csv")
+# Write data into CSV --------------------------------------
+
+if (!file.exists("data/hurdat2-oisst-landfalls.csv")) {
+	write_csv(hurr.landfalls, "data/hurdat2-oisst-landfalls.csv")
+}

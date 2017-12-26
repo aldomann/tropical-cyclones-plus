@@ -37,27 +37,3 @@ populate_sst <- function(hurr.all.obs){
 
 	return(hurr.all.obs)
 }
-
-# Mine SST data from OISST ---------------------------------
-
-if (file.exists("data/hurdat2-1981-2016.csv") & !file.exists("oisst-data/download_oisst_data.sh")) {
-	system("awk -f get_oisst_urls.awk data/hurdat2-1981-2016.csv > oisst-data/download_oisst_data.sh")
-	# Total time: 16h 45min
-}
-
-if (file.exists("data/hurdat2-1981-2016.csv") & !file.exists("data/hurdat2-oisst-1981-2016.csv")) {
-	hurr.all.obs <- fread("data/hurdat2-1981-2016.csv")
-
-	hurr.all.obs.new <- hurr.all.obs %>%
-		mutate(date.time = ymd_hms(date.time))
-
-	hurr.all.obs.full <- populate_sst(hurr.all.obs.new)
-	# Elapsed time: 3.025 min
-
-	write_csv(hurr.all.obs.full, "data/hurdat2-oisst-1981-2016.csv")
-}
-
-# hurr.all.obs <- fread("data/hurdat2-1981-2016.csv")
-# hurr.all.obs.full <- fread("data/hurdat2-oisst-1981-2016.csv")
-
-# write_csv(hurr.all.obs.full %>% filter(storm.id == "AL122005"), "data/katrina-oisst-clean.csv")
