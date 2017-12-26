@@ -10,11 +10,8 @@ library(scales)
 
 # ICOADS 1 jan 1966 data -----------------------------------
 
-<<<<<<< HEAD
 icoads <- fread("data-tests/icoads-dataset.csv")
-=======
 icoads <- fread("data/icoads-dataset.csv")
->>>>>>> 4f88be4105f2300d4c2cbe46c35f5bbce45dcc9d
 icoads <- icoads %>%
 	filter(is.na(V4) != TRUE) %>%
 	mutate(sst2 = ifelse(V4 == "NaN", NA, as.numeric(V4))) %>%
