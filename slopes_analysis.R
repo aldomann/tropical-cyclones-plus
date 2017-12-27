@@ -20,11 +20,11 @@ pdi.epac <- pdi.all %>%
 
 # Scatterplots ---------------------------------------------
 
-plot_scatterplot(pdi.natl)
-plot_scatterplot(pdi.epac)
+plot_scatterplot(pdi.natl) + theme_bw()
+plot_scatterplot(pdi.epac) + theme_bw()
 
-plot_scatterplot(pdi.natl %>% dplyr::filter(max.wind > 33))
-plot_scatterplot(pdi.epac %>% dplyr::filter(max.wind > 33))
+plot_scatterplot(pdi.natl %>% dplyr::filter(max.wind > 33)) + theme_bw()
+plot_scatterplot(pdi.epac %>% dplyr::filter(max.wind > 33)) + theme_bw()
 
 # Confidence interval --------------------------------------
 
