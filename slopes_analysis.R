@@ -13,7 +13,7 @@ pdi.all <- fread('data/hurdat2-hadisst-1966-2016.csv')
 pdi.natl <- pdi.all %>%
 	dplyr::filter(basin == "NATL")
 pdi.epac <- pdi.all %>%
-	dplyr::filter(basin == "epac")
+	dplyr::filter(basin == "EPAC")
 
 # Clean data -----------------------------------------------
 
@@ -41,44 +41,65 @@ ggplot() +
 	scale_y_log10()
 
 # Confidence interval --------------------------------------
-get_conf_interval <- function(df) {
+
+get_conf_interval <- function(df, sst.class) {
+	df <- df %>%
+		dplyr::filter(sst.class == sst.class)
+
 	dur <- df$storm.duration
 	pdi <- df$storm.pdi
 
 	fit <- lm(log10(pdi) ~ log10(dur))
-	theta <- summary(fit)$coefficients[2]
-	sdtheta <- summary(fit)$coefficients[4]
+	slope <- summary(fit)$coefficients[2]
+	slope.sd <- summary(fit)$coefficients[4]
 
 	data <- cbind(log10(dur), log10(pdi))
 	n <- nrow(data)
 
-	nb <- 1000 # Number of simulations
-	y <- seq(1, n)
-	thetab <- numeric(nb)
-	sdthetab <- numeric(nb)
-	tb <- numeric(nb)
+	nsim <- 1000 # Number of simulations
+	data.seq <- seq(1, n)
+	slope.sim <- numeric(nsim)
+	slope.sd.sim <- numeric(nsim)
+	t.value.sim <- numeric(nsim)
 
-	# Loop for
-	for (i in 1:nb) {
-		yb <- sample(y, n, replace = T)
-		fitb <- lm(data[yb, 2] ~ data[yb, 1])
-		thetab[i] <- summary(fitb)$coefficients[2]
-		sdthetab[i] <- summary(fitb)$coefficients[4]
-		tb[i] <- (thetab[i] - theta) / sdthetab[i]
+	# Perform the simulation
+	for (i in 1:nsim) {
+		sim.sample <- sample(data.seq, n, replace = T)
+		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
+		slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
+		slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]
+		t.value.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
 	}
 
 	# The bootstrap-t 95% method
-	lower.lim.theta <- theta + sdtheta * quantile(tb, 0.025)
-	upper.lim.theta <- theta + sdtheta * quantile(tb, 0.975)
+	boot.low <- slope + slope.sd * quantile(t.value.sim, 0.025)
+	boot.upp <- slope + slope.sd * quantile(t.value.sim, 0.975)
+	boot.sd <- (boot.upp - boot.low) / 2
+	boot.slope <- boot.upp - boot.sd
 
 	# Simple Method
-	a <- 2 * theta - quantile(thetab, 0.975)
-	b <- 2 * theta - quantile(thetab, 0.025)
+	simp.low <- 2 * slope - quantile(slope.sim, 0.975)
+	simp.upp <- 2 * slope - quantile(slope.sim, 0.025)
+	simp.sd <- (simp.upp - simp.low) / 2
+	simp.slope <- simp.upp - simp.sd
 
 	# Quantile method
-	quan <- quantile(thetab, c(0.025, 0.975))
+	quan.low <- quantile(slope.sim, 0.025)
+	quan.upp <- quantile(slope.sim, 0.975)
+	quan.sd <- (quan.upp - quan.low) / 2
+	quan.slope <- quan.upp - quan.sd
 
-	# return(c(a, b))
+	results.df <- data.frame(
+		method = c("bootstrap-t", "simple", "quantile"),
+		slope = c(boot.slope, simp.slope, quan.slope),
+		sd = c(boot.sd, simp.sd, quan.sd)
+		)
+
+	return(results.df)
 }
 
-get_conf_interval(pdi.natl.low)
+ci.natl.low <- get_conf_interval(pdi.natl, "low")
+ci.natl.high <- get_conf_interval(pdi.natl, "high")
+
+ci.epac.low <- get_conf_interval(pdi.epac, "low")
+ci.epac.high <- get_conf_interval(pdi.epac, "high")
