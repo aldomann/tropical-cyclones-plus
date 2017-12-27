@@ -12,50 +12,19 @@ source("slopes_base.R")
 
 pdi.all <- fread('data/hurdat2-hadisst-1966-2016.csv') %>%
 	mutate(storm.duration = conv_unit(storm.duration, "sec", "hr"))
+
 pdi.natl <- pdi.all %>%
 	dplyr::filter(basin == "NATL")
 pdi.epac <- pdi.all %>%
 	dplyr::filter(basin == "EPAC")
 
-# Clean data -----------------------------------------------
+# Scatterplots ---------------------------------------------
 
-# # North Atlantic
-# pdi.natl.low <- pdi.natl %>%
-# 	dplyr::filter(sst.class == "low")
-#
-# pdi.natl.high <- pdi.natl %>%
-# 	dplyr::filter(sst.class == "high")
-#
-# # East Pacific
-# pdi.epac.low <- pdi.epac %>%
-# 	dplyr::filter(sst.class == "low")
-#
-# pdi.epac.high <- pdi.epac %>%
-# 	dplyr::filter(sst.class == "high")
-#
-# # Test plots -----------------------------------------------
-#
-# ggplot() +
-# 	aes(x = storm.duration, y = storm.pdi) +
-# 	geom_point(data = pdi.natl.high, aes(colour = 'high')) +
-# 	geom_point(data = pdi.natl.low, aes(colour = 'low')) +
-# 	geom_smooth(data = pdi.natl.high, aes(colour='high', fill = 'high'), alpha = 0.3, size = 0.5, method = "lm") +
-# 	geom_smooth(data = pdi.natl.low, aes(colour='low', fill = 'low'), alpha = 0.3, size = 0.5, method = "lm") +
-# 	scale_x_log10() +
-# 	scale_y_log10() +
-# 	scale_colour_manual(values = c('high' = "brown1", 'low' = "dodgerblue1")) +
-# 	scale_fill_manual(values = c('high' = "brown1", 'low' = "dodgerblue1"), guide = F)
-#
-# ggplot() +
-# 	aes(x = storm.duration, y = storm.pdi) +
-# 	geom_point(data = pdi.epac.high, aes(colour = 'high')) +
-# 	geom_point(data = pdi.epac.low, aes(colour = 'low')) +
-# 	geom_smooth(data = pdi.epac.high, aes(colour='high', fill = 'high'), alpha = 0.3, size = 0.5, method = "lm") +
-# 	geom_smooth(data = pdi.epac.low, aes(colour='low', fill = 'low'), alpha = 0.3, size = 0.5, method = "lm") +
-# 	scale_x_log10() +
-# 	scale_y_log10() +
-# 	scale_colour_manual(values = c('high' = "brown1", 'low' = "dodgerblue1")) +
-# 	scale_fill_manual(values = c('high' = "brown1", 'low' = "dodgerblue1"), guide = F)
+plot_scatterplot(pdi.natl)
+plot_scatterplot(pdi.epac)
+
+plot_scatterplot(pdi.natl %>% dplyr::filter(max.wind > 33))
+plot_scatterplot(pdi.epac %>% dplyr::filter(max.wind > 33))
 
 # Confidence interval --------------------------------------
 

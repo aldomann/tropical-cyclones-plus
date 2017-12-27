@@ -132,3 +132,26 @@ do_permutation_test <- function(df) {
 	return( c(p.value, p.value.err) )
 }
 
+# Scatterplots ---------------------------------------------
+
+plot_scatterplot <- function(df) {
+	df.low <- df %>%
+		dplyr::filter(sst.class == "low")
+	df.high <- df %>%
+		dplyr::filter(sst.class == "high")
+
+	gg <- ggplot() +
+		aes(x = storm.duration, y = storm.pdi) +
+		geom_point(data = df.high, aes(colour = 'high')) +
+		geom_point(data = df.low, aes(colour = 'low')) +
+		geom_smooth(data = df.high, aes(colour='high', fill = 'high'),
+								alpha = 0.3, size = 0.5, method = "lm") +
+		geom_smooth(data = df.low, aes(colour='low', fill = 'low'),
+								alpha = 0.3, size = 0.5, method = "lm") +
+		scale_x_log10() +
+		scale_y_log10() +
+		scale_colour_manual(values = c('high' = "brown1", 'low' = "dodgerblue1")) +
+		scale_fill_manual(values = c('high' = "brown1", 'low' = "dodgerblue1"), guide = F)
+
+	return(gg)
+}
