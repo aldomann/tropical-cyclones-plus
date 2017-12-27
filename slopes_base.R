@@ -8,10 +8,10 @@ library(data.table)
 
 # Confidence interval --------------------------------------
 
-get_conf_interval <- function(df, sst.class) {
+get_conf_interval <- function(df, class) {
 	# Filter and clean data
 	df <- df %>%
-		dplyr::filter(sst.class == sst.class)
+		dplyr::filter(sst.class == class)
 	dur <- df$storm.duration
 	pdi <- df$storm.pdi
 
@@ -142,13 +142,13 @@ plot_scatterplot <- function(df) {
 
 	gg <- ggplot() +
 		aes(x = storm.duration, y = storm.pdi) +
-		geom_point(data = df.high, aes(colour = 'high')) +
-		geom_point(data = df.low, aes(colour = 'low')) +
-		geom_smooth(data = df.high, aes(colour='high', fill = 'high'),
-								alpha = 0.3, size = 0.5, method = "lm") +
+		geom_point(data = df.low, aes(colour = 'low'), shape = 5, size = 1) +
+		geom_point(data = df.high, aes(colour = 'high'), shape = 1, size = 1) +
 		geom_smooth(data = df.low, aes(colour='low', fill = 'low'),
 								alpha = 0.3, size = 0.5, method = "lm") +
-		scale_x_log10() +
+		geom_smooth(data = df.high, aes(colour='high', fill = 'high'),
+								alpha = 0.3, size = 0.5, method = "lm") +
+		scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
 		scale_y_log10() +
 		scale_colour_manual(values = c('high' = "brown1", 'low' = "dodgerblue1")) +
 		scale_fill_manual(values = c('high' = "brown1", 'low' = "dodgerblue1"), guide = F)
