@@ -39,3 +39,46 @@ ggplot() +
 	geom_point(data = pdi.natl.high, aes(colour = 'high')) +
 	scale_x_log10() +
 	scale_y_log10()
+
+# Confidence interval --------------------------------------
+get_conf_interval <- function(df) {
+	dur <- df$storm.duration
+	pdi <- df$storm.pdi
+
+	fit <- lm(log10(pdi) ~ log10(dur))
+	theta <- summary(fit)$coefficients[2]
+	sdtheta <- summary(fit)$coefficients[4]
+
+	data <- cbind(log10(dur), log10(pdi))
+	n <- nrow(data)
+
+	nb <- 1000 # Number of simulations
+	y <- seq(1, n)
+	thetab <- numeric(nb)
+	sdthetab <- numeric(nb)
+	tb <- numeric(nb)
+
+	# Loop for
+	for (i in 1:nb) {
+		yb <- sample(y, n, replace = T)
+		fitb <- lm(data[yb, 2] ~ data[yb, 1])
+		thetab[i] <- summary(fitb)$coefficients[2]
+		sdthetab[i] <- summary(fitb)$coefficients[4]
+		tb[i] <- (thetab[i] - theta) / sdthetab[i]
+	}
+
+	# The bootstrap-t 95% method
+	lower.lim.theta <- theta + sdtheta * quantile(tb, 0.025)
+	upper.lim.theta <- theta + sdtheta * quantile(tb, 0.975)
+
+	# Simple Method
+	a <- 2 * theta - quantile(thetab, 0.975)
+	b <- 2 * theta - quantile(thetab, 0.025)
+
+	# Quantile method
+	quan <- quantile(thetab, c(0.025, 0.975))
+
+	# return(c(a, b))
+}
+
+get_conf_interval(pdi.natl.low)
