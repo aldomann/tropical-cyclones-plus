@@ -16,7 +16,8 @@ pdi.all <- fread('data/hurdat2-hadisst-1966-2016.csv') %>%
 pdi.natl <- pdi.all %>%
 	dplyr::filter(basin == "NATL")
 pdi.epac <- pdi.all %>%
-	dplyr::filter(basin == "EPAC")
+	dplyr::filter(basin == "EPAC") %>%
+	dplyr::filter(storm.year >= 1986)
 
 # Scatterplots ---------------------------------------------
 
