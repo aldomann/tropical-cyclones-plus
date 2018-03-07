@@ -8,7 +8,7 @@ library(data.table)
 
 # Confidence interval --------------------------------------
 
-get_conf_interval <- function(df, class) {
+get_conf_interval <- function(df, class, reg = "y~x") {
 	# Filter and clean data
 	df <- df %>%
 		dplyr::filter(sst.class == class)
@@ -16,12 +16,22 @@ get_conf_interval <- function(df, class) {
 	pdi <- df$storm.pdi
 
 	# Construct data
-	data <- cbind(log10(dur), log10(pdi))
+	if (reg == "y~x") {
+		data <- cbind(log10(dur), log10(pdi))
+	} else if (reg == "x~y") {
+		data <- cbind(log10(pdi), log10(dur))
+	}
 	n <- nrow(data)
 
 	# Linear regression
-	fit <- lm(log10(pdi) ~ log10(dur))
-	slope <- summary(fit)$coefficients[2]
+	if (reg == "y~x") {
+		fit <- lm(log10(pdi) ~ log10(dur))
+		slope <- summary(fit)$coefficients[2]
+	} else if (reg == "x~y") {
+		fit <- lm(log10(dur) ~ log10(pdi))
+		slope <- 1/summary(fit)$coefficients[2]
+	}
+	# slope <- summary(fit)$coefficients[2]
 	slope.sd <- summary(fit)$coefficients[4]
 
 	# Prepare variables for the simulation
@@ -35,7 +45,12 @@ get_conf_interval <- function(df, class) {
 	for (i in 1:n.sim) {
 		sim.sample <- sample(data.seq, n, replace = T)
 		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
-		slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
+		if (reg == "y~x") {
+			slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
+		} else if (reg == "x~y") {
+			slope.sim[i] <- 1/summary(fit.value.sim)$coefficients[2]
+		}
+		# slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
 		slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]
 		t.value.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
 	}
@@ -59,9 +74,9 @@ get_conf_interval <- function(df, class) {
 	quan.slope <- quan.upp - quan.sd
 
 	results.df <- data.frame(
-		method = c("bootstrap-t", "simple", "quantile"),
-		slope = c(boot.slope, simp.slope, quan.slope),
-		sd = c(boot.sd, simp.sd, quan.sd)
+		method = c("raw", "bootstrap-t", "simple", "quantile"),
+		slope = c(slope, boot.slope, simp.slope, quan.slope),
+		sd = c(slope.sd, boot.sd, simp.sd, quan.sd)
 		)
 
 	return(results.df)
@@ -69,7 +84,7 @@ get_conf_interval <- function(df, class) {
 
 # Permutation test -----------------------------------------
 
-do_permutation_test <- function(df) {
+do_permutation_test <- function(df, reg = "y~x") {
 	# Filter and clean data (low SST)
 	df.low <- df %>%
 		dplyr::filter(sst.class == "low")
@@ -94,7 +109,7 @@ do_permutation_test <- function(df) {
 	# Construct data
 	data.high <-cbind(log10(dur.high), log10(pdi.high))
 	data.low <-cbind(log10(dur.low), log10(pdi.low))
-	data.all <- rbind (data.high, data.low)
+	data.all <- rbind(data.high, data.low)
 
 	n.low <- nrow(data.low)
 	n.high <- nrow(data.high)
