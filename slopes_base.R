@@ -27,12 +27,14 @@ get_conf_interval <- function(df, class, reg = "y~x") {
 	if (reg == "y~x") {
 		fit <- lm(log10(pdi) ~ log10(dur))
 		slope <- summary(fit)$coefficients[2]
+		slope.sd <- summary(fit)$coefficients[4]
 	} else if (reg == "x~y") {
 		fit <- lm(log10(dur) ~ log10(pdi))
-		slope <- 1/summary(fit)$coefficients[2]
+		slope.sim.raw <- summary(fit)$coefficients[2]
+		slope <- 1/slope.sim.raw
+		slope.sd <- summary(fit)$coefficients[4]/(slope.sim.raw^2)
 	}
-	# slope <- summary(fit)$coefficients[2]
-	slope.sd <- summary(fit)$coefficients[4]
+	# slope.sd <- summary(fit)$coefficients[4]
 
 	# Prepare variables for the simulation
 	n.sim <- 1000 # Number of simulations
@@ -47,11 +49,12 @@ get_conf_interval <- function(df, class, reg = "y~x") {
 		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
 		if (reg == "y~x") {
 			slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
+			slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]
 		} else if (reg == "x~y") {
-			slope.sim[i] <- 1/summary(fit.value.sim)$coefficients[2]
+			slope.sim.raw <- summary(fit.value.sim)$coefficients[2]
+			slope.sim[i] <- 1/slope.sim.raw
+			slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]/(slope.sim.raw^2)
 		}
-		# slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
-		slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]
 		t.value.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
 	}
 
