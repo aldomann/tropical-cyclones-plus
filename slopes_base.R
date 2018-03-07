@@ -25,14 +25,14 @@ get_conf_interval <- function(df, class) {
 	slope.sd <- summary(fit)$coefficients[4]
 
 	# Prepare variables for the simulation
-	nsim <- 1000 # Number of simulations
+	n.sim <- 1000 # Number of simulations
 	data.seq <- seq(1, n)
-	slope.sim <- numeric(nsim)
-	slope.sd.sim <- numeric(nsim)
-	t.value.sim <- numeric(nsim)
+	slope.sim <- numeric(n.sim)
+	slope.sd.sim <- numeric(n.sim)
+	t.value.sim <- numeric(n.sim)
 
 	# Perform the simulation
-	for (i in 1:nsim) {
+	for (i in 1:n.sim) {
 		sim.sample <- sample(data.seq, n, replace = T)
 		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
 		slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
@@ -119,7 +119,7 @@ do_permutation_test <- function(df) {
 		fit.highp <- lm(log10(high[,1]) ~ log10(high[,2]))
 		slope.lowp <- summary(fit.lowp)$coefficients[2]
 		slope.highp <- summary(fit.highp)$coefficients[2]
-		stat.sim[i] <- slope.highp - slope.lowp
+		stat.sim[i] <- slope.lowp - slope.highp
 
 		if (stat.sim[i] > stat.true) {
 			count <- count + 1
