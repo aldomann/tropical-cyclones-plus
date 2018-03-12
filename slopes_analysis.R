@@ -94,8 +94,13 @@ p.val.xy.epac.ds <- do_permutation_test(pdi.epac, "storm.duration", "storm.pdi",
 
 # Scatterplots ---------------------------------------------
 
-plot_scatterplot(pdi.natl) + labs(title = "NATL") + theme_bw()
-plot_scatterplot(pdi.epac) + labs(title = "EPAC") + theme_bw()
+plot_scatterplot(pdi.natl, "storm.duration", "storm.pdi") +
+	labs(title = "NATL (all storms; 1966-2016)") + theme_bw()
+plot_scatterplot(pdi.epac, "storm.duration", "storm.pdi") +
+	labs(title = "EPAC (all storms; 1986-2016)") + theme_bw()
 
-plot_scatterplot(pdi.natl %>% dplyr::filter(max.wind > 33)) + labs(title = "NATL DS") + theme_bw()
-plot_scatterplot(pdi.epac %>% dplyr::filter(max.wind > 33)) + labs(title = "EPAC DS")+ theme_bw()
+plot_scatterplot(pdi.natl, "storm.duration", "storm.pdi", 33) +
+	labs(title = "NATL (developing systems; 1966-2016)") + theme_bw()
+plot_scatterplot(pdi.epac, "storm.duration", "storm.pdi", 33) +
+	labs(title = "EPAC (developing systems; 1986-2016)") + theme_bw()
+
