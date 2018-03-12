@@ -11,7 +11,7 @@ library(data.table)
 get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	# Filter and clean data
 	df <- df %>%
-		dplyr::filter(max.wind > min.speed)
+		dplyr::filter(max.wind > min.speed) %>%
 		dplyr::filter(sst.class == class)
 	col1 <- df[,var1]
 	col2 <- df[,var2]
