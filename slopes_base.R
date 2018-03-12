@@ -8,9 +8,10 @@ library(data.table)
 
 # Confidence interval --------------------------------------
 
-get_conf_interval <- function(df, class, var1, var2) {
+get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	# Filter and clean data
 	df <- df %>%
+		dplyr::filter(max.wind > min.speed)
 		dplyr::filter(sst.class == class)
 	col1 <- df[,var1]
 	col2 <- df[,var2]
@@ -71,7 +72,11 @@ get_conf_interval <- function(df, class, var1, var2) {
 
 # Permutation test -----------------------------------------
 
-do_permutation_test <- function(df, var1, var2) {
+do_permutation_test <- function(df, var1, var2, min.speed = 0) {
+	# Filter max wind speed
+	df <- df %>%
+		dplyr::filter(max.wind > min.speed)
+
 	# Filter and clean data (low SST)
 	df.low <- df %>%
 		dplyr::filter(sst.class == "low")
@@ -121,7 +126,7 @@ do_permutation_test <- function(df, var1, var2) {
 		fit.highp <- lm(log10(high[,2]) ~ log10(high[,1]))
 		slope.lowp <- summary(fit.lowp)$coefficients[2]
 		slope.highp <- summary(fit.highp)$coefficients[2]
-		stat.sim[i] <- slope.lowp - slope.highp
+		stat.sim[i] <- slope.highp - slope.lowp
 
 		if (stat.sim[i] > stat.true) {
 			count <- count + 1
