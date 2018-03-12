@@ -141,24 +141,60 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 
 # Scatterplots ---------------------------------------------
 
-plot_scatterplot <- function(df) {
+plot_scatterplot <- function(df, var1, var2, min.speed = 0) {
+	# Filter data frames
+	df <- df %>%
+		dplyr::filter(max.wind > min.speed)
 	df.low <- df %>%
 		dplyr::filter(sst.class == "low")
 	df.high <- df %>%
 		dplyr::filter(sst.class == "high")
 
+	# Extract data vectors
+	col1.low <- df.low[,var1]
+	col2.low <- df.low[,var2]
+	col1.high <- df.high[,var1]
+	col2.high <- df.high[,var2]
+
+	lm.high.y <- lm(log10(col2.high) ~ log10(col1.high))
+	lm.low.y <- lm(log10(col2.low) ~ log10(col1.low))
+	lm.high.x <- lm(log10(col1.high) ~ log10(col2.high))
+	lm.low.x <- lm(log10(col1.low) ~ log10(col2.low))
+
+	# years.str <- paste0(year(ssts$year[1]), "-", year(ssts$year[length(ssts$year)]))
+
 	gg <- ggplot() +
-		aes(x = storm.duration, y = storm.pdi) +
-		geom_point(data = df.low, aes(colour = 'low'), shape = 5, size = 1) +
-		geom_point(data = df.high, aes(colour = 'high'), shape = 1, size = 1) +
-		geom_smooth(data = df.low, aes(colour='low', fill = 'low'),
-								alpha = 0.3, size = 0.5, method = "lm") +
-		geom_smooth(data = df.high, aes(colour='high', fill = 'high'),
-								alpha = 0.3, size = 0.5, method = "lm") +
+		# Scatterplot
+		geom_point(data = df.low, aes(x = col1.low, y = col2.low, colour = "low"), shape = 5, size = 1) +
+		geom_point(data = df.high, aes(x = col1.high, y = col2.high, colour = "high"), shape = 1, size = 1) +
+		# Regression lines
+		geom_abline(aes(slope = coef(lm.low.y)[[2]],
+										intercept = coef(lm.low.y)[[1]],
+										colour = "low", linetype = "y(x)")) +
+		geom_abline(aes(slope = 1/coef(lm.low.x)[[2]],
+										intercept = -coef(lm.low.x)[[1]]/coef(lm.low.x)[[2]],
+										colour = "low", linetype = "x(y)")) +
+		geom_abline(aes(slope = coef(lm.high.y)[[2]],
+										intercept = coef(lm.high.y)[[1]],
+										colour = "high", linetype = "y(x)")) +
+		geom_abline(aes(slope = 1/coef(lm.high.x)[[2]],
+										intercept = -coef(lm.high.x)[[1]]/coef(lm.high.x)[[2]],
+										colour = "high", linetype = "x(y)")) +
+		# Scales and legend
 		scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
 		scale_y_log10() +
-		scale_colour_manual(values = c('high' = "brown1", 'low' = "dodgerblue1")) +
-		scale_fill_manual(values = c('high' = "brown1", 'low' = "dodgerblue1"), guide = F)
+		guides(colour = guide_legend(order = 1, override.aes = list(linetype = c(0,0), shape = c(1,5))),
+					 linetype = guide_legend(order = 2, override.aes = list(colour = c("black", "black")))) +
+		scale_colour_manual(labels = c(bquote(.(paste0("high; ")) ~ r^2 ~
+																						.(paste0("= ", format(summary(lm.high.y)$r.squared, digits = 2)))),
+																	 bquote(.(paste0("low;  ")) ~ r^2 ~
+																	 			 	.(paste0("= ", format(summary(lm.low.y)$r.squared, digits = 2))))),
+												values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		scale_linetype_manual(values = c("x(y)" = "longdash", "y(x)" = "solid")) +
+		labs(
+			#title = paste0("PDI vs duration scatterplot", " (", attr(ssts, "title"), "; ", years.str ,")") ,
+				 x = "Storm duration (h)", y = bquote(PDI~ (m^3 ~s^-2)),
+				 colour = "SST class", linetype = "Regression")
 
 	return(gg)
 }
