@@ -8,33 +8,21 @@ library(data.table)
 
 # Confidence interval --------------------------------------
 
-get_conf_interval <- function(df, class, reg = "y~x") {
+get_conf_interval <- function(df, class, var1, var2) {
 	# Filter and clean data
 	df <- df %>%
 		dplyr::filter(sst.class == class)
-	dur <- df$storm.duration
-	pdi <- df$storm.pdi
+	col1 <- df[,var1]
+	col2 <- df[,var2]
 
 	# Construct data
-	if (reg == "y~x") {
-		data <- cbind(log10(dur), log10(pdi))
-	} else if (reg == "x~y") {
-		data <- cbind(log10(pdi), log10(dur))
-	}
+	data <- cbind(log10(col1), log10(col2))
 	n <- nrow(data)
 
 	# Linear regression
-	if (reg == "y~x") {
-		fit <- lm(log10(pdi) ~ log10(dur))
-		slope <- summary(fit)$coefficients[2]
-		slope.sd <- summary(fit)$coefficients[4]
-	} else if (reg == "x~y") {
-		fit <- lm(log10(dur) ~ log10(pdi))
-		slope.sim.raw <- summary(fit)$coefficients[2]
-		slope <- 1/slope.sim.raw
-		slope.sd <- summary(fit)$coefficients[4]/(slope.sim.raw^2)
-	}
-	# slope.sd <- summary(fit)$coefficients[4]
+	fit <- lm(data[,2] ~ data[,1])
+	slope <- summary(fit)$coefficients[2]
+	slope.sd <- summary(fit)$coefficients[4]
 
 	# Prepare variables for the simulation
 	n.sim <- 1000 # Number of simulations
@@ -46,15 +34,11 @@ get_conf_interval <- function(df, class, reg = "y~x") {
 	# Perform the simulation
 	for (i in 1:n.sim) {
 		sim.sample <- sample(data.seq, n, replace = T)
+
 		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
-		if (reg == "y~x") {
-			slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
-			slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]
-		} else if (reg == "x~y") {
-			slope.sim.raw <- summary(fit.value.sim)$coefficients[2]
-			slope.sim[i] <- 1/slope.sim.raw
-			slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]/(slope.sim.raw^2)
-		}
+		slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
+		slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]
+
 		t.value.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
 	}
 
@@ -77,7 +61,7 @@ get_conf_interval <- function(df, class, reg = "y~x") {
 	quan.slope <- quan.upp - quan.sd
 
 	results.df <- data.frame(
-		method = c("raw", "bootstrap-t", "simple", "quantile"),
+		method = c("lm", "bootstrap-t", "simple", "quantile"),
 		slope = c(slope, boot.slope, simp.slope, quan.slope),
 		sd = c(slope.sd, boot.sd, simp.sd, quan.sd)
 		)
@@ -87,22 +71,22 @@ get_conf_interval <- function(df, class, reg = "y~x") {
 
 # Permutation test -----------------------------------------
 
-do_permutation_test <- function(df, reg = "y~x") {
+do_permutation_test <- function(df, var1, var2) {
 	# Filter and clean data (low SST)
 	df.low <- df %>%
 		dplyr::filter(sst.class == "low")
-	dur.low <- df.low$storm.duration
-	pdi.low <- df.low$storm.pdi
+	col1.low <- df.low[,var1]
+	col2.low <- df.low[,var2]
 
 	# Filter and clean data (high SST)
 	df.high <- df %>%
 		dplyr::filter(sst.class == "high")
-	dur.high <- df.high$storm.duration
-	pdi.high <- df.high$storm.pdi
+	col1.high <- df.high[,var1]
+	col2.high <- df.high[,var2]
 
 	# Linear regressions statistics
-	fit.low <- lm(log10(pdi.low) ~ log10(dur.low))
-	fit.high <- lm(log10(pdi.high) ~ log10(dur.high))
+	fit.low <- lm(log10(col2.low) ~ log10(col1.low))
+	fit.high <- lm(log10(col2.high) ~ log10(col1.high))
 
 	slope.low <- summary(fit.low)$coefficients[2]
 	slope.high <- summary(fit.high)$coefficients[2]
@@ -110,8 +94,8 @@ do_permutation_test <- function(df, reg = "y~x") {
 	stat.true <- slope.high - slope.low
 
 	# Construct data
-	data.high <-cbind(log10(dur.high), log10(pdi.high))
-	data.low <-cbind(log10(dur.low), log10(pdi.low))
+	data.high <-cbind(log10(col1.high), log10(col2.high))
+	data.low <-cbind(log10(col1.low), log10(col2.low))
 	data.all <- rbind(data.high, data.low)
 
 	n.low <- nrow(data.low)
@@ -125,9 +109,9 @@ do_permutation_test <- function(df, reg = "y~x") {
 
 	# Perform the permutation test
 	for (i in 1:n.sim){
-		dur.sample <- sample (data.all[,1], n.all)
-		pdi.sample <- sample (data.all[,2], n.all)
-		data.sample <- cbind(dur.sample, pdi.sample)
+		col1.sample <- sample (data.all[,1], n.all)
+		col2.sample <- sample (data.all[,2], n.all)
+		data.sample <- cbind(col1.sample, col2.sample)
 
 		low <- cbind(data.sample[1:n.low, 1], data.sample[1:n.low, 2])
 		x <- n.low + 1
