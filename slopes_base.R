@@ -117,8 +117,8 @@ do_permutation_test <- function(df, var1, var2) {
 		x <- n.low + 1
 		high <- cbind(data.sample[x:n.all, 1], data.sample[x:n.all, 2])
 
-		fit.lowp <- lm(log10(low[,1]) ~ log10(low[,2]))
-		fit.highp <- lm(log10(high[,1]) ~ log10(high[,2]))
+		fit.lowp <- lm(log10(low[,2]) ~ log10(low[,1]))
+		fit.highp <- lm(log10(high[,2]) ~ log10(high[,1]))
 		slope.lowp <- summary(fit.lowp)$coefficients[2]
 		slope.highp <- summary(fit.highp)$coefficients[2]
 		stat.sim[i] <- slope.lowp - slope.highp
