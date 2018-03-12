@@ -94,9 +94,11 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	fit.high <- lm(log10(col2.high) ~ log10(col1.high))
 
 	slope.low <- summary(fit.low)$coefficients[2]
+	sd.low <- summary(fit.low)$coefficients[4]
 	slope.high <- summary(fit.high)$coefficients[2]
+	sd.high <- summary(fit.high)$coefficients[4]
 
-	stat.true <- slope.high - slope.low
+	stat.true <- ((slope.high - slope.low))/sqrt(sd.high^2 + sd.low^2)
 
 	# Construct data
 	data.high <-cbind(log10(col1.high), log10(col2.high))
@@ -108,7 +110,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	n.all <- n.low + n.high
 
 	# Prepare variables for the test
-	n.sim <- 10000  # Number of simulations
+	n.sim <- 5000  # Number of simulations
 	stat.sim <- numeric(n.sim)
 	count <- 0
 
@@ -125,8 +127,10 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 		fit.lowp <- lm(log10(low[,2]) ~ log10(low[,1]))
 		fit.highp <- lm(log10(high[,2]) ~ log10(high[,1]))
 		slope.lowp <- summary(fit.lowp)$coefficients[2]
+		sd.lowp <- summary(fit.lowp)$coefficients[4]
 		slope.highp <- summary(fit.highp)$coefficients[2]
-		stat.sim[i] <- slope.highp - slope.lowp
+		sd.highp <- summary(fit.highp)$coefficients[4]
+		stat.sim[i] <- ((slope.highp - slope.lowp))/sqrt(sd.highp^2 + sd.lowp^2)
 
 		if (stat.sim[i] > stat.true) {
 			count <- count + 1
