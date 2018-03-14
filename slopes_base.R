@@ -184,7 +184,37 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	p.value <- count/n.sim
 	p.value.err <- 1.96 * (sqrt((p.value - (p.value)^2) / n.sim))
 
-	return( c(p.value, p.value.err) )
+	results.df <- data.frame(
+		cbind(
+			p.value = p.value,
+			error =p.value.err
+			)
+		)
+
+	return(results.df)
+}
+
+summarise_p_values <- function(basin, var1, var2, min.speed = 0) {
+	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
+
+	# var2 ~ var1 regression (y ~ x)
+	p.val.yx <- do_permutation_test(basin.df, var2, var1)
+
+	# var1 ~ var2 regression (x ~ y)
+	p.val.xy <- do_permutation_test(basin.df, var1, var2)
+
+	# Construct summarised data frame
+	results <- data.frame(
+		rbind(
+			cbind(p.val.yx, dep.var = var2, indep.var = var1),
+			cbind(p.val.xy, dep.var = var1, indep.var = var2)
+		)
+	)
+
+	i <- sapply(results, is.factor)
+	results[i] <- lapply(results[i], as.character)
+
+	return(results)
 }
 
 # Scatterplots ---------------------------------------------
