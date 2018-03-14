@@ -79,6 +79,26 @@ p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.w
 p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33)
 
 
+# Analyse p-values -----------------------------------------
+
+p.values.list <- lapply ( ls(patt='^p.vals'), get)
+
+alpha = 0.05
+
+# Print regressions with p-value <= alpha
+for (i in 1:length(p.values.list)) {
+	for( j in 1:2) {
+		if (p.values.list[[i]][j,1] <= alpha) {
+			print(paste("p-val:",
+									p.values.list[[i]][j,1]))
+			print(paste("lm:",
+									p.values.list[[i]][j,3], "~",
+									p.values.list[[i]][j,4]))
+		}
+	}
+}
+
+
 # Scatterplots ---------------------------------------------
 
 plot_scatterplot(pdi.natl, "storm.duration", "storm.pdi") +
