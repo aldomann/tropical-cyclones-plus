@@ -73,6 +73,7 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 
 	results.df <- data.frame(
 		method = c("lm", "bootstrap-t"),
+		sst.class = rep(class, 2),
 		slope = c(slope, boot.slope),
 		sd = c(slope.sd, boot.sd),
 		r2 = c(r.squared, boot.r.squared),
