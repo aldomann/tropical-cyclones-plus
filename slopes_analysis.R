@@ -10,7 +10,7 @@ source("slopes_base.R")
 
 # Get RAW data ---------------------------------------------
 
-pdi.all <- fread('data/hurdat2-hadisst-1966-2016.csv') %>%
+pdi.all <- fread('data/hurdat2-hadisst-1966-2016_pdis.csv') %>%
 	mutate(storm.duration = conv_unit(storm.duration, "sec", "hr"))
 
 pdi.natl <- pdi.all %>%
