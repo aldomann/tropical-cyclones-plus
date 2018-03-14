@@ -16,8 +16,7 @@ pdi.all <- fread('data/hurdat2-hadisst-1966-2016_pdis.csv') %>%
 pdi.natl <- pdi.all %>%
 	dplyr::filter(basin == "NATL")
 pdi.epac <- pdi.all %>%
-	dplyr::filter(basin == "EPAC") %>%
-	dplyr::filter(storm.year >= 1986)
+	dplyr::filter(basin == "EPAC")
 
 
 # Confidence interval for all storms -----------------------
@@ -44,6 +43,9 @@ ci.xy.epac.low <- get_conf_interval(
 ci.xy.epac.high <- get_conf_interval(
 	pdi.epac, "high", "storm.pdi", "storm.duration")
 
+# General method (WIP)
+summarise_conf_intervals("storm.duration", "storm.pdi")
+
 
 # Confidence interval for developing systems ---------------
 
@@ -69,6 +71,8 @@ ci.xy.epac.low.ds <- get_conf_interval(
 ci.xy.epac.high.ds <- get_conf_interval(
 	pdi.epac, "high", "storm.pdi", "storm.duration", 33)
 
+# General method (WIP)
+summarise_conf_intervals("storm.duration", "storm.pdi", 33)
 
 # Permutation test for all data ----------------------------
 
@@ -103,4 +107,3 @@ plot_scatterplot(pdi.natl, "storm.duration", "storm.pdi", 33) +
 	labs(title = "NATL (developing systems; 1966-2016)") + theme_bw()
 plot_scatterplot(pdi.epac, "storm.duration", "storm.pdi", 33) +
 	labs(title = "EPAC (developing systems; 1986-2016)") + theme_bw()
-

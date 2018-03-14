@@ -24,12 +24,14 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	fit <- lm(data[,2] ~ data[,1])
 	slope <- summary(fit)$coefficients[2]
 	slope.sd <- summary(fit)$coefficients[4]
+	r.squared <- summary(fit)$r.squared
 
 	# Prepare variables for the simulation
 	n.sim <- 1000 # Number of simulations
 	data.seq <- seq(1, n)
 	slope.sim <- numeric(n.sim)
 	slope.sd.sim <- numeric(n.sim)
+	r.squared.sim <- numeric(n.sim)
 	t.value.sim <- numeric(n.sim)
 
 	# Perform the simulation
@@ -39,6 +41,7 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
 		slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
 		slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]
+		r.squared.sim[i] <- summary(fit.value.sim)$r.squared
 
 		t.value.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
 	}
@@ -48,27 +51,83 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	boot.upp <- slope + slope.sd * quantile(t.value.sim, 0.975)
 	boot.sd <- (boot.upp - boot.low) / 2
 	boot.slope <- boot.upp - boot.sd
+	boot.r.squared <- mean(r.squared.sim)
 
-	# Simple Method
-	simp.low <- 2 * slope - quantile(slope.sim, 0.975)
-	simp.upp <- 2 * slope - quantile(slope.sim, 0.025)
-	simp.sd <- (simp.upp - simp.low) / 2
-	simp.slope <- simp.upp - simp.sd
+	# # Simple Method
+	# simp.low <- 2 * slope - quantile(slope.sim, 0.975)
+	# simp.upp <- 2 * slope - quantile(slope.sim, 0.025)
+	# simp.sd <- (simp.upp - simp.low) / 2
+	# simp.slope <- simp.upp - simp.sd
+	#
+	# # Quantile method
+	# quan.low <- quantile(slope.sim, 0.025)
+	# quan.upp <- quantile(slope.sim, 0.975)
+	# quan.sd <- (quan.upp - quan.low) / 2
+	# quan.slope <- quan.upp - quan.sd
 
-	# Quantile method
-	quan.low <- quantile(slope.sim, 0.025)
-	quan.upp <- quantile(slope.sim, 0.975)
-	quan.sd <- (quan.upp - quan.low) / 2
-	quan.slope <- quan.upp - quan.sd
+	# results.df <- data.frame(
+	# 	method = c("lm", "bootstrap-t", "simple", "quantile"),
+	# 	slope = c(slope, boot.slope, simp.slope, quan.slope),
+	# 	sd = c(slope.sd, boot.sd, simp.sd, quan.sd)
+	# 	)
 
 	results.df <- data.frame(
-		method = c("lm", "bootstrap-t", "simple", "quantile"),
-		slope = c(slope, boot.slope, simp.slope, quan.slope),
-		sd = c(slope.sd, boot.sd, simp.sd, quan.sd)
-		)
+		method = c("lm", "bootstrap-t"),
+		slope = c(slope, boot.slope),
+		sd = c(slope.sd, boot.sd),
+		r2 = c(r.squared, boot.r.squared),
+		dep.var = rep(var2, 2),
+		indep.var = rep(var1, 2),
+		row.names = 1
+	)
+
+	i <- sapply(results.df, is.factor)
+	results.df[i] <- lapply(results.df[i], as.character)
+
+
+	# results.df <- results.df %>%
+	# 	dplyr::mutate(dep.var = as.character(dep.var),
+	# 								indep.var = as.character(indep.var))
 
 	return(results.df)
 }
+
+summarise_conf_intervals <- function(var1, var2, min.speed = 0) {
+	# var2 ~ var1 regression (y ~ x)
+	ci.yx.natl.low <- get_conf_interval(pdi.natl, "low", var1, var2, min.speed)
+	ci.yx.natl.high <- get_conf_interval(pdi.natl, "high", var1, var2, min.speed)
+
+	ci.yx.epac.low <- get_conf_interval(pdi.epac, "low", var1, var2, min.speed)
+	ci.yx.epac.high <- get_conf_interval(pdi.epac, "high", var1, var2, min.speed)
+
+	# var1 ~ var2 regression (x ~ y)
+	ci.xy.natl.low <- get_conf_interval(pdi.natl, "low", var2, var1, min.speed)
+	ci.xy.natl.high <- get_conf_interval(pdi.natl, "high", var2, var1, min.speed)
+
+	ci.xy.epac.low <- get_conf_interval(pdi.epac, "low", var2, var1, min.speed)
+	ci.xy.epac.high <- get_conf_interval(pdi.epac, "high", var2, var1, min.speed)
+
+	# Construct summarised data frame
+	results <- data.frame(
+		rbind(
+			# NATL results
+			cbind(ci.yx.natl.low["bootstrap-t",], basin="NATL"),
+			cbind(ci.yx.natl.high["bootstrap-t",], basin="NATL"),
+			cbind(ci.xy.natl.low["bootstrap-t",], basin="NATL"),
+			cbind(ci.xy.natl.high["bootstrap-t",], basin="NATL"),
+			# EPAC results
+			cbind(ci.yx.epac.low["bootstrap-t",], basin="EPAC"),
+			cbind(ci.yx.epac.high["bootstrap-t",], basin="EPAC"),
+			cbind(ci.xy.epac.low["bootstrap-t",], basin="EPAC"),
+			cbind(ci.xy.epac.high["bootstrap-t",], basin="EPAC")
+		)
+	)
+
+	rownames(results) <- c()
+
+	return(results)
+}
+
 
 # Permutation test -----------------------------------------
 
@@ -98,7 +157,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	slope.high <- summary(fit.high)$coefficients[2]
 	sd.high <- summary(fit.high)$coefficients[4]
 
-	stat.true <- ((slope.high - slope.low))/sqrt(sd.high^2 + sd.low^2)
+	stat.true <- abs(slope.high - slope.low)/sqrt(sd.high^2 + sd.low^2)
 
 	# Construct data
 	data.high <-cbind(log10(col1.high), log10(col2.high))
@@ -130,7 +189,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 		sd.lowp <- summary(fit.lowp)$coefficients[4]
 		slope.highp <- summary(fit.highp)$coefficients[2]
 		sd.highp <- summary(fit.highp)$coefficients[4]
-		stat.sim[i] <- ((slope.highp - slope.lowp))/sqrt(sd.highp^2 + sd.lowp^2)
+		stat.sim[i] <- abs(slope.highp - slope.lowp)/sqrt(sd.highp^2 + sd.lowp^2)
 
 		if (stat.sim[i] > stat.true) {
 			count <- count + 1
