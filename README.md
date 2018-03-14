@@ -7,7 +7,7 @@ New data base scripts:
  - `[+] writedb_hurdat2_oisst_landfalls.R`: build data set focused on landfalls and in-land observations.
  
 New base scripts: 
- - `[*] hurdat_base.R`: add `record.id` column (contains information about landfalls).
+ - `[*] hurdat2_base.R`: add `record.id` column (contains information about landfalls).
  - `[+] oisst_base.R`: functions to extract SST data from OISST.
  - `[+] slopes_base.R`: functions to perform bootstrap and permutation tests on slopes.
 
