@@ -84,45 +84,30 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	i <- sapply(results.df, is.factor)
 	results.df[i] <- lapply(results.df[i], as.character)
 
-
-	# results.df <- results.df %>%
-	# 	dplyr::mutate(dep.var = as.character(dep.var),
-	# 								indep.var = as.character(indep.var))
-
 	return(results.df)
 }
 
-summarise_conf_intervals <- function(var1, var2, min.speed = 0) {
-	# var2 ~ var1 regression (y ~ x)
-	ci.yx.natl.low <- get_conf_interval(pdi.natl, "low", var1, var2, min.speed)
-	ci.yx.natl.high <- get_conf_interval(pdi.natl, "high", var1, var2, min.speed)
+summarise_conf_intervals <- function(basin, var1, var2, min.speed = 0) {
+	# Parse the basin PDI data frame
+	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
 
-	ci.yx.epac.low <- get_conf_interval(pdi.epac, "low", var1, var2, min.speed)
-	ci.yx.epac.high <- get_conf_interval(pdi.epac, "high", var1, var2, min.speed)
+	# var2 ~ var1 regression (y ~ x)
+	ci.yx.low <-  get_conf_interval(basin.df, "low",  var1, var2, min.speed)
+	ci.yx.high <- get_conf_interval(basin.df, "high", var1, var2, min.speed)
 
 	# var1 ~ var2 regression (x ~ y)
-	ci.xy.natl.low <- get_conf_interval(pdi.natl, "low", var2, var1, min.speed)
-	ci.xy.natl.high <- get_conf_interval(pdi.natl, "high", var2, var1, min.speed)
-
-	ci.xy.epac.low <- get_conf_interval(pdi.epac, "low", var2, var1, min.speed)
-	ci.xy.epac.high <- get_conf_interval(pdi.epac, "high", var2, var1, min.speed)
+	ci.xy.low <-  get_conf_interval(basin.df, "low",  var2, var1, min.speed)
+	ci.xy.high <- get_conf_interval(basin.df, "high", var2, var1, min.speed)
 
 	# Construct summarised data frame
 	results <- data.frame(
 		rbind(
-			# NATL results
-			cbind(ci.yx.natl.low["bootstrap-t",], basin="NATL"),
-			cbind(ci.yx.natl.high["bootstrap-t",], basin="NATL"),
-			cbind(ci.xy.natl.low["bootstrap-t",], basin="NATL"),
-			cbind(ci.xy.natl.high["bootstrap-t",], basin="NATL"),
-			# EPAC results
-			cbind(ci.yx.epac.low["bootstrap-t",], basin="EPAC"),
-			cbind(ci.yx.epac.high["bootstrap-t",], basin="EPAC"),
-			cbind(ci.xy.epac.low["bootstrap-t",], basin="EPAC"),
-			cbind(ci.xy.epac.high["bootstrap-t",], basin="EPAC")
+			cbind(ci.yx.low["bootstrap-t",]),
+			cbind(ci.yx.high["bootstrap-t",]),
+			cbind(ci.xy.low["bootstrap-t",]),
+			cbind(ci.xy.high["bootstrap-t",])
 		)
 	)
-
 	rownames(results) <- c()
 
 	return(results)
