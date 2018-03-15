@@ -96,14 +96,31 @@ for (i in 1:length(p.values.list)) {
 }
 
 
-# Scatterplots ---------------------------------------------
+# Scatterplots (all storms) --------------------------------
 
-plot_scatterplot(pdi.natl, "storm.duration", "storm.pdi") +
-	labs(title = "NATL (all storms; 1966-2016)") + theme_bw()
-plot_scatterplot(pdi.epac, "storm.duration", "storm.pdi") +
-	labs(title = "EPAC (all storms; 1986-2016)") + theme_bw()
+# NATL
+plot_scatterplot("NATL", "storm.duration", "storm.pdi")
+plot_scatterplot("NATL", "storm.duration", "max.wind")
+plot_scatterplot("NATL", "storm.duration", "mean.wind")
+plot_scatterplot("NATL", "storm.duration", "mean.sq.wind")
 
-plot_scatterplot(pdi.natl, "storm.duration", "storm.pdi", 33) +
-	labs(title = "NATL (developing systems; 1966-2016)") + theme_bw()
-plot_scatterplot(pdi.epac, "storm.duration", "storm.pdi", 33) +
-	labs(title = "EPAC (developing systems; 1986-2016)") + theme_bw()
+# EPAC
+plot_scatterplot("EPAC", "storm.duration", "storm.pdi")
+plot_scatterplot("EPAC", "storm.duration", "max.wind")
+plot_scatterplot("EPAC", "storm.duration", "mean.wind")
+plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind")
+
+
+# Scatterplots (developing systems) ------------------------
+
+# NATL
+plot_scatterplot("NATL", "storm.duration", "storm.pdi", 33)
+plot_scatterplot("NATL", "storm.duration", "max.wind", 33)
+plot_scatterplot("NATL", "storm.duration", "mean.wind", 33)
+plot_scatterplot("NATL", "storm.duration", "mean.sq.wind", 33)
+
+# EPAC
+plot_scatterplot("EPAC", "storm.duration", "storm.pdi", 33)
+plot_scatterplot("EPAC", "storm.duration", "max.wind", 33)
+plot_scatterplot("EPAC", "storm.duration", "mean.wind", 33)
+plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind", 33)
