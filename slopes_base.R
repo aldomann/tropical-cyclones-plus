@@ -51,7 +51,13 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	boot.upp <- slope + slope.sd * quantile(t.value.sim, 0.975)
 	boot.sd <- (boot.upp - boot.low) / 2
 	boot.slope <- boot.upp - boot.sd
-	boot.r.squared <- mean(r.squared.sim)
+
+	# Estimation of the correlation coefficient
+	r.squared.sim <- r.squared.sim[order(r.squared.sim)]
+	r.sq.low <- quantile(r.squared.sim, 0.025)
+	r.sq.upp <- quantile(r.squared.sim, 0.975)
+	r.sq.sd <- (r.sq.upp - r.sq.low) / 2
+	boot.r.sq <- r.sq.upp - r.sq.sd
 
 	# # Simple Method
 	# simp.low <- 2 * slope - quantile(slope.sim, 0.975)
@@ -65,18 +71,12 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	# quan.sd <- (quan.upp - quan.low) / 2
 	# quan.slope <- quan.upp - quan.sd
 
-	# results.df <- data.frame(
-	# 	method = c("lm", "bootstrap-t", "simple", "quantile"),
-	# 	slope = c(slope, boot.slope, simp.slope, quan.slope),
-	# 	sd = c(slope.sd, boot.sd, simp.sd, quan.sd)
-	# 	)
-
 	results.df <- data.frame(
 		method = c("lm", "bootstrap-t"),
 		sst.class = rep(class, 2),
 		slope = c(slope, boot.slope),
 		sd = c(slope.sd, boot.sd),
-		r2 = c(r.squared, boot.r.squared),
+		r2 = c(r.squared, boot.r.sq),
 		dep.var = rep(var2, 2),
 		indep.var = rep(var1, 2),
 		row.names = 1
