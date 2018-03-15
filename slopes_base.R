@@ -220,13 +220,16 @@ summarise_p_values <- function(basin, var1, var2, min.speed = 0) {
 
 # Scatterplots ---------------------------------------------
 
-plot_scatterplot <- function(df, var1, var2, min.speed = 0) {
+plot_scatterplot <- function(basin, var1, var2, min.speed = 0) {
+	# Parse the basin PDI data frame
+	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
+
 	# Filter data frames
-	df <- df %>%
+	basin.df <- basin.df %>%
 		dplyr::filter(max.wind > min.speed)
-	df.low <- df %>%
+	df.low <- basin.df %>%
 		dplyr::filter(sst.class == "low")
-	df.high <- df %>%
+	df.high <- basin.df %>%
 		dplyr::filter(sst.class == "high")
 
 	# Extract data vectors
@@ -240,7 +243,14 @@ plot_scatterplot <- function(df, var1, var2, min.speed = 0) {
 	lm.high.x <- lm(log10(col1.high) ~ log10(col2.high))
 	lm.low.x <- lm(log10(col1.low) ~ log10(col2.low))
 
-	# years.str <- paste0(year(ssts$year[1]), "-", year(ssts$year[length(ssts$year)]))
+	# Automatic plot title
+	if (min.speed == 0) {
+		storms.str <- "all storms"
+	} else {
+		storms.str <- paste("wind speed >", min.speed)
+	}
+	years.str <- paste0( min(basin.df$storm.year), "-", max(basin.df$storm.year))
+	title.str <- paste0(basin, " (", storms.str, "; ", years.str, ")" )
 
 	gg <- ggplot() +
 		# Scatterplot
@@ -270,10 +280,9 @@ plot_scatterplot <- function(df, var1, var2, min.speed = 0) {
 																	 			 	.(paste0("= ", format(summary(lm.low.y)$r.squared, digits = 2))))),
 												values = c("high" = "brown1", "low" = "dodgerblue1")) +
 		scale_linetype_manual(values = c("x(y)" = "longdash", "y(x)" = "solid")) +
-		labs(
-			#title = paste0("PDI vs duration scatterplot", " (", attr(ssts, "title"), "; ", years.str ,")") ,
-				 x = "Storm duration (h)", y = bquote(PDI~ (m^3 ~s^-2)),
+		labs(title = title.str,
+				 x = paste(eval(var1)), y = paste(eval(var2)),
 				 colour = "SST class", linetype = "Regression")
 
-	return(gg)
+	return(gg + theme_bw())
 }
