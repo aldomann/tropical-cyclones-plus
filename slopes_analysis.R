@@ -7,6 +7,7 @@ library(measurements) # Convert units
 
 # Source base code -----------------------------------------
 source("slopes_base.R")
+load("slopes_analysis.RData")
 
 # Get RAW data ---------------------------------------------
 
@@ -81,19 +82,15 @@ p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mea
 
 # Analyse p-values -----------------------------------------
 
-p.values.list <- lapply ( ls(patt='^p.vals'), get)
+p.values.list <- lapply(ls(patt='^p.vals'), get)
 
 alpha = 0.05
 
 # Print regressions with p-value <= alpha
 for (i in 1:length(p.values.list)) {
-	for( j in 1:2) {
-		if (p.values.list[[i]][j,1] <= alpha) {
-			print(paste("p-val:",
-									p.values.list[[i]][j,1]))
-			print(paste("lm:",
-									p.values.list[[i]][j,3], "~",
-									p.values.list[[i]][j,4]))
+	for (j in 1:2) {
+		if (p.values.list[[i]][["p.value"]][1] <= alpha) {
+			print(p.values.list[[i]][j,])
 		}
 	}
 }
