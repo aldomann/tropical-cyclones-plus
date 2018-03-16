@@ -103,10 +103,10 @@ summarise_conf_intervals <- function(basin, var1, var2, min.speed = 0) {
 	# Construct summarised data frame
 	results <- data.frame(
 		rbind(
-			cbind(ci.yx.low["bootstrap-t",]),
-			cbind(ci.yx.high["bootstrap-t",]),
-			cbind(ci.xy.low["bootstrap-t",]),
-			cbind(ci.xy.high["bootstrap-t",])
+			cbind(ci.yx.low["bootstrap-t",], basin = toupper(basin), min.speed = min.speed),
+			cbind(ci.yx.high["bootstrap-t",], basin = toupper(basin), min.speed = min.speed),
+			cbind(ci.xy.low["bootstrap-t",], basin = toupper(basin), min.speed = min.speed),
+			cbind(ci.xy.high["bootstrap-t",], basin = toupper(basin), min.speed = min.speed)
 		)
 	)
 	rownames(results) <- c()
@@ -207,8 +207,10 @@ summarise_p_values <- function(basin, var1, var2, min.speed = 0) {
 	# Construct summarised data frame
 	results <- data.frame(
 		rbind(
-			cbind(p.val.yx, dep.var = var2, indep.var = var1),
-			cbind(p.val.xy, dep.var = var1, indep.var = var2)
+			cbind(p.val.yx, dep.var = var2, indep.var = var1,
+						basin = toupper(basin), min.speed = min.speed),
+			cbind(p.val.xy, dep.var = var1, indep.var = var2,
+						basin = toupper(basin), min.speed = min.speed)
 		)
 	)
 
