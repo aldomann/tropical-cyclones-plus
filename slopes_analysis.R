@@ -113,27 +113,29 @@ plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind", 33)
 # Summarise CI data frames ---------------------------------
 
 # Group data frames into a list
+rm(ci.list)
 ci.list <- lapply(ls(patt='^ci.'), get)
-rm(list=ls(pattern="^ci.epac"))
-rm(list=ls(pattern="^ci.natl"))
+# rm(list=ls(pattern="^ci.epac"))
+# rm(list=ls(pattern="^ci.natl"))
 
 # NATL (all storms)
-ci.list[lapply(purrr::map(ci.list, ~filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0]
+ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0]
 
 # NATL (all storms)
-ci.list[lapply(purrr::map(ci.list, ~filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0]
+ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0]
 
 # NATL (developing systems)
-ci.list[lapply(purrr::map(ci.list, ~filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0]
+ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0]
 
 # EPAC (developing systems)
-ci.list[lapply(purrr::map(ci.list, ~filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0]
+ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0]
 
 # Analyse p-values -----------------------------------------
 
 # Group data frames into a list
+rm(p.values.list)
 p.values.list <- lapply(ls(patt='^p.vals.'), get)
-rm(list=ls(pattern="^p.vals."))
+# rm(list=ls(pattern="^p.vals."))
 
 alpha = 0.05
 
@@ -147,13 +149,13 @@ for (i in 1:length(p.values.list)) {
 }
 
 # NATL (all storms)
-p.values.list[lapply(purrr::map(p.values.list, ~filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0]
+p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0]
 
 # NATL (all storms)
-p.values.list[lapply(purrr::map(p.values.list, ~filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0]
+p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0]
 
 # NATL (developing systems)
-p.values.list[lapply(purrr::map(p.values.list, ~filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0]
+p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0]
 
 # EPAC (developing systems)
-p.values.list[lapply(purrr::map(p.values.list, ~filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0]
+p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0]
