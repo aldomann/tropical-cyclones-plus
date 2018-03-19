@@ -10,8 +10,9 @@ New base scripts:
  - `[*] hurdat2_base.R`: add `record.id` column (contains information about landfalls).
  - `[+] oisst_base.R`: functions to extract SST data from OISST.
  - `[+] slopes_base.R`: functions to perform bootstrap and permutation tests on slopes.
+ - `[+] geographic_base.R`: functions analise the geographical track of hurricanes.
 
 New scripts: 
  - `[+] correlation_analysis.R`: explore the correlation between hurricane and sea variables.
  - `[+] slopes_analysis.R`: use different statistical tests to analise the slopes of linear regressions.
- - `[+] geographical_analysis.R`: analise the influence of the geographical track of on the duration of hurricanes.
+ - `[+] geographic_analysis.R`: analise the influence of the geographical track of on the duration of hurricanes.
