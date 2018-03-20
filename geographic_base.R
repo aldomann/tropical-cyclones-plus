@@ -66,7 +66,12 @@ scale_y_latitude <- function(ymin = -90, ymax = 90, step = 0.5, xtra.lim = 1.5, 
 
 # Install legacy version of ggalt (see https://github.com/hrbrmstr/ggalt/issues/33)
 # devtools::install_github("rplzzz/ggalt", ref = "ggp221")
-map_region_hurrs <- function(hurr.obs, coords, rect.coords, steps = c(5,5), xtra.lims = c(1.5,1.5)){
+map_region_hurrs <- function(storms.obs, coords, rect.coords, steps = c(5,5), xtra.lims = c(1.5,1.5)){
+	storms.obs <- base::merge(x = storms.natl,
+														y = pdi.all %>% select(storm.id, sst.class),
+														by = "storm.id", all.x = TRUE)
+
+
 	coords <- morph_coords(coords)
 	rect.coords <- morph_coords(rect.coords)
 
@@ -80,9 +85,14 @@ map_region_hurrs <- function(hurr.obs, coords, rect.coords, steps = c(5,5), xtra
 		scale_y_latitude(ymin = as.numeric(coords[3]), ymax = as.numeric(coords[4]),
 										 step = steps[2], xtra.lim = xtra.lims[2]) +
 		coord_proj("+proj=merc") +
-		geom_path(data = hurr.obs, aes(x = long, y = lat, group = storm.id),
-							colour = "red", alpha = 0.2, size = 0.2) +
+		geom_path(data = storms.obs %>% dplyr::filter(sst.class == "low"),
+							aes(x = long, y = lat, group = storm.id, colour = "low"),
+							alpha = 0.1, size = 0.2) +
+		geom_path(data = storms.obs %>% dplyr::filter(sst.class == "high"),
+							aes(x = long, y = lat, group = storm.id, colour = "high"),
+							alpha = 0.1, size = 0.2) +
 		annotate("rect", xmin = as.integer(rect.coords[1]), xmax = as.integer(rect.coords[2]),
 						 ymin = as.integer(rect.coords[3]), ymax = as.integer(rect.coords[4]),
-						 colour = "green", alpha = 0.2)
+						 colour = "green", alpha = 0.2) +
+		scale_colour_manual(values = c("high" = "brown1", "low" = "dodgerblue1"))
 }
