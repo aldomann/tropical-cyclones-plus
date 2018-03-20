@@ -67,18 +67,20 @@ scale_y_latitude <- function(ymin = -90, ymax = 90, step = 0.5, xtra.lim = 1.5, 
 # Install legacy version of ggalt (see https://github.com/hrbrmstr/ggalt/issues/33)
 # devtools::install_github("rplzzz/ggalt", ref = "ggp221")
 map_region_hurrs <- function(storms.obs, coords, rect.coords, steps = c(5,5), xtra.lims = c(1.5,1.5)){
-	storms.obs <- base::merge(x = storms.obs,
-														y = pdi.all %>% select(storm.id, sst.class),
-														by = "storm.id", all.x = TRUE)
+	# Populate SST Class into storms data frame
+	storms.obs <- plyr::join(storms.obs,
+													 pdi.all %>% select(storm.id, sst.class))
 
-
+	# Coordinates
 	coords <- morph_coords(coords)
 	rect.coords <- morph_coords(rect.coords)
 
+	# World map
 	world_map <- map_data("world")
 	world_map <- subset(world_map, region!="Antarctica")
 
-	ggplot(data = world_map, aes(x = long, y = lat, group = group)) +
+	# Create map
+	gg <- ggplot(data = world_map, aes(x = long, y = lat, group = group)) +
 		geom_cartogram(map = world_map, aes(map_id = region), colour = "white", fill = "grey50") +
 		scale_x_longitude(xmin = as.numeric(coords[1]), xmax = as.numeric(coords[2]),
 											step = steps[1], xtra.lim = xtra.lims[1]) +
@@ -95,4 +97,6 @@ map_region_hurrs <- function(storms.obs, coords, rect.coords, steps = c(5,5), xt
 						 ymin = as.integer(rect.coords[3]), ymax = as.integer(rect.coords[4]),
 						 colour = "green", alpha = 0.2) +
 		scale_colour_manual(values = c("high" = "brown1", "low" = "dodgerblue1"))
+
+	return(gg)
 }
