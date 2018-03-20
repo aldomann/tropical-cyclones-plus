@@ -66,10 +66,10 @@ scale_y_latitude <- function(ymin = -90, ymax = 90, step = 0.5, xtra.lim = 1.5, 
 
 # Install legacy version of ggalt (see https://github.com/hrbrmstr/ggalt/issues/33)
 # devtools::install_github("rplzzz/ggalt", ref = "ggp221")
-map_region_hurrs <- function(storms.obs, coords, rect.coords, steps = c(5,5), xtra.lims = c(1.5,1.5)){
+map_region_hurrs <- function(storms.obs, coords, rect.coords, steps = c(5,5), xtra.lims = c(1.5,1.5), facet = F){
 	# Populate SST Class into storms data frame
 	storms.obs <- plyr::join(storms.obs,
-													 pdi.all %>% select(storm.id, sst.class))
+													 storms.joint %>% select(storm.id, sst.class, distance))
 
 	# Coordinates
 	coords <- morph_coords(coords)
@@ -88,15 +88,21 @@ map_region_hurrs <- function(storms.obs, coords, rect.coords, steps = c(5,5), xt
 										 step = steps[2], xtra.lim = xtra.lims[2]) +
 		coord_proj("+proj=merc") +
 		geom_path(data = storms.obs %>% dplyr::filter(sst.class == "low"),
-							aes(x = long, y = lat, group = storm.id, colour = "low"),
-							alpha = 0.1, size = 0.2) +
+							aes(x = long, y = lat, group = storm.id, colour = "low"), #size = distance),
+							alpha = 0.2, size = 0.2) +
 		geom_path(data = storms.obs %>% dplyr::filter(sst.class == "high"),
-							aes(x = long, y = lat, group = storm.id, colour = "high"),
-							alpha = 0.1, size = 0.2) +
+							aes(x = long, y = lat, group = storm.id, colour = "high"), #size = distance),
+							alpha = 0.2, size = 0.2) +
 		annotate("rect", xmin = as.integer(rect.coords[1]), xmax = as.integer(rect.coords[2]),
 						 ymin = as.integer(rect.coords[3]), ymax = as.integer(rect.coords[4]),
 						 colour = "green", alpha = 0.2) +
-		scale_colour_manual(values = c("high" = "brown1", "low" = "dodgerblue1"))
+		scale_colour_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		scale_size_continuous(range = c(0.2,1))
+
+	if (facet == T) {
+		gg <- gg +
+			facet_wrap(~sst.class)
+	}
 
 	return(gg)
 }
