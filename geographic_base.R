@@ -67,7 +67,7 @@ scale_y_latitude <- function(ymin = -90, ymax = 90, step = 0.5, xtra.lim = 1.5, 
 # Install legacy version of ggalt (see https://github.com/hrbrmstr/ggalt/issues/33)
 # devtools::install_github("rplzzz/ggalt", ref = "ggp221")
 map_region_hurrs <- function(storms.obs, coords, rect.coords, steps = c(5,5), xtra.lims = c(1.5,1.5)){
-	storms.obs <- base::merge(x = storms.natl,
+	storms.obs <- base::merge(x = storms.obs,
 														y = pdi.all %>% select(storm.id, sst.class),
 														by = "storm.id", all.x = TRUE)
 
