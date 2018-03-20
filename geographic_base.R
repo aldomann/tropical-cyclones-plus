@@ -5,6 +5,8 @@
 library(tidyverse)
 # library(lubridate)
 library(data.table)
+library(maps)
+library(ggalt)
 
 # Haversine formula ----------------------------------------
 
@@ -22,4 +24,65 @@ haversine_distance <- function(lat1, lat2, lon1, lon2) {
 	c <- 2 * atan2(sqrt(a), sqrt(1-a))
 
 	return(earth.radius * c)
+}
+
+
+# Basins maps functions ------------------------------------
+
+# Transform basin coordinates into numbers
+morph_coords <- function(coords){
+	coords[1] <- ifelse(str_extract(coords[1], "[A-Z]") == "W",
+											- as.numeric(str_extract(coords[1], "[^A-Z]+")),
+											as.numeric(str_extract(coords[1], "[^A-Z]+")) )
+	coords[2] <- ifelse(str_extract(coords[2], "[A-Z]") == "W",
+											- as.numeric(str_extract(coords[2], "[^A-Z]+")),
+											as.numeric(str_extract(coords[2], "[^A-Z]+")) )
+	coords[3] <- ifelse(str_extract(coords[3], "[A-Z]") == "S",
+											- as.numeric(str_extract(coords[3], "[^A-Z]+")),
+											as.numeric(str_extract(coords[3], "[^A-Z]+")) )
+	coords[4] <- ifelse(str_extract(coords[4], "[A-Z]") == "S",
+											- as.numeric(str_extract(coords[4], "[^A-Z]+")),
+											as.numeric(str_extract(coords[4], "[^A-Z]+")) )
+	return(coords)
+}
+
+# Map showing the hurricanes in specified window
+# SRC: http://stackoverflow.com/questions/33302424/format-latitude-and-longitude-axis-labels-in-ggplot
+scale_x_longitude <- function(xmin = -180, xmax = 180, step = 1, xtra.lim = 1.5, ...) {
+	xbreaks <- seq(xmin,xmax,step)
+	xlabels <- unlist(lapply(xbreaks, function(x) ifelse(x < 0, parse(text=paste0(-x,"^o", "*W")),
+																											 ifelse(x > 0, parse(text=paste0(x,"^o", "*E")), x))))
+	return(scale_x_continuous("Longitude", breaks = xbreaks, labels = xlabels,
+														expand = c(0, 0), limits = c(xmin-xtra.lim, xmax+xtra.lim), ...))
+}
+
+scale_y_latitude <- function(ymin = -90, ymax = 90, step = 0.5, xtra.lim = 1.5, ...) {
+	ybreaks <- seq(ymin,ymax,step)
+	ylabels <- unlist(lapply(ybreaks, function(x) ifelse(x < 0, parse(text=paste0(-x,"^o", "*S")),
+																											 ifelse(x > 0, parse(text=paste0(x,"^o", "*N")), x))))
+	return(scale_y_continuous("Latitude", breaks = ybreaks, labels = ylabels,
+														expand = c(0, 0), limits = c(ymin-xtra.lim, ymax+xtra.lim), ...))
+}
+
+# Install legacy version of ggalt (see https://github.com/hrbrmstr/ggalt/issues/33)
+# devtools::install_github("rplzzz/ggalt", ref = "ggp221")
+map_region_hurrs <- function(hurr.obs, coords, rect.coords, steps = c(5,5), xtra.lims = c(1.5,1.5)){
+	coords <- morph_coords(coords)
+	rect.coords <- morph_coords(rect.coords)
+
+	world_map <- map_data("world")
+	world_map <- subset(world_map, region!="Antarctica")
+
+	ggplot(data = world_map, aes(x = long, y = lat, group = group)) +
+		geom_cartogram(map = world_map, aes(map_id = region), colour = "white", fill = "grey50") +
+		scale_x_longitude(xmin = as.numeric(coords[1]), xmax = as.numeric(coords[2]),
+											step = steps[1], xtra.lim = xtra.lims[1]) +
+		scale_y_latitude(ymin = as.numeric(coords[3]), ymax = as.numeric(coords[4]),
+										 step = steps[2], xtra.lim = xtra.lims[2]) +
+		coord_proj("+proj=merc") +
+		geom_path(data = hurr.obs, aes(x = long, y = lat, group = storm.id),
+							colour = "red", alpha = 0.2, size = 0.2) +
+		annotate("rect", xmin = as.integer(rect.coords[1]), xmax = as.integer(rect.coords[2]),
+						 ymin = as.integer(rect.coords[3]), ymax = as.integer(rect.coords[4]),
+						 colour = "green", alpha = 0.2)
 }
