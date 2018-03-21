@@ -108,10 +108,9 @@ map_region_hurrs <- function(storms.obs, coords, rect.coords, steps = c(5,5), xt
 }
 
 
-
-
 # Distance analysis ----------------------------------------
 
+# Get summary of storms with longest path
 get_longest_paths <- function(basin.name, head.n = 6) {
 	gg <- storms.joint %>%
 		dplyr::filter(basin == basin.name) %>%
@@ -122,6 +121,7 @@ get_longest_paths <- function(basin.name, head.n = 6) {
 	return(gg)
 }
 
+# Plot scatterplot of distance vs duration
 plot_distance_scatterplot <- function(basin.name, min.speed = 0) {
 	df <- storms.joint %>%
 		dplyr::filter(max.wind > min.speed) %>%
@@ -148,3 +148,42 @@ plot_distance_scatterplot <- function(basin.name, min.speed = 0) {
 		labs(colour = "SST class")
 }
 
+# Scatterplot of initial and final positions
+plot_positions <- function(basin.name, type = "all", min.speed = 0) {
+
+	# Filter data frame
+	df <- storms.joint %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		dplyr::filter(basin == basin.name)
+
+	# Initialise ggplot object
+	gg <- ggplot(df)
+
+	if (type == "first") {
+		gg <- gg +
+			geom_point(aes(x = first.long, y = first.lat,
+										 colour = sst.class, shape = sst.class,
+										 size = distance, alpha = distance))
+	} else if (type == "last") {
+		gg <- gg +
+			geom_point(aes(x = last.long, y = last.lat,
+										 colour = sst.class, shape = sst.class,
+										 size = distance, alpha = distance))
+	} else if (type == "all") {
+		gg <- gg +
+			geom_point(aes(x = last.long, y = last.lat,
+										 colour = sst.class, shape = sst.class,
+										 size = distance, alpha = distance)) +
+			geom_point(aes(x = first.long, y = first.lat,
+										 colour = sst.class, shape = sst.class,
+										 size = distance, alpha = distance))
+	}
+
+	gg <- gg +
+		scale_color_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		scale_shape_manual(values = c("high" = 1, "low" = 1)) +
+		scale_size_continuous(range = c(0.25, 3)) +
+		scale_alpha_continuous(range = c(0.25, 1))
+
+	return(gg)
+}
