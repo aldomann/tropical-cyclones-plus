@@ -112,9 +112,9 @@ map_region_hurrs <- function(storms.obs, coords, rect.coords, steps = c(5,5), xt
 
 # Distance analysis ----------------------------------------
 
-get_longest_paths <- function(basin.n, head.n = 6) {
+get_longest_paths <- function(basin.name, head.n = 6) {
 	gg <- storms.joint %>%
-		dplyr::filter(basin == basin.n) %>%
+		dplyr::filter(basin == basin.name) %>%
 		dplyr::arrange(desc(distance)) %>%
 		select(storm.id, storm.name, storm.year, distance)%>%
 		head(n = head.n)
@@ -122,16 +122,26 @@ get_longest_paths <- function(basin.n, head.n = 6) {
 	return(gg)
 }
 
-plot_distance_scatterplot <- function(df) {
+plot_distance_scatterplot <- function(basin.name, min.speed = 0) {
+	df <- storms.joint %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		dplyr::filter(basin == basin.name)
+
 	gg <- ggplot(df) +
 		# Low SST Years
 		geom_point(data = df %>% dplyr::filter(sst.class == "low"),
 							 aes(x = storm.duration, y = distance, colour = "low"),
 							 shape = 5, size = 1) +
+		geom_smooth(data = df %>% dplyr::filter(sst.class == "low"),
+							 aes(x = storm.duration, y = distance, colour = "low"),
+							 method = "lm") +
 		# High SST Years
 		geom_point(data = df %>% dplyr::filter(sst.class == "high"),
 							 aes(x = storm.duration, y = distance, colour = "high"),
 							 shape = 1, size = 1) +
+		geom_smooth(data = df %>% dplyr::filter(sst.class == "high"),
+								aes(x = storm.duration, y = distance, colour = "high"),
+								method = "lm") +
 		scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
 		scale_y_log10() +
 		scale_color_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
