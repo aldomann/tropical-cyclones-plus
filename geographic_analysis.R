@@ -63,3 +63,15 @@ coords.epac.map <- c("160W", "90W", "5N", "35N")
 # Maps of the basins (full)
 map_region_hurrs(storms.natl, coords.natl.map, coords.natl, steps = c(20, 10), xtra.lims = c(3,2)) #+ theme_bw() + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "map-natl.pdf", width = 5.75, height = 3.75, dpi = 96, device = cairo_pdf)
 map_region_hurrs(storms.epac, coords.epac.map, coords.epac, steps = c(10, 10), xtra.lims = c(3,2)) #+ theme_bw() + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "map-epac.pdf", width = 6, height = 3.15, dpi = 96, device = cairo_pdf)
+
+
+# Analysis of travelled distance ---------------------------
+
+storms.joint %>%
+	group_by(basin) %>%
+	summarise(dist.mean = mean(distance))
+
+get_longest_paths("NATL")
+get_longest_paths("EPAC")
+
+plot_distance_scatterplot(storms.joint) + theme_bw()
