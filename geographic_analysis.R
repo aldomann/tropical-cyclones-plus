@@ -74,4 +74,8 @@ storms.joint %>%
 get_longest_paths("NATL")
 get_longest_paths("EPAC")
 
-plot_distance_scatterplot(storms.joint) + theme_bw()
+plot_distance_scatterplot("NATL") + theme_bw()
+plot_distance_scatterplot("EPAC") + theme_bw()
+
+plot_distance_scatterplot("NATL", 33) + theme_bw()
+plot_distance_scatterplot("EPAC", 33) + theme_bw()
