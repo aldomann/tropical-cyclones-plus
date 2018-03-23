@@ -69,13 +69,19 @@ map_region_hurrs(storms.epac, coords.epac.map, coords.epac, steps = c(10, 10), x
 
 # Summary of the distances
 storms.joint %>%
-	group_by(basin) %>%
-	summarise(dist.mean = mean(distance))
+	group_by(sst.class, basin) %>%
+	summarise(dist.mean = round(mean(distance)/1000))
 
+# Summary of the durations
+storms.joint %>%
+	group_by(sst.class, basin) %>%
+	summarise(dist.mean = round(mean(storm.duration)))
+
+# Summarise storms with longest paths
 get_longest_paths("NATL")
 get_longest_paths("EPAC")
 
-# Plot scatterplot of distance vs duration
+# Scatterplot of distance vs duration
 plot_distance_scatterplot("NATL") + theme_bw()
 plot_distance_scatterplot("EPAC") + theme_bw()
 
