@@ -181,3 +181,28 @@ plot_positions <- function(basin.name, type = "all", min.speed = 0) {
 
 	return(gg)
 }
+
+
+# Histogram of initial and final positions
+plot_positions_histogram <- function(basin.name, var, min.speed = 0, facet = F) {
+
+	# Filter data frame
+	df <- storms.joint %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		dplyr::filter(basin == basin.name)
+
+	# Initialise ggplot object
+	gg <- ggplot(df) +
+		geom_density(aes(fill = sst.class), alpha = 0.2) +
+		scale_x_continuous(limits = c(-150,10)) +
+		scale_fill_manual(values = c("high" = "brown1", "low" = "dodgerblue1"))
+
+	# Specify variable
+	gg <- gg + aes_string(x = var)
+
+	if (facet == T) {
+		gg <- gg + facet_wrap(~ sst.class)
+	}
+
+	return(gg)
+}
