@@ -184,7 +184,7 @@ plot_positions <- function(basin.name, type = "all", min.speed = 0) {
 
 
 # Histogram of initial and final positions
-plot_positions_histogram <- function(basin.name, var, min.speed = 0, facet = F) {
+plot_positions_histogram <- function(basin.name, var, min.speed = 0) {
 
 	# Filter data frame
 	df <- storms.joint %>%
@@ -194,15 +194,23 @@ plot_positions_histogram <- function(basin.name, var, min.speed = 0, facet = F) 
 	# Initialise ggplot object
 	gg <- ggplot(df) +
 		geom_density(aes(fill = sst.class), alpha = 0.2) +
-		scale_x_continuous(limits = c(-150,10)) +
-		scale_fill_manual(values = c("high" = "brown1", "low" = "dodgerblue1"))
+		# scale_x_continuous(limits = c(-150,10)) +
+		scale_fill_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		labs(fill = "SST Class")
 
 	# Specify variable
-	gg <- gg + aes_string(x = var)
+	gg.lat <- gg +
+		aes_string(x = paste0(var, ".lat"))
+	gg.long <- gg +
+		aes_string(x = paste0(var, ".long"))
 
-	if (facet == T) {
-		gg <- gg + facet_wrap(~ sst.class)
-	}
-
-	return(gg)
+	# Facet using multiplot and GGally
+	pm <- ggmatrix(list("lat" = gg.lat + theme(legend.position="lat"),
+											"long" = gg.long + theme(legend.position="long")),
+								 nrow = 1, ncol = 2,
+								 legend = c(1,1),
+								 xAxisLabels = c("Latitude", "Longitude")) +
+		theme( #strip.background = element_rect(fill = "white"),
+			strip.placement = "outside")
+	return(pm)
 }
