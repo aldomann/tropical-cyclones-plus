@@ -214,3 +214,25 @@ plot_positions_histogram <- function(basin.name, var, min.speed = 0) {
 			strip.placement = "outside")
 	return(pm)
 }
+
+# Statistical summary of positions
+get_stat_summary <- function(basin.name, min.speed = 0) {
+	df <- storms.joint %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		dplyr::filter(basin == basin.name) %>%
+		group_by(sst.class) %>%
+		dplyr::summarise(mean.first.lat = mean(first.lat),
+										 mean.last.lat = mean(last.lat),
+										 mean.first.long = mean(first.long),
+										 mean.last.long = mean(last.long))
+	# summary(df)
+
+	# sum <- df %>% split(.$sst.class) %>% purrr::map(summary)
+	#
+	# print("$high")
+	# print(sum[["high"]][,-1])
+	# print("$low")
+	# print(sum[["low"]][,-1])
+
+	return(df)
+}
