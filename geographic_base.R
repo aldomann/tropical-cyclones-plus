@@ -157,26 +157,20 @@ plot_positions <- function(basin.name, type = "all", min.speed = 0) {
 		dplyr::filter(basin == basin.name)
 
 	# Initialise ggplot object
-	gg <- ggplot(df)
+	gg <- ggplot(df) +
+		aes(colour = sst.class, shape = sst.class,
+				size = distance, alpha = distance)
 
 	if (type == "first") {
 		gg <- gg +
-			geom_point(aes(x = first.long, y = first.lat,
-										 colour = sst.class, shape = sst.class,
-										 size = distance, alpha = distance))
+			geom_point(aes(x = first.long, y = first.lat))
 	} else if (type == "last") {
 		gg <- gg +
-			geom_point(aes(x = last.long, y = last.lat,
-										 colour = sst.class, shape = sst.class,
-										 size = distance, alpha = distance))
+			geom_point(aes(x = last.long, y = last.lat))
 	} else if (type == "all") {
 		gg <- gg +
-			geom_point(aes(x = last.long, y = last.lat,
-										 colour = sst.class, shape = sst.class,
-										 size = distance, alpha = distance)) +
-			geom_point(aes(x = first.long, y = first.lat,
-										 colour = sst.class, shape = sst.class,
-										 size = distance, alpha = distance))
+			geom_point(aes(x = last.long, y = last.lat)) +
+			geom_point(aes(x = first.long, y = first.lat))
 	}
 
 	gg <- gg +
