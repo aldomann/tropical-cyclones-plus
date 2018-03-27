@@ -10,7 +10,7 @@ source("geographic_base.R")
 
 # Get RAW data ---------------------------------------------
 
-storms.all <- fread('data/hurdat2-all.csv')
+storms.all <- as_tibble(fread('data/hurdat2-all.csv'))
 
 storms.natl <- storms.all %>%
 	dplyr::filter(basin == "NATL") %>%
@@ -41,7 +41,7 @@ storms.tracks <- storms.all %>%
 
 # Read PDI data frame
 
-pdi.all <- fread('data/hurdat2-hadisst-1966-2016_pdis.csv') %>%
+pdi.all <- as_tibble(fread('data/hurdat2-hadisst-1966-2016_pdis.csv')) %>%
 	mutate(storm.duration = conv_unit(storm.duration, "sec", "hr"))
 
 # Join data frames by storm.id
