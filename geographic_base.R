@@ -142,10 +142,30 @@ plot_distance_scatterplot <- function(basin.name, min.speed = 0) {
 		geom_smooth(data = df %>% dplyr::filter(sst.class == "high"),
 								aes(x = storm.duration, y = distance, colour = "high"),
 								method = "lm") +
-		scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
-		scale_y_log10() +
+		# scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
+		# scale_y_log10() +
 		scale_color_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
 		labs(colour = "SST class")
+}
+
+# Plot histogram of distance/duration
+plot_distance_histogram <- function(basin.name, min.speed = 0, facet = F) {
+	df <- storms.joint %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		dplyr::filter(basin == basin.name)
+
+	gg <- ggplot(df) +
+		geom_histogram(aes(fill = sst.class), colour = "black", alpha = 0.5) +
+		aes(x = storm.duration/distance) +
+		scale_color_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		labs(fill = "SST class")
+
+	if (facet == T) {
+		gg <- gg +
+			facet_wrap(~sst.class)
+	}
+
+	return(gg)
 }
 
 # Scatterplot of initial and final positions
