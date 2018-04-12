@@ -8,9 +8,10 @@ library(data.table)
 library(maps)
 library(ggalt)
 
-# Haversine formula ----------------------------------------
+# Distance formulas ----------------------------------------
 
-haversine_distance <- function(lat1, lat2, lon1, lon2) {
+# Haversine Formula
+distance_haversine <- function(lat1, lat2, lon1, lon2) {
 	earth.radius = 6371000
 
 	lat1 = lat1 * (pi/180)
@@ -24,6 +25,21 @@ haversine_distance <- function(lat1, lat2, lon1, lon2) {
 	c <- 2 * atan2(sqrt(a), sqrt(1-a))
 
 	return(earth.radius * c)
+}
+
+# Spherical Law of Cosines
+distance_slc <- function(lat1, lat2, lon1, lon2) {
+	earth.radius = 6371000
+
+	lat1 = lat1 * (pi/180)
+	lat2 = lat2 * (pi/180)
+	lon1 = lon1 * (pi/180)
+	lon2 = lon2 * (pi/180)
+	delta.lon = lon2 - lon1
+
+	distance <- acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(delta.lon)) * earth.radius
+
+	return(as.numeric(distance))
 }
 
 
@@ -236,23 +252,36 @@ plot_positions_histogram <- function(basin.name, var, min.speed = 0) {
 }
 
 # Statistical summary of positions
-get_stat_summary <- function(basin.name, min.speed = 0) {
+get_location_mean_summary <- function(basin.name, min.speed = 0) {
 	df <- storms.joint %>%
 		dplyr::filter(max.wind > min.speed) %>%
 		dplyr::filter(basin == basin.name) %>%
 		group_by(sst.class) %>%
 		dplyr::summarise(mean.first.lat = mean(first.lat),
+										 sd.first.lat = sd(first.lat)/sqrt(n()),
 										 mean.last.lat = mean(last.lat),
+										 sd.last.lat = sd(last.lat)/sqrt(n()),
 										 mean.first.long = mean(first.long),
-										 mean.last.long = mean(last.long))
-	# summary(df)
+										 sd.first.long = sd(first.long)/sqrt(n()),
+										 mean.last.long = mean(last.long),
+										 sd.last.long = sd(last.long)/sqrt(n()))
 
-	# sum <- df %>% split(.$sst.class) %>% purrr::map(summary)
-	#
-	# print("$high")
-	# print(sum[["high"]][,-1])
-	# print("$low")
-	# print(sum[["low"]][,-1])
+	return(df)
+}
+
+get_location_median_summary <- function(basin.name, min.speed = 0) {
+	df <- storms.joint %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		dplyr::filter(basin == basin.name) %>%
+		group_by(sst.class) %>%
+		dplyr::summarise(median.first.lat = median(first.lat),
+										 sd.first.lat = sd(first.lat)/sqrt(n()),
+										 median.last.lat = median(last.lat),
+										 sd.last.lat = sd(last.lat)/sqrt(n()),
+										 median.first.long = median(first.long),
+										 sd.first.long = sd(first.long)/sqrt(n()),
+										 median.last.long = median(last.long),
+										 sd.last.long = sd(last.long)/sqrt(n()))
 
 	return(df)
 }
