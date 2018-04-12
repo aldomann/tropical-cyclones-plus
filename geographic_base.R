@@ -251,14 +251,18 @@ plot_positions_histogram <- function(basin.name, var, min.speed = 0) {
 	return(pm)
 }
 
+
+
 # Statistical summary of positions
 get_location_mean_summary <- function(basin.name, min.speed = 0) {
+	std.error <- function(x) { sd(x)/sqrt(length(x)) }
+
 	df <- storms.joint %>%
 		dplyr::filter(max.wind > min.speed) %>%
 		dplyr::filter(basin == basin.name) %>%
 		group_by(sst.class) %>%
 		dplyr::summarise(mean.first.lat = mean(first.lat),
-										 sd.first.lat = sd(first.lat)/sqrt(n()),
+										 sd.first.lat = std.error(first.lat),
 										 mean.last.lat = mean(last.lat),
 										 sd.last.lat = sd(last.lat)/sqrt(n()),
 										 mean.first.long = mean(first.long),
@@ -270,18 +274,32 @@ get_location_mean_summary <- function(basin.name, min.speed = 0) {
 }
 
 get_location_median_summary <- function(basin.name, min.speed = 0) {
+	median.error <- function(x) { 1.253 * sd(x)/sqrt(length(x)) }
+
 	df <- storms.joint %>%
 		dplyr::filter(max.wind > min.speed) %>%
 		dplyr::filter(basin == basin.name) %>%
 		group_by(sst.class) %>%
 		dplyr::summarise(median.first.lat = median(first.lat),
-										 sd.first.lat = sd(first.lat)/sqrt(n()),
+										 sd.first.lat = median.error(first.lat),
 										 median.last.lat = median(last.lat),
-										 sd.last.lat = sd(last.lat)/sqrt(n()),
+										 sd.last.lat = median.error(last.lat),
 										 median.first.long = median(first.long),
-										 sd.first.long = sd(first.long)/sqrt(n()),
+										 sd.first.long = median.error(first.long),
 										 median.last.long = median(last.long),
-										 sd.last.long = sd(last.long)/sqrt(n()))
+										 sd.last.long = median.error(last.long))
 
 	return(df)
+}
+
+# Unpaired Wilcoxon Test
+perform_wilcox_test <- function(var, basin.name, min.speed = 0) {
+	df <- storms.joint %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		dplyr::filter(basin == basin.name)
+
+	res <- wilcox.test(df[, var] ~ df[, "sst.class"],
+										 exact = FALSE)
+
+	return(res)
 }
