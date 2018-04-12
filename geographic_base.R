@@ -303,3 +303,36 @@ perform_wilcox_test <- function(var, basin.name, min.speed = 0) {
 
 	return(res)
 }
+
+
+# Histogram of initial and final positions
+plot_positions_boxplot <- function(basin.name, var, min.speed = 0) {
+
+	# Filter data frame
+	df <- storms.joint %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		dplyr::filter(basin == basin.name)
+
+	# Initialise ggplot object
+	gg <- ggplot(df) +
+		geom_boxplot(aes(x = sst.class, colour = sst.class), alpha = 1) +
+		# scale_x_continuous(limits = c(-150,10)) +
+		scale_color_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		labs(x = "SST Class", colour = "SST Class")
+
+	# Specify variable
+	gg.lat <- gg +
+		aes_string(y = paste0(var, ".lat"))
+	gg.long <- gg +
+		aes_string(y = paste0(var, ".long"))
+
+	# Facet using multiplot and GGally
+	pm <- ggmatrix(list("lat" = gg.lat + theme(legend.position="lat"),
+											"long" = gg.long + theme(legend.position="long")),
+								 nrow = 1, ncol = 2,
+								 legend = c(1,1),
+								 xAxisLabels = c("Latitude", "Longitude")) +
+		theme( #strip.background = element_rect(fill = "white"),
+			strip.placement = "outside")
+	return(pm)
+}
