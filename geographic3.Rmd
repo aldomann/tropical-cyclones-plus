@@ -164,3 +164,69 @@ plot_positions_boxplot("EPAC", "first", 33) + theme_bw()
 perform_wilcox_test("first.lat", "EPAC", 33)
 perform_wilcox_test("first.long", "EPAC", 33)
 ```
+
+\newpage
+
+# Análisis de posición (V)
+
+```{r}
+plot_clusters <- function(basin.name, type, min.speed = 0, n.clust = 2) {
+	storms.small <- storms.joint %>% 
+		dplyr::filter(basin == basin.name) %>%
+		dplyr::filter(max.wind > min.speed)
+	
+	if (type == "first") {
+		mat <- storms.small %>% select(first.lat, first.long, distance)
+	} else if (type == "last") {
+		mat <- storms.small %>% select(last.lat, last.long, distance)
+	}
+	
+	clust <- hclust(dist(mat), method = "complete")
+	tree <- cutree(clust, n.clust)
+	
+	gg <- ggplot(as_tibble(cbind(storms.small, clust = as.factor(tree))) ) +
+		aes(colour = clust, size = distance) +
+		scale_size_continuous(range = c(0.2, 3)) +
+		facet_wrap( ~ sst.class)
+
+	if (type == "first") {
+		gg <- gg +
+			geom_point(aes(x = first.long, y = first.lat), shape = 1)
+	} else if (type == "last") {
+		gg <- gg +
+			geom_point(aes(x = last.long, y = last.lat), shape = 1)
+	}
+	
+	return(gg)
+}
+```
+
+\newpage
+
+## North Atlantic
+```{r}
+plot_clusters("NATL", "first", 2)
+plot_clusters("NATL", "last", 2)
+```
+
+\newpage
+```{r}
+plot_clusters("NATL", "first", 33, 2)
+plot_clusters("NATL", "last", 33, 2)
+```
+
+\newpage
+
+## East Pacific
+```{r}
+plot_clusters("EPAC", "first", 2)
+plot_clusters("EPAC", "last", 2)
+```
+
+\newpage
+```{r}
+plot_clusters("EPAC", "first", 33, 2)
+plot_clusters("EPAC", "last", 33, 2)
+```
+
+
