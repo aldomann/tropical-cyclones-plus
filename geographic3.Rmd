@@ -176,15 +176,32 @@ plot_clusters <- function(basin.name, type, min.speed = 0, n.clust = 2) {
 		dplyr::filter(max.wind > min.speed)
 	
 	if (type == "first") {
-		mat <- storms.small %>% select(first.lat, first.long, distance)
+		mat <- storms.small %>% select(sst.class, first.lat, first.long, distance)
 	} else if (type == "last") {
-		mat <- storms.small %>% select(last.lat, last.long, distance)
+		mat <- storms.small %>% select(sst.class, last.lat, last.long, distance)
 	}
 	
-	clust <- hclust(dist(mat), method = "complete")
-	tree <- cutree(clust, n.clust)
+	# High SST
+	mat.high <- mat %>%
+		dplyr::filter(sst.class == "high") %>% 
+		select(-sst.class)
+	clust.high <- hclust(dist(mat.high), method = "complete")
+	tree.high <- cutree(clust.high, n.clust)
 	
-	gg <- ggplot(as_tibble(cbind(storms.small, clust = as.factor(tree))) ) +
+	# Low SST
+	mat.low <- mat %>%
+		dplyr::filter(sst.class == "low") %>% 
+		select(-sst.class)
+	clust.low <- hclust(dist(mat.low), method = "complete")
+	tree.low <- cutree(clust.low, n.clust)
+	
+	# Merge data with clustering results
+	data.high <- as_tibble(cbind(mat.high, clust = as.factor(tree.high), sst.class = "high"))
+	data.low <- as_tibble(cbind(mat.low, clust = as.factor(tree.low), sst.class = "low"))
+	data.all <- rbind(data.high, data.low)
+
+	# Plot
+	gg <- ggplot(data.all) +
 		aes(colour = clust, size = distance) +
 		scale_size_continuous(range = c(0.2, 3)) +
 		facet_wrap( ~ sst.class)
@@ -196,7 +213,7 @@ plot_clusters <- function(basin.name, type, min.speed = 0, n.clust = 2) {
 		gg <- gg +
 			geom_point(aes(x = last.long, y = last.lat), shape = 1)
 	}
-	
+
 	return(gg)
 }
 ```
