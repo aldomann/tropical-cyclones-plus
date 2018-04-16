@@ -125,25 +125,35 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	# Filter and clean data (low SST)
 	df.low <- df %>%
 		dplyr::filter(sst.class == "low")
-	col1.low <- df.low[,var1]
-	col2.low <- df.low[,var2]
+	col1.low <- c(df.low[,var1])
+	col2.low <- c(df.low[,var2])
 
 	# Filter and clean data (high SST)
 	df.high <- df %>%
 		dplyr::filter(sst.class == "high")
-	col1.high <- df.high[,var1]
-	col2.high <- df.high[,var2]
+	col1.high <- c(df.high[,var1])
+	col2.high <- c(df.high[,var2])
 
 	# Linear regressions statistics
 	fit.low <- lm(log10(col2.low) ~ log10(col1.low))
 	fit.high <- lm(log10(col2.high) ~ log10(col1.high))
 
+	# True slopes
 	slope.low <- summary(fit.low)$coefficients[2]
-	sd.low <- summary(fit.low)$coefficients[4]
+	slope.sd.low <- summary(fit.low)$coefficients[4]
 	slope.high <- summary(fit.high)$coefficients[2]
-	sd.high <- summary(fit.high)$coefficients[4]
+	slope.sd.high <- summary(fit.high)$coefficients[4]
 
-	stat.true <- abs(slope.high - slope.low)/sqrt(sd.high^2 + sd.low^2)
+	# True intercepts
+	inter.low <- summary(fit.low)$coefficients[1]
+	inter.sd.low <- summary(fit.low)$coefficients[3]
+	inter.high <- summary(fit.high)$coefficients[1]
+	inter.sd.high <- summary(fit.high)$coefficients[3]
+
+	# True statistics
+	slope.stat.true <- abs(slope.high - slope.low)/sqrt(slope.sd.high^2 + slope.sd.low^2)
+	inter.stat.true <- abs(inter.high - inter.low)/sqrt(inter.sd.high^2 + inter.sd.low^2)
+	total.stat.true <- slope.stat.true + inter.stat.true
 
 	# Construct data
 	data.high <-cbind(log10(col1.high), log10(col2.high))
@@ -156,7 +166,9 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 
 	# Prepare variables for the test
 	n.sim <- 5000  # Number of simulations
-	stat.sim <- numeric(n.sim)
+	slope.stat.sim <- numeric(n.sim)
+	inter.stat.sim <- numeric(n.sim)
+	total.stat.sim <- numeric(n.sim)
 	count <- 0
 
 	# Perform the permutation test
@@ -169,26 +181,63 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 		x <- n.low + 1
 		high <- cbind(data.sample[x:n.all, 1], data.sample[x:n.all, 2])
 
+		# Fit the new data
 		fit.lowp <- lm(log10(low[,2]) ~ log10(low[,1]))
 		fit.highp <- lm(log10(high[,2]) ~ log10(high[,1]))
-		slope.lowp <- summary(fit.lowp)$coefficients[2]
-		sd.lowp <- summary(fit.lowp)$coefficients[4]
-		slope.highp <- summary(fit.highp)$coefficients[2]
-		sd.highp <- summary(fit.highp)$coefficients[4]
-		stat.sim[i] <- abs(slope.highp - slope.lowp)/sqrt(sd.highp^2 + sd.lowp^2)
 
-		if (stat.sim[i] > stat.true) {
-			count <- count + 1
+		# Simulated slopes
+		slope.lowp <- summary(fit.lowp)$coefficients[2]
+		slope.sd.lowp <- summary(fit.lowp)$coefficients[4]
+		slope.highp <- summary(fit.highp)$coefficients[2]
+		slope.sd.highp <- summary(fit.highp)$coefficients[4]
+
+		# Simulated intercepts
+		inter.lowp <- summary(fit.lowp)$coefficients[1]
+		inter.sd.lowp <- summary(fit.lowp)$coefficients[3]
+		inter.highp <- summary(fit.highp)$coefficients[1]
+		inter.sd.highp <- summary(fit.highp)$coefficients[3]
+
+		# Simulated statistics
+		slope.stat.sim[i] <- abs(slope.highp - slope.lowp)/sqrt(slope.sd.highp^2 + slope.sd.lowp^2)
+		inter.stat.sim[i] <- abs(inter.highp - inter.lowp)/sqrt(inter.sd.highp^2 + inter.sd.lowp^2)
+		total.stat.sim[i] <- slope.stat.sim + inter.stat.sim
+
+		# Counters for p-values
+		if (slope.stat.sim[i] > slope.stat.true) {
+			slope.count <- slope.count + 1
+		}
+		if (inter.stat.sim[i] > inter.stat.true) {
+			inter.count <- inter.count + 1
+		}
+		if (total.stat.sim[i] > total.stat.true) {
+			total.count <- total.count + 1
 		}
 	}
-	# Calculate p-value and its error
-	p.value <- count/n.sim
-	p.value.err <- 1.96 * (sqrt((p.value - (p.value)^2) / n.sim))
 
+	get_pval_error <- function(p) {
+		return(1.96 * (sqrt((p - (p)^2) / n.sim)))
+	}
+
+	# Calculate p-value and its error
+	slope.p.value <- slope.count/n.sim
+	slope.p.value.err <- get_pval_error(slope.p.value)
+	inter.p.value <- inter.count/n.sim
+	inter.p.value.err <- get_pval_error(inter.p.value)
+	total.p.value <- total.count/n.sim
+	total.p.value.err <- get_pval_error(total.p.value)
+
+	# Format results
 	results.df <- data.frame(
 		cbind(
-			p.value = p.value,
-			error =p.value.err
+			# Slopes
+			slope.p.val = slope.p.value,
+			slope.p.val.error = slope.p.value.err,
+			# Intercepts
+			inter.p.val = inter.p.value,
+			inter.p.val.error = inter.p.value.err,
+			# Total
+			total.p.val = total.p.value,
+			total.p.val.error = total.p.value.err
 			)
 		)
 
@@ -199,10 +248,10 @@ summarise_p_values <- function(basin, var1, var2, min.speed = 0) {
 	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
 
 	# var2 ~ var1 regression (y ~ x)
-	p.val.yx <- do_permutation_test(basin.df, var2, var1)
+	p.val.yx <- do_permutation_test(basin.df, var2, var1, min.speed)
 
 	# var1 ~ var2 regression (x ~ y)
-	p.val.xy <- do_permutation_test(basin.df, var1, var2)
+	p.val.xy <- do_permutation_test(basin.df, var1, var2, min.speed)
 
 	# Construct summarised data frame
 	results <- data.frame(
