@@ -7,7 +7,7 @@ library(measurements) # Convert units
 
 # Source base code -----------------------------------------
 source("slopes_base.R")
-load("slopes_analysis.RData")
+# load("slopes_analysis.RData")
 
 # Get RAW data ---------------------------------------------
 
@@ -59,7 +59,9 @@ alpha = 0.05
 # Print regressions with p-value <= alpha
 for (i in 1:length(p.values.list)) {
 	for (j in 1:2) {
-		if (p.values.list[[i]][["p.value"]][1] <= alpha) {
+		if ( (p.values.list[[i]][["slope.p.val"]][j] <= alpha) |
+				 (p.values.list[[i]][["inter.p.val"]][j] <= alpha) |
+				 (p.values.list[[i]][["total.p.val"]][j] <= alpha) ) {
 			print(p.values.list[[i]][j,])
 		}
 	}

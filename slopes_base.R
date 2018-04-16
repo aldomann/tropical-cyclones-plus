@@ -125,14 +125,14 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	# Filter and clean data (low SST)
 	df.low <- df %>%
 		dplyr::filter(sst.class == "low")
-	col1.low <- c(df.low[,var1])
-	col2.low <- c(df.low[,var2])
+	col1.low <- df.low[[var1]]
+	col2.low <- df.low[[var2]]
 
 	# Filter and clean data (high SST)
 	df.high <- df %>%
 		dplyr::filter(sst.class == "high")
-	col1.high <- c(df.high[,var1])
-	col2.high <- c(df.high[,var2])
+	col1.high <- df.high[[var1]]
+	col2.high <- df.high[[var2]]
 
 	# Linear regressions statistics
 	fit.low <- lm(log10(col2.low) ~ log10(col1.low))
@@ -169,7 +169,11 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	slope.stat.sim <- numeric(n.sim)
 	inter.stat.sim <- numeric(n.sim)
 	total.stat.sim <- numeric(n.sim)
-	count <- 0
+
+	# Prepare counters
+	slope.count <- 0
+	inter.count <- 0
+	total.count <- 0
 
 	# Perform the permutation test
 	for (i in 1:n.sim){
@@ -200,7 +204,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 		# Simulated statistics
 		slope.stat.sim[i] <- abs(slope.highp - slope.lowp)/sqrt(slope.sd.highp^2 + slope.sd.lowp^2)
 		inter.stat.sim[i] <- abs(inter.highp - inter.lowp)/sqrt(inter.sd.highp^2 + inter.sd.lowp^2)
-		total.stat.sim[i] <- slope.stat.sim + inter.stat.sim
+		total.stat.sim[i] <- slope.stat.sim[i] + inter.stat.sim[i]
 
 		# Counters for p-values
 		if (slope.stat.sim[i] > slope.stat.true) {
