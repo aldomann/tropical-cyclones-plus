@@ -13,13 +13,12 @@ output:
     toc_depth: 2
 ---
 
-```{r}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 # Libraries ------------------------------------------------
-library(tidyverse)
 library(measurements) # Convert units
 
 # Source base code -----------------------------------------
-# source("marginals_base.R")
+source("marginals_base.R")
 ```
 
 ```{r}
@@ -55,63 +54,17 @@ ggplot(natl.data) +
 ```
 
 ```{r}
-
-
-get_marginals_stats <- function(basin.name, min.speed = 0) {
-	std.error <- function(x) { sd(x)/sqrt(length(x)) }
-	median.error <- function(x) { 1.253 * sd(x)/sqrt(length(x)) }
-	
-	data <- pdi.all %>% 
-	dplyr::filter(basin == basin.name) %>% 
-	dplyr::filter(max.wind > min.speed) %>% 
-	select(storm.pdi, storm.duration, max.wind, sst.class)
-	
-	data <- data %>% 
-		group_by(sst.class) %>% 
-		dplyr::summarise(
-			pdi.mean = mean(storm.pdi)/1E-9,
-			pdi.mean.err = std.error(storm.pdi)/1E-9,
-			pdi.median = median(storm.pdi)/1E-9,
-			pdi.median.err = median.error(storm.pdi)/1E-9,
-			dur.mean = mean(storm.duration),
-			dur.mean.err = std.error(storm.duration),
-			dur.median = median(storm.duration),
-			dur.median.err = median.error(storm.duration)
-			)
-	
-	return(data)
-}
-```
-```{r}
-get_marginals_stats("NATL")
-get_marginals_stats("EPAC")
-get_marginals_stats("NATL", 33)
-get_marginals_stats("EPAC", 33)
+summarise_marginals_stats("NATL")
+summarise_marginals_stats("EPAC")
+summarise_marginals_stats("NATL", 33)
+summarise_marginals_stats("EPAC", 33)
 ```
 
 ```{r}
-analyse_marginals_compat <- function(basin.name, min.speed = 0) {
-	
-	data <- get_marginals_stats(basin.name, min.speed)
-	
-	is_overlapping <- function(x1, x2, y1, y2) {
-		return(x1 <= y2 && y1 <= x2)
-	}
-	
-	data <- data %>% 
-		summarise(
-			pdi.mean.min = min(pdi.mean) + pdi.mean.err[[which.min(pdi.mean)]],
-			pdi.mean.max = max(pdi.mean) + pdi.mean.err[[which.max(pdi.mean)]],
-			pdi.mean.comp = (pdi.mean.max <= pdi.mean.min),
-			dur.mean.min = min(dur.mean) + dur.mean.err[[which.min(dur.mean)]],
-			dur.mean.max = max(dur.mean) + dur.mean.err[[which.max(dur.mean)]],
-			dur.mean.comp = (dur.mean.max <= dur.mean.min) 
-		) %>% 
-		select(pdi.mean.comp, dur.mean.comp)
-	
-	return(data)
-}
-
+analyse_marginals_compat("NATL")
+analyse_marginals_compat("EPAC")
 analyse_marginals_compat("NATL", 33)
+analyse_marginals_compat("EPAC", 33)
 ```
+
 
