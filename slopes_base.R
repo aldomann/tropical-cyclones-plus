@@ -4,7 +4,6 @@
 # Libraries ------------------------------------------------
 library(tidyverse)
 library(lubridate)
-library(data.table)
 
 # Confidence interval --------------------------------------
 
