@@ -7,7 +7,7 @@ library(measurements) # Convert units
 
 # Source base code -----------------------------------------
 source("slopes_base.R")
-load("slopes_analysis.RData")
+# load("slopes_analysis.RData")
 
 # Get RAW data ---------------------------------------------
 
@@ -19,9 +19,9 @@ pdi.natl <- pdi.all %>%
 pdi.epac <- pdi.all %>%
 	dplyr::filter(basin == "EPAC")
 
-# Permutation test for all data ----------------------------
+compute.flag <- T
 
-compute.flag <- FALSE
+# Permutation test for all data ----------------------------
 
 if (compute.flag) {
 	# NATL
@@ -35,9 +35,12 @@ if (compute.flag) {
 	p.vals.epac.max.wind <- summarise_p_values("EPAC", "storm.duration", "max.wind")
 	p.vals.epac.mean.wind <- summarise_p_values("EPAC", "storm.duration", "mean.wind")
 	p.vals.epac.mean.sq.wind <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind")
+}
 
-	# Permutation test for developing systems ------------------
 
+# Permutation test for developing systems ------------------
+
+if (compute.flag) {
 	# NATL
 	p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33)
 	p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33)
@@ -54,7 +57,6 @@ if (compute.flag) {
 # Tidy p-values in a list ----------------------------------
 
 if (compute.flag) {
-	print("hello")
 	# Group data frames into a list
 	rm(p.values.list)
 	p.values.list <- lapply(ls(patt='^p.vals.'), get)
@@ -65,16 +67,16 @@ if (compute.flag) {
 
 alpha = 0.05
 
-# Print regressions with p-value <= alpha
-for (i in 1:length(p.values.list)) {
-	for (j in 1:2) {
-		if ( (p.values.list[[i]][["slope.p.val"]][j] <= alpha) |
-				 (p.values.list[[i]][["inter.p.val"]][j] <= alpha) |
-				 (p.values.list[[i]][["total.p.val"]][j] <= alpha) ) {
-			print(p.values.list[[i]][j,])
+	# Print regressions with p-value <= alpha
+	for (i in 1:length(p.values.list)) {
+		for (j in 1:2) {
+			if ( (p.values.list[[i]][["slope.p.val"]][j] <= alpha) |
+					 (p.values.list[[i]][["inter.p.val"]][j] <= alpha) |
+					 (p.values.list[[i]][["total.p.val"]][j] <= alpha) ) {
+				print(p.values.list[[i]][j,])
+			}
 		}
 	}
-}
 
 # NATL (all storms)
 p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0]
