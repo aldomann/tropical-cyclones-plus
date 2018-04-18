@@ -149,10 +149,15 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	inter.high <- summary(fit.high)$coefficients[1]
 	inter.sd.high <- summary(fit.high)$coefficients[3]
 
+	# True R Squared coefficients
+	r.sqr.low <- summary(fit.low)$r.squared
+	r.sqr.high <- summary(fit.high)$r.squared
+
 	# True statistics
 	slope.stat.true <- abs(slope.high - slope.low)/sqrt(slope.sd.high^2 + slope.sd.low^2)
 	inter.stat.true <- abs(inter.high - inter.low)/sqrt(inter.sd.high^2 + inter.sd.low^2)
 	total.stat.true <- slope.stat.true + inter.stat.true
+	r.sqr.stat.true <- r.sqr.high + r.sqr.low
 
 	# Construct data
 	data.high <-cbind(log10(col1.high), log10(col2.high))
@@ -168,11 +173,13 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	slope.stat.sim <- numeric(n.sim)
 	inter.stat.sim <- numeric(n.sim)
 	total.stat.sim <- numeric(n.sim)
+	r.sqr.stat.sim <- numeric(n.sim)
 
 	# Prepare counters
 	slope.count <- 0
 	inter.count <- 0
 	total.count <- 0
+	r.sqr.count <- 0
 
 	# Perform the permutation test
 	for (i in 1:n.sim){
@@ -200,10 +207,15 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 		inter.highp <- summary(fit.highp)$coefficients[1]
 		inter.sd.highp <- summary(fit.highp)$coefficients[3]
 
+		# Simulated R Squared coefficients
+		r.sqr.lowp <- summary(fit.lowp)$r.squared
+		r.sqr.highp <- summary(fit.highp)$r.squared
+
 		# Simulated statistics
 		slope.stat.sim[i] <- abs(slope.highp - slope.lowp)/sqrt(slope.sd.highp^2 + slope.sd.lowp^2)
 		inter.stat.sim[i] <- abs(inter.highp - inter.lowp)/sqrt(inter.sd.highp^2 + inter.sd.lowp^2)
 		total.stat.sim[i] <- slope.stat.sim[i] + inter.stat.sim[i]
+		r.sqr.stat.sim[i] <- r.sqr.highp + r.sqr.lowp
 
 		# Counters for p-values
 		if (slope.stat.sim[i] > slope.stat.true) {
@@ -215,6 +227,9 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 		if (total.stat.sim[i] > total.stat.true) {
 			total.count <- total.count + 1
 		}
+		if (r.sqr.stat.sim[i] < r.sqr.stat.true) {
+			r.sqr.count <- r.sqr.count + 1
+		}
 	}
 
 	get_pval_error <- function(p) {
@@ -224,10 +239,15 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	# Calculate p-value and its error
 	slope.p.value <- slope.count/n.sim
 	slope.p.value.err <- get_pval_error(slope.p.value)
+
 	inter.p.value <- inter.count/n.sim
 	inter.p.value.err <- get_pval_error(inter.p.value)
+
 	total.p.value <- total.count/n.sim
 	total.p.value.err <- get_pval_error(total.p.value)
+
+	r.sqr.p.value <- r.sqr.count/n.sim
+	r.sqr.p.value.err <- get_pval_error(r.sqr.p.value)
 
 	# Format results
 	results.df <- data.frame(
@@ -240,7 +260,10 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 			inter.p.val.error = inter.p.value.err,
 			# Total
 			total.p.val = total.p.value,
-			total.p.val.error = total.p.value.err
+			total.p.val.error = total.p.value.err,
+			# R Squared
+			r.sqr.p.val = r.sqr.p.value,
+			r.sqr.p.val.error = r.sqr.p.value.err
 			)
 		)
 
