@@ -171,7 +171,7 @@ plot_distance_histogram <- function(basin.name, min.speed = 0, facet = F) {
 		dplyr::filter(basin == basin.name)
 
 	gg <- ggplot(df) +
-		geom_histogram(aes(fill = sst.class), colour = "black", alpha = 0.5) +
+		geom_histogram(aes(fill = sst.class), colour = "black", alpha = 0.5, bins = 50) +
 		aes(x = storm.duration/distance) +
 		scale_color_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
 		labs(fill = "SST class")
@@ -335,4 +335,58 @@ plot_positions_boxplot <- function(basin.name, var, min.speed = 0) {
 		theme( #strip.background = element_rect(fill = "white"),
 			strip.placement = "outside")
 	return(pm)
+}
+
+
+# Cluster analysis -----------------------------------------
+
+plot_clusters <- function(basin.name, type, min.speed = 0, n.clust = 2) {
+	storms.small <- storms.joint %>%
+		dplyr::filter(basin == basin.name) %>%
+		dplyr::filter(max.wind > min.speed)
+
+	if (type == "first") {
+		mat <- storms.small %>% select(sst.class, first.lat, first.long, distance)
+	} else if (type == "last") {
+		mat <- storms.small %>% select(sst.class, last.lat, last.long, distance)
+	}
+
+	# High SST
+	mat.high <- mat %>%
+		dplyr::filter(sst.class == "high") %>%
+		select(-sst.class)
+	clust.high <- hclust(dist(mat.high), method = "complete")
+	tree.high <- cutree(clust.high, n.clust)
+
+	# Low SST
+	mat.low <- mat %>%
+		dplyr::filter(sst.class == "low") %>%
+		select(-sst.class)
+	clust.low <- hclust(dist(mat.low), method = "complete")
+	tree.low <- cutree(clust.low, n.clust)
+
+	# Merge data with clustering results
+	data.high <- as_tibble(cbind(mat.high, clust = as.factor(tree.high), sst.class = "high"))
+	data.low <- as_tibble(cbind(mat.low, clust = as.factor(tree.low), sst.class = "low"))
+	data.all <- rbind(data.high, data.low)
+
+	# Plot
+	gg <- ggplot(data.all) +
+		aes(colour = clust) +
+		scale_size_continuous(range = c(0.2, 3)) +
+		facet_wrap( ~ sst.class)
+
+	if (type == "first") {
+		gg <- gg +
+			aes(x = first.long, y = first.lat) +
+			geom_point(aes(size = distance), shape = 1) +
+			geom_encircle(s_shape=0.8)
+	} else if (type == "last") {
+		gg <- gg +
+			aes(x = last.long, y = last.lat) +
+			geom_point(aes(size = distance), shape = 1) +
+			geom_encircle(s_shape=0.8)
+	}
+
+	return(gg)
 }

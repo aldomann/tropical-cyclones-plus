@@ -23,6 +23,11 @@ load("geographic_analysis.RData")
 source("../libs/multiplot.R")
 ```
 
+```{r include=FALSE}
+options(dplyr.width = Inf)
+```
+
+
 \newpage
 
 # Análisis de la distancia (III)
@@ -43,7 +48,7 @@ storms.tracks <- storms.all %>%
 
 Usando la fórmula de Haversine (vs la Ley de Cosenos), se obtiene en el peor de los casos una diferencia de 0.37 metros, y de media $10^{-8}$ metros. Pero bueno, en realidad no hay ninguna justificación para usar Haversine en lugar de la Ley de Cosenos (no con la precisión computacional de hoy en día).
 
-## Mínimos y máximos de distancia recorrida y duración
+## Histogramas de distancia/duración
 
 ### Todas las tormentas
 ```{r}
@@ -60,39 +65,6 @@ plot_distance_histogram("EPAC", 33) + theme_bw()
 \newpage
 
 # Análisis de posición inicial y final (III)
-
-## North Atlantic
-
-### Todas las tormentas (NATL)
-```{r}
-plot_positions_histogram("NATL", "first") + theme_bw()
-plot_positions_histogram("NATL", "last") + theme_bw()
-```
-
-### Developing systems (NATL)
-```{r}
-plot_positions_histogram("NATL", "first", 33) + theme_bw()
-plot_positions_histogram("NATL", "last", 33) + theme_bw()
-```
-
-\newpage
-
-## East Pacific
-
-### Todas las tormentas (EPAC)
-```{r}
-plot_positions_histogram("EPAC", "first") + theme_bw()
-plot_positions_histogram("EPAC", "last") + theme_bw()
-```
-
-### Developing systems (EPAC)
-```{r}
-plot_positions_histogram("EPAC", "first", 33) + theme_bw()
-plot_positions_histogram("EPAC", "last", 33) + theme_bw()
-```
-
-
-\newpage
 
 ## Mirando las medias
 
@@ -169,81 +141,33 @@ perform_wilcox_test("first.long", "EPAC", 33)
 
 # Análisis de posición (V)
 
-```{r}
-plot_clusters <- function(basin.name, type, min.speed = 0, n.clust = 2) {
-	storms.small <- storms.joint %>% 
-		dplyr::filter(basin == basin.name) %>%
-		dplyr::filter(max.wind > min.speed)
-	
-	if (type == "first") {
-		mat <- storms.small %>% select(sst.class, first.lat, first.long, distance)
-	} else if (type == "last") {
-		mat <- storms.small %>% select(sst.class, last.lat, last.long, distance)
-	}
-	
-	# High SST
-	mat.high <- mat %>%
-		dplyr::filter(sst.class == "high") %>% 
-		select(-sst.class)
-	clust.high <- hclust(dist(mat.high), method = "complete")
-	tree.high <- cutree(clust.high, n.clust)
-	
-	# Low SST
-	mat.low <- mat %>%
-		dplyr::filter(sst.class == "low") %>% 
-		select(-sst.class)
-	clust.low <- hclust(dist(mat.low), method = "complete")
-	tree.low <- cutree(clust.low, n.clust)
-	
-	# Merge data with clustering results
-	data.high <- as_tibble(cbind(mat.high, clust = as.factor(tree.high), sst.class = "high"))
-	data.low <- as_tibble(cbind(mat.low, clust = as.factor(tree.low), sst.class = "low"))
-	data.all <- rbind(data.high, data.low)
-
-	# Plot
-	gg <- ggplot(data.all) +
-		aes(colour = clust, size = distance) +
-		scale_size_continuous(range = c(0.2, 3)) +
-		facet_wrap( ~ sst.class)
-
-	if (type == "first") {
-		gg <- gg +
-			geom_point(aes(x = first.long, y = first.lat), shape = 1)
-	} else if (type == "last") {
-		gg <- gg +
-			geom_point(aes(x = last.long, y = last.lat), shape = 1)
-	}
-
-	return(gg)
-}
-```
 
 \newpage
 
 ## North Atlantic
 ```{r}
-plot_clusters("NATL", "first", 2)
-plot_clusters("NATL", "last", 2)
+plot_clusters("NATL", "first", n.clust = 2)
+	
+plot_clusters("NATL", "last", n.clust = 2)
 ```
 
 \newpage
 ```{r}
-plot_clusters("NATL", "first", 33, 2)
-plot_clusters("NATL", "last", 33, 2)
+plot_clusters("NATL", "first", 33, n.clust = 2)
+plot_clusters("NATL", "last", 33, n.clust = 2)
 ```
 
 \newpage
 
 ## East Pacific
 ```{r}
-plot_clusters("EPAC", "first", 2)
-plot_clusters("EPAC", "last", 2)
+plot_clusters("EPAC", "first", n.clust = 3)
+plot_clusters("EPAC", "last", n.clust = 3)
 ```
 
 \newpage
 ```{r}
-plot_clusters("EPAC", "first", 33, 2)
-plot_clusters("EPAC", "last", 33, 2)
+plot_clusters("EPAC", "first", 33, n.clust = 3)
+plot_clusters("EPAC", "last", 33, n.clust = 3)
 ```
-
 
