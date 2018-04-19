@@ -157,7 +157,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	slope.stat.true <- abs(slope.high - slope.low)/sqrt(slope.sd.high^2 + slope.sd.low^2)
 	inter.stat.true <- abs(inter.high - inter.low)/sqrt(inter.sd.high^2 + inter.sd.low^2)
 	total.stat.true <- slope.stat.true + inter.stat.true
-	r.sqr.stat.true <- r.sqr.high + r.sqr.low
+	r.sqr.stat.true <- abs(r.sqr.high - r.sqr.low)
 
 	# Construct data
 	data.high <-cbind(log10(col1.high), log10(col2.high))
@@ -192,30 +192,30 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 		high <- cbind(data.sample[x:n.all, 1], data.sample[x:n.all, 2])
 
 		# Fit the new data
-		fit.lowp <- lm(log10(low[,2]) ~ log10(low[,1]))
-		fit.highp <- lm(log10(high[,2]) ~ log10(high[,1]))
+		fit.low.perm <- lm(log10(low[,2]) ~ log10(low[,1]))
+		fit.high.perm <- lm(log10(high[,2]) ~ log10(high[,1]))
 
 		# Simulated slopes
-		slope.lowp <- summary(fit.lowp)$coefficients[2]
-		slope.sd.lowp <- summary(fit.lowp)$coefficients[4]
-		slope.highp <- summary(fit.highp)$coefficients[2]
-		slope.sd.highp <- summary(fit.highp)$coefficients[4]
+		slope.low.perm <- summary(fit.low.perm)$coefficients[2]
+		slope.sd.low.perm <- summary(fit.low.perm)$coefficients[4]
+		slope.high.perm <- summary(fit.high.perm)$coefficients[2]
+		slope.sd.high.perm <- summary(fit.high.perm)$coefficients[4]
 
 		# Simulated intercepts
-		inter.lowp <- summary(fit.lowp)$coefficients[1]
-		inter.sd.lowp <- summary(fit.lowp)$coefficients[3]
-		inter.highp <- summary(fit.highp)$coefficients[1]
-		inter.sd.highp <- summary(fit.highp)$coefficients[3]
+		inter.low.perm <- summary(fit.low.perm)$coefficients[1]
+		inter.sd.low.perm <- summary(fit.low.perm)$coefficients[3]
+		inter.high.perm <- summary(fit.high.perm)$coefficients[1]
+		inter.sd.high.perm <- summary(fit.high.perm)$coefficients[3]
 
 		# Simulated R Squared coefficients
-		r.sqr.lowp <- summary(fit.lowp)$r.squared
-		r.sqr.highp <- summary(fit.highp)$r.squared
+		r.sqr.low.perm <- summary(fit.low.perm)$r.squared
+		r.sqr.high.perm <- summary(fit.high.perm)$r.squared
 
 		# Simulated statistics
-		slope.stat.sim[i] <- abs(slope.highp - slope.lowp)/sqrt(slope.sd.highp^2 + slope.sd.lowp^2)
-		inter.stat.sim[i] <- abs(inter.highp - inter.lowp)/sqrt(inter.sd.highp^2 + inter.sd.lowp^2)
+		slope.stat.sim[i] <- abs(slope.high.perm - slope.low.perm)/sqrt(slope.sd.high.perm^2 + slope.sd.low.perm^2)
+		inter.stat.sim[i] <- abs(inter.high.perm - inter.low.perm)/sqrt(inter.sd.high.perm^2 + inter.sd.low.perm^2)
 		total.stat.sim[i] <- slope.stat.sim[i] + inter.stat.sim[i]
-		r.sqr.stat.sim[i] <- r.sqr.highp + r.sqr.lowp
+		r.sqr.stat.sim[i] <- abs(r.sqr.high.perm - r.sqr.low.perm)
 
 		# Counters for p-values
 		if (slope.stat.sim[i] > slope.stat.true) {
@@ -230,6 +230,8 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 		if (r.sqr.stat.sim[i] < r.sqr.stat.true) {
 			r.sqr.count <- r.sqr.count + 1
 		}
+		# print(paste("REAL",slope.low))
+		# print(paste("SIM",slope.low.perm))
 	}
 
 	get_pval_error <- function(p) {
