@@ -2,9 +2,6 @@
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 
-# Libraries ------------------------------------------------
-library(measurements) # Convert units
-
 # Source base code -----------------------------------------
 source("slopes_base.R")
 # load("slopes_analysis.RData")
@@ -12,7 +9,7 @@ source("slopes_base.R")
 # Get RAW data ---------------------------------------------
 
 pdi.all <- as_tibble(data.table::fread('data/hurdat2-hadisst-1966-2016_pdis.csv')) %>%
-	mutate(storm.duration = conv_unit(storm.duration, "sec", "hr"))
+	mutate(storm.duration = measurements::conv_unit(storm.duration, "sec", "hr"))
 
 pdi.natl <- pdi.all %>%
 	dplyr::filter(basin == "NATL")
@@ -25,16 +22,16 @@ compute.flag <- T
 
 if (compute.flag) {
 	# NATL
-	p.vals.natl.pdi <- summarise_p_values("NATL", "storm.duration", "storm.pdi")
-	p.vals.natl.max.wind <- summarise_p_values("NATL", "storm.duration", "max.wind")
-	p.vals.natl.mean.wind <- summarise_p_values("NATL", "storm.duration", "mean.wind")
-	p.vals.natl.mean.sq.wind <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind")
+	p.vals.natl.pdi <- summarise_p_values("NATL", "storm.duration", "storm.pdi", bootstrap = T)
+	p.vals.natl.max.wind <- summarise_p_values("NATL", "storm.duration", "max.wind", bootstrap = T)
+	p.vals.natl.mean.wind <- summarise_p_values("NATL", "storm.duration", "mean.wind", bootstrap = T)
+	p.vals.natl.mean.sq.wind <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", bootstrap = T)
 
 	# EPAC
-	p.vals.epac.pdi <- summarise_p_values("EPAC", "storm.duration", "storm.pdi")
-	p.vals.epac.max.wind <- summarise_p_values("EPAC", "storm.duration", "max.wind")
-	p.vals.epac.mean.wind <- summarise_p_values("EPAC", "storm.duration", "mean.wind")
-	p.vals.epac.mean.sq.wind <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind")
+	p.vals.epac.pdi <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", bootstrap = T)
+	p.vals.epac.max.wind <- summarise_p_values("EPAC", "storm.duration", "max.wind", bootstrap = T)
+	p.vals.epac.mean.wind <- summarise_p_values("EPAC", "storm.duration", "mean.wind", bootstrap = T)
+	p.vals.epac.mean.sq.wind <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", bootstrap = T)
 }
 
 
@@ -42,16 +39,16 @@ if (compute.flag) {
 
 if (compute.flag) {
 	# NATL
-	p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33)
-	p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33)
-	p.vals.natl.mean.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.wind", 33)
-	p.vals.natl.mean.sq.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", 33)
+	p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33, bootstrap = T)
+	p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33, bootstrap = T)
+	p.vals.natl.mean.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.wind", 33, bootstrap = T)
+	p.vals.natl.mean.sq.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", 33, bootstrap = T)
 
 	# EPAC
-	p.vals.epac.pdi.ds <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", 33)
-	p.vals.epac.max.wind.ds <- summarise_p_values("EPAC", "storm.duration", "max.wind", 33)
-	p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 33)
-	p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33)
+	p.vals.epac.pdi.ds <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", 33, bootstrap = T)
+	p.vals.epac.max.wind.ds <- summarise_p_values("EPAC", "storm.duration", "max.wind", 33, bootstrap = T)
+	p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 33, bootstrap = T)
+	p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33, bootstrap = T)
 }
 
 # Tidy p-values in a list ----------------------------------
