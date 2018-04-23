@@ -2,9 +2,6 @@
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 
-# Libraries ------------------------------------------------
-library(measurements) # Convert units
-
 # Source base code -----------------------------------------
 source("slopes_base.R")
 load("slopes_analysis.RData")
@@ -12,7 +9,7 @@ load("slopes_analysis.RData")
 # Get RAW data ---------------------------------------------
 
 pdi.all <- as_tibble(data.table::fread('data/hurdat2-hadisst-1966-2016_pdis.csv')) %>%
-	mutate(storm.duration = conv_unit(storm.duration, "sec", "hr"))
+	mutate(storm.duration = measurements::conv_unit(storm.duration, "sec", "hr"))
 
 pdi.natl <- pdi.all %>%
 	dplyr::filter(basin == "NATL")
