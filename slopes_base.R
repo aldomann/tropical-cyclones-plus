@@ -23,6 +23,8 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	fit <- lm(data[,2] ~ data[,1])
 	slope <- summary(fit)$coefficients[2]
 	slope.sd <- summary(fit)$coefficients[4]
+	inter <- summary(fit)$coefficients[1]
+	inter.sd <- summary(fit)$coefficients[3]
 	r.squared <- summary(fit)$r.squared
 
 	# Prepare variables for the simulation
@@ -30,26 +32,43 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	data.seq <- seq(1, n)
 	slope.sim <- numeric(n.sim)
 	slope.sd.sim <- numeric(n.sim)
+	inter.sim <- numeric(n.sim)
+	inter.sd.sim <- numeric(n.sim)
 	r.squared.sim <- numeric(n.sim)
-	t.value.sim <- numeric(n.sim)
+	t.value.slope.sim <- numeric(n.sim)
+	t.value.inter.sim <- numeric(n.sim)
 
 	# Perform the simulation
 	for (i in 1:n.sim) {
 		sim.sample <- sample(data.seq, n, replace = T)
 
+		# Fit linear model
 		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
+		# Slope
 		slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
 		slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]
+		# Intercept
+		inter.sim[i] <- summary(fit.value.sim)$coefficients[1]
+		inter.sd.sim[i] <- summary(fit.value.sim)$coefficients[3]
+		# R-Squared
 		r.squared.sim[i] <- summary(fit.value.sim)$r.squared
 
-		t.value.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
+		# t-values
+		t.value.slope.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
+		t.value.inter.sim[i] <- (inter.sim[i] - inter) / inter.sd.sim[i]
 	}
 
-	# The bootstrap-t 95% method
-	boot.low <- slope + slope.sd * quantile(t.value.sim, 0.025)
-	boot.upp <- slope + slope.sd * quantile(t.value.sim, 0.975)
-	boot.sd <- (boot.upp - boot.low) / 2
-	boot.slope <- boot.upp - boot.sd
+	# Bootstrap-t 95% method (slopes)
+	boot.slope.low <- slope + slope.sd * quantile(t.value.slope.sim, 0.025)
+	boot.slope.upp <- slope + slope.sd * quantile(t.value.slope.sim, 0.975)
+	boot.slope.sd <- (boot.slope.upp - boot.slope.low) / 2
+	boot.slope <- boot.slope.upp - boot.slope.sd
+
+	# Bootstrap-t 95% method (intercepts)
+	boot.inter.low <- inter + inter.sd * quantile(t.value.inter.sim, 0.025)
+	boot.inter.upp <- inter + inter.sd * quantile(t.value.inter.sim, 0.975)
+	boot.inter.sd <- (boot.inter.upp - boot.inter.low) / 2
+	boot.inter <- boot.inter.upp - boot.inter.sd
 
 	# Estimation of the correlation coefficient
 	r.squared.sim <- r.squared.sim[order(r.squared.sim)]
@@ -58,23 +77,14 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	r.sq.sd <- (r.sq.upp - r.sq.low) / 2
 	boot.r.sq <- r.sq.upp - r.sq.sd
 
-	# # Simple Method
-	# simp.low <- 2 * slope - quantile(slope.sim, 0.975)
-	# simp.upp <- 2 * slope - quantile(slope.sim, 0.025)
-	# simp.sd <- (simp.upp - simp.low) / 2
-	# simp.slope <- simp.upp - simp.sd
-	#
-	# # Quantile method
-	# quan.low <- quantile(slope.sim, 0.025)
-	# quan.upp <- quantile(slope.sim, 0.975)
-	# quan.sd <- (quan.upp - quan.low) / 2
-	# quan.slope <- quan.upp - quan.sd
-
+	# Summarise results
 	results.df <- data.frame(
 		method = c("lm", "bootstrap-t"),
 		sst.class = rep(class, 2),
 		slope = c(slope, boot.slope),
-		sd = c(slope.sd, boot.sd),
+		slope.sd = c(slope.sd, boot.slope.sd),
+		inter = c(inter, boot.inter),
+		inter.sd = c(inter.sd, boot.inter.sd),
 		r2 = c(r.squared, boot.r.sq),
 		dep.var = rep(var2, 2),
 		indep.var = rep(var1, 2),
