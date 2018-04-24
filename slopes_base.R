@@ -170,8 +170,8 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	r.sqr.stat.true <- abs(r.sqr.high - r.sqr.low)
 
 	# Construct data
-	data.high <-cbind(log10(col1.high), log10(col2.high))
-	data.low <-cbind(log10(col1.low), log10(col2.low))
+	data.high <-cbind(col1.high, col2.high)
+	data.low <-cbind(col1.low, col2.low)
 	data.all <- rbind(data.high, data.low)
 
 	n.low <- nrow(data.low)
@@ -333,7 +333,7 @@ do_bootstrap <- function(col1, col2) {
 	r.squared <- summary(fit)$r.squared
 
 	# Prepare variables for the simulation
-	n.sim <- 10 # Number of simulations
+	n.sim <- 500 # Number of simulations
 	data.seq <- seq(1, n)
 	slope.sim <- numeric(n.sim)
 	slope.sd.sim <- numeric(n.sim)
@@ -445,8 +445,8 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
 	r.sqr.stat.true <- abs(r.sqr.high - r.sqr.low)
 
 	# Construct data
-	data.high <-cbind(log10(col1.high), log10(col2.high))
-	data.low <-cbind(log10(col1.low), log10(col2.low))
+	data.high <-cbind(col1.high, col2.high)
+	data.low <-cbind(col1.low, col2.low)
 	data.all <- rbind(data.high, data.low)
 
 	n.low <- nrow(data.low)
@@ -454,7 +454,7 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
 	n.all <- n.low + n.high
 
 	# Prepare variables for the test
-	n.sim <- 5000  # Number of simulations
+	n.sim <- 100  # Number of simulations
 	slope.stat.sim <- numeric(n.sim)
 	inter.stat.sim <- numeric(n.sim)
 	total.stat.sim <- numeric(n.sim)
@@ -468,6 +468,7 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
 
 	# Perform the permutation test
 	for (i in 1:n.sim){
+		print(i)
 		col1.sample <- sample(data.all[,1], n.all)
 		col2.sample <- sample(data.all[,2], n.all)
 		data.sample <- cbind(col1.sample, col2.sample)
@@ -476,31 +477,31 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
 		x <- n.low + 1
 		high <- cbind(data.sample[x:n.all, 1], data.sample[x:n.all, 2])
 
-		# Fit the new data
-		fit.low.perm <- lm(log10(low[,2]) ~ log10(low[,1]))
-		fit.high.perm <- lm(log10(high[,2]) ~ log10(high[,1]))
+		# Simulated bootstrap statistics
+		sim.boot.lm.high <- do_bootstrap(high[,2], high[,1])
+		sim.boot.lm.low <- do_bootstrap(low[,2], low[,1])
 
 		# Simulated slopes
-		slope.low.perm <- summary(fit.low.perm)$coefficients[2]
-		slope.sd.low.perm <- summary(fit.low.perm)$coefficients[4]
-		slope.high.perm <- summary(fit.high.perm)$coefficients[2]
-		slope.sd.high.perm <- summary(fit.high.perm)$coefficients[4]
+		slope.low.sim <- sim.boot.lm.low$slope
+		slope.sd.low.sim <- sim.boot.lm.low$slope.sd
+		slope.high.sim <- sim.boot.lm.high$slope
+		slope.sd.high.sim <- sim.boot.lm.high$slope.sd
 
 		# Simulated intercepts
-		inter.low.perm <- summary(fit.low.perm)$coefficients[1]
-		inter.sd.low.perm <- summary(fit.low.perm)$coefficients[3]
-		inter.high.perm <- summary(fit.high.perm)$coefficients[1]
-		inter.sd.high.perm <- summary(fit.high.perm)$coefficients[3]
+		inter.low.sim <- sim.boot.lm.low$inter
+		inter.sd.low.sim <- sim.boot.lm.low$inter.sd
+		inter.high.sim <- sim.boot.lm.high$inter
+		inter.sd.high.sim <- sim.boot.lm.high$inter.sd
 
 		# Simulated R Squared coefficients
-		r.sqr.low.perm <- summary(fit.low.perm)$r.squared
-		r.sqr.high.perm <- summary(fit.high.perm)$r.squared
+		r.sqr.low.sim <- sim.boot.lm.low$r2
+		r.sqr.high.sim <- sim.boot.lm.high$r2
 
 		# Simulated statistics
-		slope.stat.sim[i] <- abs(slope.high.perm - slope.low.perm)/sqrt(slope.sd.high.perm^2 + slope.sd.low.perm^2)
-		inter.stat.sim[i] <- abs(inter.high.perm - inter.low.perm)/sqrt(inter.sd.high.perm^2 + inter.sd.low.perm^2)
-		total.stat.sim[i] <- slope.stat.sim[i] + inter.stat.sim[i]
-		r.sqr.stat.sim[i] <- abs(r.sqr.high.perm - r.sqr.low.perm)
+		slope.stat.sim[i] <- abs(slope.high.sim - slope.low.sim)/sqrt(slope.sd.high.sim^2 + slope.sd.low.sim^2)
+		inter.stat.sim[i] <- abs(inter.high.sim - inter.low.sim)/sqrt(inter.sd.high.sim^2 + inter.sd.low.sim^2)
+		total.stat.sim[i] <- slope.stat.sim + inter.stat.sim
+		r.sqr.stat.sim[i] <- abs(r.sqr.high.sim - r.sqr.low.sim)
 
 		# Counters for p-values
 		if (slope.stat.sim[i] > slope.stat.true) {
