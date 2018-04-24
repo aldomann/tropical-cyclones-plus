@@ -558,6 +558,21 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
 	return(results.df)
 }
 
+# Explore p-values -----------------------------------------
+
+explore_p_values <- function(p.values.list, alpha = 0.05) {
+	for (i in 1:length(p.values.list)) {
+		for (j in 1:2) {
+			if ( (p.values.list[[i]][["slope.p.val"]][j] <= alpha) |
+					 (p.values.list[[i]][["inter.p.val"]][j] <= alpha) |
+					 (p.values.list[[i]][["total.p.val"]][j] <= alpha) |
+					 (p.values.list[[i]][["r.sqr.p.val"]][j] <= alpha) ) {
+				print(p.values.list[[i]][j,])
+			}
+		}
+	}
+}
+
 # Scatterplots ---------------------------------------------
 
 plot_scatterplot <- function(basin, var1, var2, min.speed = 0) {
