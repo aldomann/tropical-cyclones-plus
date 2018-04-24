@@ -4,7 +4,8 @@
 
 # Source base code -----------------------------------------
 source("slopes_base.R")
-load("slopes_analysis.RData")
+# load("slopes_analysis.RData")
+
 
 # Get RAW data ---------------------------------------------
 
@@ -16,35 +17,47 @@ pdi.natl <- pdi.all %>%
 pdi.epac <- pdi.all %>%
 	dplyr::filter(basin == "EPAC")
 
+compute.flag <- T
+
+# Load objects from disk -----------------------------------
+
+if (!compute.flag) {
+	ci.list <- readRDS("slopes_ci_list.rds")
+}
+
 
 # Confidence interval for all storms -----------------------
 
-# NATL
-ci.natl.pdi <- summarise_conf_intervals("NATL", "storm.duration", "storm.pdi")
-ci.natl.max.wind <- summarise_conf_intervals("NATL", "storm.duration", "max.wind")
-ci.natl.mean.wind <- summarise_conf_intervals("NATL", "storm.duration", "mean.wind")
-ci.natl.mean.sq.wind <- summarise_conf_intervals("NATL", "storm.duration", "mean.sq.wind")
+if (compute.flag) {
+	# NATL
+	ci.natl.pdi <- summarise_conf_intervals("NATL", "storm.duration", "storm.pdi")
+	ci.natl.max.wind <- summarise_conf_intervals("NATL", "storm.duration", "max.wind")
+	ci.natl.mean.wind <- summarise_conf_intervals("NATL", "storm.duration", "mean.wind")
+	ci.natl.mean.sq.wind <- summarise_conf_intervals("NATL", "storm.duration", "mean.sq.wind")
 
-# EPAC
-ci.epac.pdi <- summarise_conf_intervals("EPAC", "storm.duration", "storm.pdi")
-ci.epac.max.wind <- summarise_conf_intervals("EPAC", "storm.duration", "max.wind")
-ci.epac.mean.wind <- summarise_conf_intervals("EPAC", "storm.duration", "mean.wind")
-ci.epac.mean.sq.wind <- summarise_conf_intervals("EPAC", "storm.duration", "mean.sq.wind")
+	# EPAC
+	ci.epac.pdi <- summarise_conf_intervals("EPAC", "storm.duration", "storm.pdi")
+	ci.epac.max.wind <- summarise_conf_intervals("EPAC", "storm.duration", "max.wind")
+	ci.epac.mean.wind <- summarise_conf_intervals("EPAC", "storm.duration", "mean.wind")
+	ci.epac.mean.sq.wind <- summarise_conf_intervals("EPAC", "storm.duration", "mean.sq.wind")
+}
 
 
 # Confidence interval for developing systems ---------------
 
-# NATL
-ci.natl.pdi.ds <- summarise_conf_intervals("NATL", "storm.duration", "storm.pdi", 33)
-ci.natl.max.wind.ds <- summarise_conf_intervals("NATL", "storm.duration", "max.wind", 33)
-ci.natl.mean.wind.ds <- summarise_conf_intervals("NATL", "storm.duration", "mean.wind", 33)
-ci.natl.mean.sq.wind.ds <- summarise_conf_intervals("NATL", "storm.duration", "mean.sq.wind", 33)
+if (compute.flag) {
+	# NATL
+	ci.natl.pdi.ds <- summarise_conf_intervals("NATL", "storm.duration", "storm.pdi", 33)
+	ci.natl.max.wind.ds <- summarise_conf_intervals("NATL", "storm.duration", "max.wind", 33)
+	ci.natl.mean.wind.ds <- summarise_conf_intervals("NATL", "storm.duration", "mean.wind", 33)
+	ci.natl.mean.sq.wind.ds <- summarise_conf_intervals("NATL", "storm.duration", "mean.sq.wind", 33)
 
-# EPAC
-ci.epac.pdi.ds <- summarise_conf_intervals("EPAC", "storm.duration", "storm.pdi", 33)
-ci.epac.max.wind.ds <- summarise_conf_intervals("EPAC", "storm.duration", "max.wind", 33)
-ci.epac.mean.wind.ds <- summarise_conf_intervals("EPAC", "storm.duration", "mean.wind", 33)
-ci.epac.mean.sq.wind.ds <- summarise_conf_intervals("EPAC", "storm.duration", "mean.sq.wind", 33)
+	# EPAC
+	ci.epac.pdi.ds <- summarise_conf_intervals("EPAC", "storm.duration", "storm.pdi", 33)
+	ci.epac.max.wind.ds <- summarise_conf_intervals("EPAC", "storm.duration", "max.wind", 33)
+	ci.epac.mean.wind.ds <- summarise_conf_intervals("EPAC", "storm.duration", "mean.wind", 33)
+	ci.epac.mean.sq.wind.ds <- summarise_conf_intervals("EPAC", "storm.duration", "mean.sq.wind", 33)
+}
 
 
 # Scatterplots (all storms) --------------------------------
@@ -80,11 +93,13 @@ plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind", 33)
 # Summarise CI data frames ---------------------------------
 
 # Group data frames into a list
-rm(ci.list)
-ci.list <- lapply(ls(patt='^ci.'), get)
-saveRDS(ci.list, "slopes_ci_list.rds")
-# rm(list=ls(pattern="^ci.epac"))
-# rm(list=ls(pattern="^ci.natl"))
+if (compute.flag) {
+	rm(ci.list)
+	ci.list <- lapply(ls(patt='^ci.'), get)
+	saveRDS(ci.list, "slopes_ci_list.rds")
+	# rm(list=ls(pattern="^ci.epac"))
+	# rm(list=ls(pattern="^ci.natl"))
+}
 
 # NATL (all storms)
 ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0]
