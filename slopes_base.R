@@ -7,7 +7,7 @@ library(lubridate)
 
 # Confidence intervals -------------------------------------
 
-get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
+get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000) {
 	# Filter and clean data
 	df <- df %>%
 		dplyr::filter(max.wind > min.speed) %>%
@@ -28,7 +28,7 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	r.squared <- summary(fit)$r.squared
 
 	# Prepare variables for the simulation
-	n.sim <- 1000 # Number of simulations
+	# n.sim <- 1000 # Number of simulations
 	data.seq <- seq(1, n)
 	slope.sim <- numeric(n.sim)
 	slope.sd.sim <- numeric(n.sim)
@@ -97,13 +97,13 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	return(results.df)
 }
 
-summarise_conf_intervals <- function(basin, var1, var2, min.speed = 0) {
+summarise_conf_intervals <- function(basin, var1, var2, min.speed = 0, n.sim = 1000) {
 	# Parse the basin PDI data frame
 	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
 
 	# var2 ~ var1 regression (y ~ x)
-	ci.yx.low <-  get_conf_interval(basin.df, "low",  var1, var2, min.speed)
-	ci.yx.high <- get_conf_interval(basin.df, "high", var1, var2, min.speed)
+	ci.yx.low <-  get_conf_interval(basin.df, "low",  var1, var2, min.speed, n.sim)
+	ci.yx.high <- get_conf_interval(basin.df, "high", var1, var2, min.speed, n.sim)
 
 	# var1 ~ var2 regression (x ~ y)
 	ci.xy.low <-  get_conf_interval(basin.df, "low",  var2, var1, min.speed)
