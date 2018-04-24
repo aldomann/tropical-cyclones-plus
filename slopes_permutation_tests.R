@@ -128,8 +128,10 @@ if (compute.flag && !bootstrap.flag) {
 	# Group data frames into a list
 	rm(p.values.list)
 	p.values.list <- lapply(ls(patt='^p.vals.'), get)
+	p.values.list.pdi <- lapply(ls(patt='^p.vals.*pdi*'), get)
 	# rm(list=ls(pattern="^p.vals."))
 	saveRDS(p.values.list, "slopes_p_values.rds")
+	saveRDS(p.values.list.pdi, "slopes_p_values_pdi.rds")
 }
 
 if (compute.flag && bootstrap.flag) {
@@ -144,16 +146,27 @@ if (compute.flag && bootstrap.flag) {
 
 # Print regressions with p-value <= alpha
 explore_p_values(p.values.list, 0.05)
+explore_p_values(p.values.list.pdi, 0.05)
 explore_p_values(boot.p.values.list, 0.05)
 
 # NATL (all storms)
-p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0]
+p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0][[4]]
 
 # NATL (all storms)
-p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0]
+p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0][[4]]
 
 # NATL (developing systems)
-p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0]
+p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0][[4]]
 
 # EPAC (developing systems)
-p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0]
+p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0][[4]]
+
+
+# Compare raw permutation & bootstrap-powered permutation
+for (i in 1:4) {
+	print(boot.p.values.list[[i]])
+	print(p.values.list.pdi[[i]])
+	print("=======================================================================")
+}
+
+
