@@ -82,6 +82,7 @@ plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind", 33)
 # Group data frames into a list
 rm(ci.list)
 ci.list <- lapply(ls(patt='^ci.'), get)
+saveRDS(ci.list, "slopes_ci_list.rds")
 # rm(list=ls(pattern="^ci.epac"))
 # rm(list=ls(pattern="^ci.natl"))
 
