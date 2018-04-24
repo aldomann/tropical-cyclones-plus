@@ -319,7 +319,7 @@ summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, 
 
 # Permutation + bootstrap ----------------------------------
 
-do_bootstrap <- function(col1, col2) {
+do_bootstrap <- function(col1, col2, n.sim = 500) {
 	# Construct data
 	data <- cbind(log10(col1), log10(col2))
 	n <- nrow(data)
@@ -333,7 +333,7 @@ do_bootstrap <- function(col1, col2) {
 	r.squared <- summary(fit)$r.squared
 
 	# Prepare variables for the simulation
-	n.sim <- 500 # Number of simulations
+	# n.sim <- 500 # Number of simulations
 	data.seq <- seq(1, n)
 	slope.sim <- numeric(n.sim)
 	slope.sd.sim <- numeric(n.sim)
@@ -401,7 +401,7 @@ do_bootstrap <- function(col1, col2) {
 	return(results.df)
 }
 
-do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
+do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.sim.boot = 10, n.sim.perm = 10) {
 	# Filter max wind speed
 	df <- df %>%
 		dplyr::filter(max.wind > min.speed)
@@ -419,8 +419,8 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
 	col2.high <- df.high[[var2]]
 
 	# True bootstrap statistics
-	true.boot.lm.high <- do_bootstrap(col2.high, col1.high)
-	true.boot.lm.low <- do_bootstrap(col2.low, col1.low)
+	true.boot.lm.high <- do_bootstrap(col2.high, col1.high, n.sim.boot)
+	true.boot.lm.low <- do_bootstrap(col2.low, col1.low, n.sim.boot)
 
 	# True slopes
 	slope.low <- true.boot.lm.low$slope
@@ -454,7 +454,7 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
 	n.all <- n.low + n.high
 
 	# Prepare variables for the test
-	n.sim <- 100  # Number of simulations
+	n.sim <- n.sim.perm  # Number of simulations
 	slope.stat.sim <- numeric(n.sim)
 	inter.stat.sim <- numeric(n.sim)
 	total.stat.sim <- numeric(n.sim)
@@ -468,7 +468,6 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
 
 	# Perform the permutation test
 	for (i in 1:n.sim){
-		print(i)
 		col1.sample <- sample(data.all[,1], n.all)
 		col2.sample <- sample(data.all[,2], n.all)
 		data.sample <- cbind(col1.sample, col2.sample)
@@ -478,8 +477,8 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
 		high <- cbind(data.sample[x:n.all, 1], data.sample[x:n.all, 2])
 
 		# Simulated bootstrap statistics
-		sim.boot.lm.high <- do_bootstrap(high[,2], high[,1])
-		sim.boot.lm.low <- do_bootstrap(low[,2], low[,1])
+		sim.boot.lm.high <- do_bootstrap(high[,2], high[,1], n.sim.boot)
+		sim.boot.lm.low <- do_bootstrap(low[,2], low[,1], n.sim.boot)
 
 		# Simulated slopes
 		slope.low.sim <- sim.boot.lm.low$slope
@@ -500,7 +499,7 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0) {
 		# Simulated statistics
 		slope.stat.sim[i] <- abs(slope.high.sim - slope.low.sim)/sqrt(slope.sd.high.sim^2 + slope.sd.low.sim^2)
 		inter.stat.sim[i] <- abs(inter.high.sim - inter.low.sim)/sqrt(inter.sd.high.sim^2 + inter.sd.low.sim^2)
-		total.stat.sim[i] <- slope.stat.sim + inter.stat.sim
+		total.stat.sim[i] <- slope.stat.sim[i] + inter.stat.sim[i]
 		r.sqr.stat.sim[i] <- abs(r.sqr.high.sim - r.sqr.low.sim)
 
 		# Counters for p-values
