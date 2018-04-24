@@ -5,7 +5,7 @@
 library(tidyverse)
 library(lubridate)
 
-# Confidence interval --------------------------------------
+# Confidence intervals -------------------------------------
 
 get_conf_interval <- function(df, class, var1, var2, min.speed = 0) {
 	# Filter and clean data
@@ -126,7 +126,7 @@ summarise_conf_intervals <- function(basin, var1, var2, min.speed = 0) {
 
 # Permutation test -----------------------------------------
 
-do_permutation_test <- function(df, var1, var2, min.speed = 0) {
+do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 	# Filter max wind speed
 	df <- df %>%
 		dplyr::filter(max.wind > min.speed)
@@ -179,7 +179,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	n.all <- n.low + n.high
 
 	# Prepare variables for the test
-	n.sim <- 5000  # Number of simulations
+	# n.sim <- 5000  # Number of simulations
 	slope.stat.sim <- numeric(n.sim)
 	inter.stat.sim <- numeric(n.sim)
 	total.stat.sim <- numeric(n.sim)
@@ -282,7 +282,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0) {
 	return(results.df)
 }
 
-summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F) {
+summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 5000) {
 	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
 
 	if (bootstrap) {
@@ -293,10 +293,10 @@ summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F) 
 		p.val.xy <- do_permutation_test_with_bootstrap(basin.df, var1, var2, min.speed)
 	} else if (!bootstrap) {
 		# var2 ~ var1 regression (y ~ x)
-		p.val.yx <- do_permutation_test(basin.df, var2, var1, min.speed)
+		p.val.yx <- do_permutation_test(basin.df, var2, var1, min.speed, n.sim)
 
 		# var1 ~ var2 regression (x ~ y)
-		p.val.xy <- do_permutation_test(basin.df, var1, var2, min.speed)
+		p.val.xy <- do_permutation_test(basin.df, var1, var2, min.speed, n.sim)
 	}
 
 
