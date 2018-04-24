@@ -6,6 +6,12 @@
 source("slopes_base.R")
 # load("slopes_analysis.RData")
 
+zug_zug <- function(call) {
+	print(system.time(call))
+	system("notify-send 'Finished calculations' 'Get back to work!' -i rstudio -u critical")
+	system("paplay /usr/share/sounds/freedesktop/stereo/complete.oga")
+}
+
 
 # Get RAW data ---------------------------------------------
 
@@ -93,16 +99,16 @@ if (compute.flag && bootstrap.flag) {
 # Permutation test for developing systems
 if (compute.flag && bootstrap.flag) {
 	# NATL
-	boot.p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33, bootstrap = T)
-	boot.p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33, bootstrap = T)
-	boot.p.vals.natl.mean.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.wind", 33, bootstrap = T)
-	boot.p.vals.natl.mean.sq.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", 33, bootstrap = T)
+	boot.p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.natl.mean.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.wind", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.natl.mean.sq.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", 33, bootstrap = T, n.sim = 500)
 
 	# EPAC
-	boot.p.vals.epac.pdi.ds <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", 33, bootstrap = T)
-	boot.p.vals.epac.max.wind.ds <- summarise_p_values("EPAC", "storm.duration", "max.wind", 33, bootstrap = T)
-	boot.p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 33, bootstrap = T)
-	boot.p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33, bootstrap = T)
+	boot.p.vals.epac.pdi.ds <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.epac.max.wind.ds <- summarise_p_values("EPAC", "storm.duration", "max.wind", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33, bootstrap = T, n.sim = 500)
 
 	# Save final time
 	final.time <- Sys.time()
