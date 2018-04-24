@@ -6,6 +6,7 @@
 source("slopes_base.R")
 # load("slopes_analysis.RData")
 
+
 # Get RAW data ---------------------------------------------
 
 pdi.all <- as_tibble(data.table::fread('data/hurdat2-hadisst-1966-2016_pdis.csv')) %>%
@@ -19,6 +20,12 @@ pdi.epac <- pdi.all %>%
 compute.flag <- T
 bootstrap.flag <- F
 
+# Load objects from disk -----------------------------------
+
+if (!compute.flag) {
+	p.values.list <- readRDS("slopes_p_values.rds")
+	boot.p.values.list <- readRDS("slopes_p_values_boot.rds")
+}
 
 # Permutation tests ----------------------------------------
 
@@ -45,6 +52,7 @@ if (compute.flag && !bootstrap.flag) {
 if (compute.flag && !bootstrap.flag) {
 	# NATL
 	p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33)
+	p.vals.natl.pdi.ds.2 <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33)
 	p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33)
 	p.vals.natl.mean.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.wind", 33)
 	p.vals.natl.mean.sq.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", 33)
@@ -60,9 +68,9 @@ if (compute.flag && !bootstrap.flag) {
 }
 
 elapsed.time <- final.time - init.time
+system("notify-send 'Finished calculations' 'Get back to work!' -i rstudio -u critical")
 
 # Permutation tests with bootstrap -------------------------
-
 
 # Permutation test for all data
 if (compute.flag && bootstrap.flag) {
@@ -109,6 +117,7 @@ if (compute.flag && !bootstrap.flag) {
 	rm(p.values.list)
 	p.values.list <- lapply(ls(patt='^p.vals.'), get)
 	# rm(list=ls(pattern="^p.vals."))
+	saveRDS(p.values.list, "slopes_p_values.rds")
 }
 
 if (compute.flag && bootstrap.flag) {
@@ -116,6 +125,7 @@ if (compute.flag && bootstrap.flag) {
 	rm(boot.p.values.list)
 	boot.p.values.list <- lapply(ls(patt='^boot.p.vals.'), get)
 	# rm(list=ls(pattern="^boot.p.vals."))
+	saveRDS(boot.p.values.list, "slopes_p_values_boot.rds")
 }
 
 # Analyse p-values -----------------------------------------
