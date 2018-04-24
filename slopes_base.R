@@ -285,18 +285,18 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 5000) {
 	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
 
-	if (bootstrap) {
-		# var2 ~ var1 regression (y ~ x)
-		p.val.yx <- do_permutation_test_with_bootstrap(basin.df, var2, var1, min.speed)
-
-		# var1 ~ var2 regression (x ~ y)
-		p.val.xy <- do_permutation_test_with_bootstrap(basin.df, var1, var2, min.speed)
-	} else if (!bootstrap) {
+	if (!bootstrap) {
 		# var2 ~ var1 regression (y ~ x)
 		p.val.yx <- do_permutation_test(basin.df, var2, var1, min.speed, n.sim)
 
 		# var1 ~ var2 regression (x ~ y)
 		p.val.xy <- do_permutation_test(basin.df, var1, var2, min.speed, n.sim)
+	} else	if (bootstrap) {
+		# var2 ~ var1 regression (y ~ x)
+		p.val.yx <- do_permutation_test_with_bootstrap(basin.df, var2, var1, n.sim.perm = n.sim, n.sim.boot = n.sim)
+
+		# var1 ~ var2 regression (x ~ y)
+		p.val.xy <- do_permutation_test_with_bootstrap(basin.df, var1, var2, min.speed, n.sim.perm = n.sim, n.sim.boot = n.sim)
 	}
 
 
