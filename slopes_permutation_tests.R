@@ -24,14 +24,18 @@ pdi.natl <- pdi.all %>%
 pdi.epac <- pdi.all %>%
 	dplyr::filter(basin == "EPAC")
 
-compute.flag <- T
+compute.flag <- F
 bootstrap.flag <- F
 
 # Load objects from disk -----------------------------------
 
 if (!compute.flag) {
-	p.values.list <- readRDS("slopes_p_values.rds")
-	boot.p.values.list <- readRDS("slopes_p_values_boot.rds")
+	# p.values.list <- readRDS("slopes_p_values.rds")
+	p.values.list.pdi <- readRDS("slopes_p_values_pdi.rds")
+	p.values.list.max.wind <- readRDS("slopes_p_values_maxwind.rds")
+	# boot.p.values.list <- readRDS("slopes_p_values_boot.rds")
+	boot.p.values.list.pdi <- readRDS("slopes_p_values_boot_pdi.rds")
+	boot.p.values.list.max.wind <- readRDS("slopes_p_values_boot_maxwind.rds")
 }
 
 # Permutation tests ----------------------------------------
@@ -156,32 +160,37 @@ if (compute.flag && bootstrap.flag) {
 # Analyse p-values -----------------------------------------
 
 # Print regressions with p-value <= alpha
-explore_p_values(p.values.list, 0.05)
+# explore_p_values(p.values.list, 0.05)
 explore_p_values(p.values.list.pdi, 0.05)
 explore_p_values(p.values.list.max.wind, 0.05)
 
-explore_p_values(boot.p.values.list, 0.05)
+# explore_p_values(boot.p.values.list, 0.05)
 explore_p_values(boot.p.values.list.pdi, 0.05)
 explore_p_values(boot.p.values.list.max.wind, 0.05)
 
 # NATL (all storms)
-p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0][[4]]
-
-# NATL (all storms)
-p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0][[4]]
-
-# NATL (developing systems)
-p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0][[4]]
-
-# EPAC (developing systems)
-p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0][[4]]
+# p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0][[4]]
+#
+# # NATL (all storms)
+# p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0][[4]]
+#
+# # NATL (developing systems)
+# p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0][[4]]
+#
+# # EPAC (developing systems)
+# p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0][[4]]
 
 
 # Compare raw permutation & bootstrap-powered permutation
 for (i in 1:4) {
-	print(boot.p.values.list[[i]])
+	print(boot.p.values.list.pdi[[i]])
 	print(p.values.list.pdi[[i]])
 	print("=======================================================================")
 }
 
+for (i in 1:4) {
+	print(boot.p.values.list.max.wind[[i]])
+	print(p.values.list.max.wind[[i]])
+	print("=======================================================================")
+}
 
