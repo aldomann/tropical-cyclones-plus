@@ -6,14 +6,6 @@
 source("slopes_base.R")
 # load("slopes_analysis.RData")
 
-zug_zug <- function(call) {
-	print(paste("Started computation at", Sys.time()))
-	print(system.time(call))
-	system("notify-send 'Finished calculations' 'Get back to work!' -i rstudio -u critical")
-	system("paplay /usr/share/sounds/freedesktop/stereo/complete.oga")
-}
-
-
 # Get RAW data ---------------------------------------------
 
 pdi.all <- as_tibble(data.table::fread('data/hurdat2-hadisst-1966-2016_pdis.csv')) %>%
@@ -25,7 +17,7 @@ pdi.epac <- pdi.all %>%
 	dplyr::filter(basin == "EPAC")
 
 compute.flag <- F
-bootstrap.flag <- F
+bootstrap.flag <- T
 
 # Load objects from disk -----------------------------------
 
@@ -42,9 +34,6 @@ if (!compute.flag) {
 
 # Permutation test for all data
 if (compute.flag && !bootstrap.flag) {
-	# Save initial time
-	init.time <- Sys.time()
-
 	# NATL
 	p.vals.natl.pdi <- summarise_p_values("NATL", "storm.duration", "storm.pdi")
 	p.vals.natl.max.wind <- summarise_p_values("NATL", "storm.duration", "max.wind")
@@ -72,59 +61,41 @@ if (compute.flag && !bootstrap.flag) {
 	p.vals.epac.max.wind.ds <- summarise_p_values("EPAC", "storm.duration", "max.wind", 33)
 	p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 33)
 	p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33)
-
-	# Save final time
-	final.time <- Sys.time()
 }
 
-if (compute.flag && !bootstrap.flag) {
-	elapsed.time <- final.time - init.time
-	system("notify-send 'Finished calculations' 'Get back to work!' -i rstudio -u critical")
-}
 
 # Permutation tests with bootstrap -------------------------
 
 # Permutation test for all data
 if (compute.flag && bootstrap.flag) {
-	# Save initial time
-	init.time <- Sys.time()
-
 	# NATL
-	boot.p.vals.natl.pdi <- summarise_p_values("NATL", "storm.duration", "storm.pdi", bootstrap = T, n.sim = 500)
-	zug_zug(boot.p.vals.natl.max.wind <- summarise_p_values("NATL", "storm.duration", "max.wind", bootstrap = T, n.sim = 500))
-	# boot.p.vals.natl.mean.wind <- summarise_p_values("NATL", "storm.duration", "mean.wind", bootstrap = T, n.sim = 500)
-	# boot.p.vals.natl.mean.sq.wind <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", bootstrap = T, n.sim = 500)
+	alfR::zug_zug(boot.p.vals.natl.pdi <- summarise_p_values("NATL", "storm.duration", "storm.pdi", bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.natl.max.wind <- summarise_p_values("NATL", "storm.duration", "max.wind", bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.natl.mean.wind <- summarise_p_values("NATL", "storm.duration", "mean.wind", bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.natl.mean.sq.wind <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", bootstrap = T, n.sim = 500))
 
 	# EPAC
-	boot.p.vals.epac.pdi <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", bootstrap = T, n.sim = 500)
-	zug_zug(boot.p.vals.epac.max.wind <- summarise_p_values("EPAC", "storm.duration", "max.wind", bootstrap = T, n.sim = 500))
-	# boot.p.vals.epac.mean.wind <- summarise_p_values("EPAC", "storm.duration", "mean.wind", bootstrap = T, n.sim = 500)
-	# boot.p.vals.epac.mean.sq.wind <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", bootstrap = T, n.sim = 500)
+	alfR::zug_zug(boot.p.vals.epac.pdi <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.epac.max.wind <- summarise_p_values("EPAC", "storm.duration", "max.wind", bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.epac.mean.wind <- summarise_p_values("EPAC", "storm.duration", "mean.wind", bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.epac.mean.sq.wind <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", bootstrap = T, n.sim = 500))
 }
 
 # Permutation test for developing systems
 if (compute.flag && bootstrap.flag) {
 	# NATL
-	boot.p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33, bootstrap = T, n.sim = 500)
-	zug_zug(boot.p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33, bootstrap = T, n.sim = 500))
-	# boot.p.vals.natl.mean.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.wind", 33, bootstrap = T, n.sim = 500)
-	# boot.p.vals.natl.mean.sq.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", 33, bootstrap = T, n.sim = 500)
+	alfR::zug_zug(boot.p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33, bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33, bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.natl.mean.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.wind", 33, bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.natl.mean.sq.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", 33, bootstrap = T, n.sim = 500))
 
 	# EPAC
-	boot.p.vals.epac.pdi.ds <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", 33, bootstrap = T, n.sim = 500)
-	zug_zug(boot.p.vals.epac.max.wind.ds <- summarise_p_values("EPAC", "storm.duration", "max.wind", 33, bootstrap = T, n.sim = 500))
-	# boot.p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 33, bootstrap = T, n.sim = 500)
-	# boot.p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33, bootstrap = T, n.sim = 500)
-
-	# Save final time
-	final.time <- Sys.time()
+	alfR::zug_zug(boot.p.vals.epac.pdi.ds <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", 33, bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.epac.max.wind.ds <- summarise_p_values("EPAC", "storm.duration", "max.wind", 33, bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 33, bootstrap = T, n.sim = 500))
+	alfR::zug_zug(boot.p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33, bootstrap = T, n.sim = 500))
 }
 
-if (compute.flag && bootstrap.flag) {
-	# Time goes as 0.007*n^2
-	boot.elapsed.time <- final.time - init.time
-	system("notify-send 'Finished calculations' 'Get back to work!' -i rstudio -u critical")
-}
 
 # Tidy p-values in a list ----------------------------------
 
