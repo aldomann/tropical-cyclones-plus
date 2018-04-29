@@ -21,11 +21,12 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000
 
 	# Linear regression
 	fit <- lm(data[,2] ~ data[,1])
-	slope <- summary(fit)$coefficients[2]
-	slope.sd <- summary(fit)$coefficients[4]
-	inter <- summary(fit)$coefficients[1]
-	inter.sd <- summary(fit)$coefficients[3]
-	r.squared <- summary(fit)$r.squared
+	sum.fit <- summary(fit)
+	slope <- sum.fit$coefficients[2]
+	slope.sd <- sum.fit$coefficients[4]
+	inter <- sum.fit$coefficients[1]
+	inter.sd <- sum.fit$coefficients[3]
+	r.squared <- sum.fit$r.squared
 
 	# Prepare variables for the simulation
 	# n.sim <- 1000 # Number of simulations
@@ -44,14 +45,15 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000
 
 		# Fit linear model
 		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
+		sum.fit.value.sim <- summary(fit.value.sim)
 		# Slope
-		slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
-		slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]
+		slope.sim[i] <- sum.fit.value.sim$coefficients[2]
+		slope.sd.sim[i] <- sum.fit.value.sim$coefficients[4]
 		# Intercept
-		inter.sim[i] <- summary(fit.value.sim)$coefficients[1]
-		inter.sd.sim[i] <- summary(fit.value.sim)$coefficients[3]
+		inter.sim[i] <- sum.fit.value.sim$coefficients[1]
+		inter.sd.sim[i] <- sum.fit.value.sim$coefficients[3]
 		# R-Squared
-		r.squared.sim[i] <- summary(fit.value.sim)$r.squared
+		r.squared.sim[i] <- sum.fit.value.sim$r.squared
 
 		# t-values
 		t.value.slope.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
@@ -145,23 +147,25 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 
 	# Linear regressions statistics
 	fit.low <- lm(log10(col2.low) ~ log10(col1.low))
+	sum.fit.low <- summary(fit.low)
 	fit.high <- lm(log10(col2.high) ~ log10(col1.high))
+	sum.fit.high <- summary(fit.high)
 
 	# True slopes
-	slope.low <- summary(fit.low)$coefficients[2]
-	slope.sd.low <- summary(fit.low)$coefficients[4]
-	slope.high <- summary(fit.high)$coefficients[2]
-	slope.sd.high <- summary(fit.high)$coefficients[4]
+	slope.low <- sum.fit.low$coefficients[2]
+	slope.sd.low <- sum.fit.low$coefficients[4]
+	slope.high <- sum.fit.high$coefficients[2]
+	slope.sd.high <- sum.fit.high$coefficients[4]
 
 	# True intercepts
-	inter.low <- summary(fit.low)$coefficients[1]
-	inter.sd.low <- summary(fit.low)$coefficients[3]
-	inter.high <- summary(fit.high)$coefficients[1]
-	inter.sd.high <- summary(fit.high)$coefficients[3]
+	inter.low <- sum.fit.low$coefficients[1]
+	inter.sd.low <- sum.fit.low$coefficients[3]
+	inter.high <- sum.fit.high$coefficients[1]
+	inter.sd.high <- sum.fit.high$coefficients[3]
 
 	# True R Squared coefficients
-	r.sqr.low <- summary(fit.low)$r.squared
-	r.sqr.high <- summary(fit.high)$r.squared
+	r.sqr.low <- sum.fit.low$r.squared
+	r.sqr.high <- sum.fit.high$r.squared
 
 	# True statistics
 	slope.stat.true <- abs(slope.high - slope.low)/sqrt(slope.sd.high^2 + slope.sd.low^2)
@@ -203,23 +207,25 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 
 		# Fit the new data
 		fit.low.perm <- lm(log10(low[,2]) ~ log10(low[,1]))
+		sum.fit.low.perm <- summary(fit.low.perm)
 		fit.high.perm <- lm(log10(high[,2]) ~ log10(high[,1]))
+		sum.fit.high.perm <- summary(fit.high.perm)
 
 		# Simulated slopes
-		slope.low.perm <- summary(fit.low.perm)$coefficients[2]
-		slope.sd.low.perm <- summary(fit.low.perm)$coefficients[4]
-		slope.high.perm <- summary(fit.high.perm)$coefficients[2]
-		slope.sd.high.perm <- summary(fit.high.perm)$coefficients[4]
+		slope.low.perm <- sum.fit.low.perm$coefficients[2]
+		slope.sd.low.perm <- sum.fit.low.perm$coefficients[4]
+		slope.high.perm <- sum.fit.high.perm$coefficients[2]
+		slope.sd.high.perm <- sum.fit.high.perm$coefficients[4]
 
 		# Simulated intercepts
-		inter.low.perm <- summary(fit.low.perm)$coefficients[1]
-		inter.sd.low.perm <- summary(fit.low.perm)$coefficients[3]
-		inter.high.perm <- summary(fit.high.perm)$coefficients[1]
-		inter.sd.high.perm <- summary(fit.high.perm)$coefficients[3]
+		inter.low.perm <- sum.fit.low.perm$coefficients[1]
+		inter.sd.low.perm <- sum.fit.low.perm$coefficients[3]
+		inter.high.perm <- sum.fit.high.perm$coefficients[1]
+		inter.sd.high.perm <- sum.fit.high.perm$coefficients[3]
 
 		# Simulated R Squared coefficients
-		r.sqr.low.perm <- summary(fit.low.perm)$r.squared
-		r.sqr.high.perm <- summary(fit.high.perm)$r.squared
+		r.sqr.low.perm <- sum.fit.low.perm$r.squared
+		r.sqr.high.perm <- sum.fit.high.perm$r.squared
 
 		# Simulated statistics
 		slope.stat.sim[i] <- abs(slope.high.perm - slope.low.perm)/sqrt(slope.sd.high.perm^2 + slope.sd.low.perm^2)
@@ -326,11 +332,12 @@ do_bootstrap <- function(col1, col2, n.sim = 500) {
 
 	# Linear regression
 	fit <- lm(data[,2] ~ data[,1])
-	slope <- summary(fit)$coefficients[2]
-	slope.sd <- summary(fit)$coefficients[4]
-	inter <- summary(fit)$coefficients[1]
-	inter.sd <- summary(fit)$coefficients[3]
-	r.squared <- summary(fit)$r.squared
+	sum.fit <- summary(fit)
+	slope <- sum.fit$coefficients[2]
+	slope.sd <- sum.fit$coefficients[4]
+	inter <- sum.fit$coefficients[1]
+	inter.sd <- sum.fit$coefficients[3]
+	r.squared <- sum.fit$r.squared
 
 	# Prepare variables for the simulation
 	# n.sim <- 500 # Number of simulations
@@ -349,14 +356,15 @@ do_bootstrap <- function(col1, col2, n.sim = 500) {
 
 		# Fit linear model
 		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
+		sum.fit.value.sim <- summary(fit.value.sim)
 		# Slope
-		slope.sim[i] <- summary(fit.value.sim)$coefficients[2]
-		slope.sd.sim[i] <- summary(fit.value.sim)$coefficients[4]
+		slope.sim[i] <- sum.fit.value.sim$coefficients[2]
+		slope.sd.sim[i] <- sum.fit.value.sim$coefficients[4]
 		# Intercept
-		inter.sim[i] <- summary(fit.value.sim)$coefficients[1]
-		inter.sd.sim[i] <- summary(fit.value.sim)$coefficients[3]
+		inter.sim[i] <- sum.fit.value.sim$coefficients[1]
+		inter.sd.sim[i] <- sum.fit.value.sim$coefficients[3]
 		# R-Squared
-		r.squared.sim[i] <- summary(fit.value.sim)$r.squared
+		r.squared.sim[i] <- sum.fit.value.sim$r.squared
 
 		# t-values
 		t.value.slope.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
