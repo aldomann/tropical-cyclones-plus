@@ -288,7 +288,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 	return(results.df)
 }
 
-summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 5000) {
+summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 1000) {
 	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
 
 	if (!bootstrap) {
@@ -299,10 +299,10 @@ summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, 
 		p.val.xy <- do_permutation_test(basin.df, var1, var2, min.speed, n.sim)
 	} else	if (bootstrap) {
 		# var2 ~ var1 regression (y ~ x)
-		p.val.yx <- do_permutation_test_with_bootstrap(basin.df, var2, var1, n.sim.perm = n.sim, n.sim.boot = n.sim)
+		p.val.yx <- do_permutation_test_with_bootstrap(basin.df, var2, var1, n.sim.perm = n.sim*2, n.sim.boot = n.sim)
 
 		# var1 ~ var2 regression (x ~ y)
-		p.val.xy <- do_permutation_test_with_bootstrap(basin.df, var1, var2, min.speed, n.sim.perm = n.sim, n.sim.boot = n.sim)
+		p.val.xy <- do_permutation_test_with_bootstrap(basin.df, var1, var2, min.speed, n.sim.perm = n.sim*2, n.sim.boot = n.sim)
 	}
 
 
@@ -409,7 +409,7 @@ do_bootstrap <- function(col1, col2, n.sim = 500) {
 	return(results.df)
 }
 
-do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.sim.boot = 10, n.sim.perm = 10) {
+do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.sim.boot = 500, n.sim.perm = 1000) {
 	# Filter max wind speed
 	df <- df %>%
 		dplyr::filter(max.wind > min.speed)
