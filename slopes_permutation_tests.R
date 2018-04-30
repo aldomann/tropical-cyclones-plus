@@ -16,18 +16,25 @@ pdi.natl <- pdi.all %>%
 pdi.epac <- pdi.all %>%
 	dplyr::filter(basin == "EPAC")
 
-compute.flag <- F
-bootstrap.flag <- T
+compute.flag <- T
+bootstrap.flag <- F
 
 # Load objects from disk -----------------------------------
 
 if (!compute.flag) {
+	# Standard
 	# p.values.list <- readRDS("slopes_p_values.rds")
 	p.values.list.pdi <- readRDS("slopes_p_values_pdi.rds")
 	p.values.list.max.wind <- readRDS("slopes_p_values_maxwind.rds")
+	p.values.list.mean.wind <- readRDS("slopes_p_values_meanwind.rds")
+	p.values.list.mean.sq.wind <- readRDS("slopes_p_values_meansqwind.rds")
+
+	# With bootstrap
 	# boot.p.values.list <- readRDS("slopes_p_values_boot.rds")
 	boot.p.values.list.pdi <- readRDS("slopes_p_values_boot_pdi.rds")
 	boot.p.values.list.max.wind <- readRDS("slopes_p_values_boot_maxwind.rds")
+	boot.p.values.list.mean.wind <- readRDS("slopes_p_values_boot_meanwind.rds")
+	boot.p.values.list.mean.sq.wind <- readRDS("slopes_p_values_boot_meansqwind.rds")
 }
 
 # Permutation tests ----------------------------------------
@@ -69,31 +76,31 @@ if (compute.flag && !bootstrap.flag) {
 # Permutation test for all data
 if (compute.flag && bootstrap.flag) {
 	# NATL
-	alfR::zug_zug(boot.p.vals.natl.pdi <- summarise_p_values("NATL", "storm.duration", "storm.pdi", bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.natl.max.wind <- summarise_p_values("NATL", "storm.duration", "max.wind", bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.natl.mean.wind <- summarise_p_values("NATL", "storm.duration", "mean.wind", bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.natl.mean.sq.wind <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", bootstrap = T, n.sim = 500))
+	boot.p.vals.natl.pdi <- summarise_p_values("NATL", "storm.duration", "storm.pdi", bootstrap = T, n.sim = 500)
+	boot.p.vals.natl.max.wind <- summarise_p_values("NATL", "storm.duration", "max.wind", bootstrap = T, n.sim = 500)
+	boot.p.vals.natl.mean.wind <- summarise_p_values("NATL", "storm.duration", "mean.wind", bootstrap = T, n.sim = 500)
+	boot.p.vals.natl.mean.sq.wind <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", bootstrap = T, n.sim = 500)
 
 	# EPAC
-	alfR::zug_zug(boot.p.vals.epac.pdi <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.epac.max.wind <- summarise_p_values("EPAC", "storm.duration", "max.wind", bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.epac.mean.wind <- summarise_p_values("EPAC", "storm.duration", "mean.wind", bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.epac.mean.sq.wind <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", bootstrap = T, n.sim = 500))
+	boot.p.vals.epac.pdi <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", bootstrap = T, n.sim = 500)
+	boot.p.vals.epac.max.wind <- summarise_p_values("EPAC", "storm.duration", "max.wind", bootstrap = T, n.sim = 500)
+	boot.p.vals.epac.mean.wind <- summarise_p_values("EPAC", "storm.duration", "mean.wind", bootstrap = T, n.sim = 500)
+	boot.p.vals.epac.mean.sq.wind <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", bootstrap = T, n.sim = 500)
 }
 
 # Permutation test for developing systems
 if (compute.flag && bootstrap.flag) {
 	# NATL
-	alfR::zug_zug(boot.p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33, bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33, bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.natl.mean.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.wind", 33, bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.natl.mean.sq.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", 33, bootstrap = T, n.sim = 500))
+	boot.p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.natl.mean.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.wind", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.natl.mean.sq.wind.ds <- summarise_p_values("NATL", "storm.duration", "mean.sq.wind", 33, bootstrap = T, n.sim = 500)
 
 	# EPAC
-	alfR::zug_zug(boot.p.vals.epac.pdi.ds <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", 33, bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.epac.max.wind.ds <- summarise_p_values("EPAC", "storm.duration", "max.wind", 33, bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 33, bootstrap = T, n.sim = 500))
-	alfR::zug_zug(boot.p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33, bootstrap = T, n.sim = 500))
+	boot.p.vals.epac.pdi.ds <- summarise_p_values("EPAC", "storm.duration", "storm.pdi", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.epac.max.wind.ds <- summarise_p_values("EPAC", "storm.duration", "max.wind", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 33, bootstrap = T, n.sim = 500)
+	boot.p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33, bootstrap = T, n.sim = 500)
 }
 
 
@@ -105,12 +112,16 @@ if (compute.flag && !bootstrap.flag) {
 	p.values.list <- lapply(ls(patt='^p.vals.'), get)
 	p.values.list.pdi <- lapply(ls(patt='^p.vals.*pdi*'), get)
 	p.values.list.max.wind <- lapply(ls(patt='^p.vals.*max.wind*'), get)
+	p.values.list.mean.wind <- lapply(ls(patt='^p.vals.*mean.wind*'), get)
+	p.values.list.mean.sq.wind <- lapply(ls(patt='^p.vals.*mean.sq.wind*'), get)
 
 	# rm(list=ls(pattern="^p.vals."))
 
 	saveRDS(p.values.list, "slopes_p_values.rds")
 	saveRDS(p.values.list.pdi, "slopes_p_values_pdi.rds")
 	saveRDS(p.values.list.max.wind, "slopes_p_values_maxwind.rds")
+	saveRDS(p.values.list.mean.wind, "slopes_p_values_meanwind.rds")
+	saveRDS(p.values.list.mean.sq.wind, "slopes_p_values_meansqwind.rds")
 }
 
 if (compute.flag && bootstrap.flag) {
@@ -120,12 +131,16 @@ if (compute.flag && bootstrap.flag) {
 	boot.p.values.list <- lapply(ls(patt='^boot.p.vals.'), get)
 	boot.p.values.list.pdi <- lapply(ls(patt='^boot.p.vals.*pdi*'), get)
 	boot.p.values.list.max.wind <- lapply(ls(patt='^boot.p.vals.*max.wind*'), get)
+	boot.p.values.list.mean.wind <- lapply(ls(patt='^boot.p.vals.*mean.wind*'), get)
+	boot.p.values.list.mean.sq.wind <- lapply(ls(patt='^boot.p.vals.*mean.sq.wind*'), get)
 
 	# rm(list=ls(pattern="^boot.p.vals."))
 
 	saveRDS(boot.p.values.list, "slopes_p_values_boot.rds")
 	saveRDS(boot.p.values.list.pdi, "slopes_p_values_boot_pdi.rds")
 	saveRDS(boot.p.values.list.max.wind, "slopes_p_values_boot_maxwind.rds")
+	saveRDS(boot.p.values.list.mean.wind, "slopes_p_values_boot_meanwind.rds")
+	saveRDS(boot.p.values.list.mean.sq.wind, "slopes_p_values_boot_meansqwind.rds")
 }
 
 # Analyse p-values -----------------------------------------
