@@ -168,8 +168,10 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 	r.sqr.high <- sum.fit.high$r.squared
 
 	# True statistics
-	slope.stat.true <- abs(slope.high - slope.low)/sqrt(slope.sd.high^2 + slope.sd.low^2)
-	inter.stat.true <- abs(inter.high - inter.low)/sqrt(inter.sd.high^2 + inter.sd.low^2)
+	slope.alt.stat.true <- abs(slope.high - slope.low)
+	inter.alt.stat.true <- abs(inter.high - inter.low)
+	slope.stat.true <- slope.alt.stat.true/sqrt(slope.sd.high^2 + slope.sd.low^2)
+	inter.stat.true <- inter.alt.stat.true/sqrt(inter.sd.high^2 + inter.sd.low^2)
 	total.stat.true <- slope.stat.true + inter.stat.true
 	r.sqr.stat.true <- abs(r.sqr.high - r.sqr.low)
 
@@ -184,12 +186,16 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 
 	# Prepare variables for the test
 	# n.sim <- 5000  # Number of simulations
+	slope.alt.stat.sim <- numeric(n.sim)
+	inter.alt.stat.sim <- numeric(n.sim)
 	slope.stat.sim <- numeric(n.sim)
 	inter.stat.sim <- numeric(n.sim)
 	total.stat.sim <- numeric(n.sim)
 	r.sqr.stat.sim <- numeric(n.sim)
 
 	# Prepare counters
+	slope.alt.count <- 0
+	inter.alt.count <- 0
 	slope.count <- 0
 	inter.count <- 0
 	total.count <- 0
@@ -228,12 +234,20 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 		r.sqr.high.perm <- sum.fit.high.perm$r.squared
 
 		# Simulated statistics
-		slope.stat.sim[i] <- abs(slope.high.perm - slope.low.perm)/sqrt(slope.sd.high.perm^2 + slope.sd.low.perm^2)
-		inter.stat.sim[i] <- abs(inter.high.perm - inter.low.perm)/sqrt(inter.sd.high.perm^2 + inter.sd.low.perm^2)
+		slope.alt.stat.sim[i] <- abs(slope.high.perm - slope.low.perm)
+		inter.alt.stat.sim[i] <- abs(inter.high.perm - inter.low.perm)
+		slope.stat.sim[i] <- slope.alt.stat.sim[i]/sqrt(slope.sd.high.perm^2 + slope.sd.low.perm^2)
+		inter.stat.sim[i] <- inter.alt.stat.sim[i]/sqrt(inter.sd.high.perm^2 + inter.sd.low.perm^2)
 		total.stat.sim[i] <- slope.stat.sim[i] + inter.stat.sim[i]
 		r.sqr.stat.sim[i] <- abs(r.sqr.high.perm - r.sqr.low.perm)
 
 		# Counters for p-values
+		if (slope.alt.stat.sim[i] > slope.alt.stat.true) {
+			slope.alt.count <- slope.alt.count + 1
+		}
+		if (inter.alt.stat.sim[i] > inter.alt.stat.true) {
+			inter.alt.count <- inter.alt.count + 1
+		}
 		if (slope.stat.sim[i] > slope.stat.true) {
 			slope.count <- slope.count + 1
 		}
@@ -255,6 +269,12 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 	}
 
 	# Calculate p-value and its error
+	slope.alt.p.value <- slope.alt.count/n.sim
+	slope.alt.p.value.err <- get_pval_error(slope.alt.p.value)
+
+	inter.alt.p.value <- inter.alt.count/n.sim
+	inter.alt.p.value.err <- get_pval_error(inter.alt.p.value)
+
 	slope.p.value <- slope.count/n.sim
 	slope.p.value.err <- get_pval_error(slope.p.value)
 
@@ -270,6 +290,12 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 	# Format results
 	results.df <- data.frame(
 		cbind(
+			# Slopes (Alt)
+			slope.alt.p.val = slope.alt.p.value,
+			slope.alt.p.val.error = slope.alt.p.value.err,
+			# Intercepts (Alt)
+			inter.alt.p.val = inter.alt.p.value,
+			inter.alt.p.val.error = inter.alt.p.value.err,
 			# Slopes
 			slope.p.val = slope.p.value,
 			slope.p.val.error = slope.p.value.err,
@@ -286,40 +312,6 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
 		)
 
 	return(results.df)
-}
-
-summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 1000) {
-	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
-
-	if (!bootstrap) {
-		# var2 ~ var1 regression (y ~ x)
-		p.val.yx <- do_permutation_test(basin.df, var2, var1, min.speed, n.sim)
-
-		# var1 ~ var2 regression (x ~ y)
-		p.val.xy <- do_permutation_test(basin.df, var1, var2, min.speed, n.sim)
-	} else	if (bootstrap) {
-		# var2 ~ var1 regression (y ~ x)
-		p.val.yx <- do_permutation_test_with_bootstrap(basin.df, var2, var1, n.sim.perm = n.sim*2, n.sim.boot = n.sim)
-
-		# var1 ~ var2 regression (x ~ y)
-		p.val.xy <- do_permutation_test_with_bootstrap(basin.df, var1, var2, min.speed, n.sim.perm = n.sim*2, n.sim.boot = n.sim)
-	}
-
-
-	# Construct summarised data frame
-	results <- data.frame(
-		rbind(
-			cbind(p.val.yx, dep.var = var2, indep.var = var1,
-						basin = toupper(basin), min.speed = min.speed),
-			cbind(p.val.xy, dep.var = var1, indep.var = var2,
-						basin = toupper(basin), min.speed = min.speed)
-		)
-	)
-
-	i <- sapply(results, is.factor)
-	results[i] <- lapply(results[i], as.character)
-
-	return(results)
 }
 
 
@@ -563,6 +555,43 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.
 	)
 
 	return(results.df)
+}
+
+
+# Summarise p-values ---------------------------------------
+
+summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 1000) {
+	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
+
+	if (!bootstrap) {
+		# var2 ~ var1 regression (y ~ x)
+		p.val.yx <- do_permutation_test(basin.df, var2, var1, min.speed, n.sim)
+
+		# var1 ~ var2 regression (x ~ y)
+		p.val.xy <- do_permutation_test(basin.df, var1, var2, min.speed, n.sim)
+	} else	if (bootstrap) {
+		# var2 ~ var1 regression (y ~ x)
+		p.val.yx <- do_permutation_test_with_bootstrap(basin.df, var2, var1, n.sim.perm = n.sim*2, n.sim.boot = n.sim)
+
+		# var1 ~ var2 regression (x ~ y)
+		p.val.xy <- do_permutation_test_with_bootstrap(basin.df, var1, var2, min.speed, n.sim.perm = n.sim*2, n.sim.boot = n.sim)
+	}
+
+
+	# Construct summarised data frame
+	results <- data.frame(
+		rbind(
+			cbind(p.val.yx, dep.var = var2, indep.var = var1,
+						basin = toupper(basin), min.speed = min.speed),
+			cbind(p.val.xy, dep.var = var1, indep.var = var2,
+						basin = toupper(basin), min.speed = min.speed)
+		)
+	)
+
+	i <- sapply(results, is.factor)
+	results[i] <- lapply(results[i], as.character)
+
+	return(results)
 }
 
 # Explore p-values -----------------------------------------
