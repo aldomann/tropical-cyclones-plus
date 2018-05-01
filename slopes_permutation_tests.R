@@ -180,3 +180,18 @@ for (i in 1:4) {
 	print("=======================================================================")
 }
 
+
+# Compare slope/intercept with alt calculation -------------
+
+slope.factor <- numeric(16)
+inter.factor <- numeric(16)
+for (i in 1:length(p.values.list)) {
+	for (j in 1:2) {
+		slope.factor[i] <- p.values.list[[i]][j, 1] / p.values.list[[i]][j, 5]
+		inter.factor[i] <- p.values.list[[i]][j, 3] / p.values.list[[i]][j, 7]
+	}
+}
+mean(slope.factor)
+sd(slope.factor)
+mean(inter.factor)
+sd(inter.factor)
