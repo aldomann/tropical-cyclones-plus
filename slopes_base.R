@@ -256,8 +256,8 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 		r.sqr.high <- sum.fit.high$r.squared
 	} else if (bootstrap) {
 		# True bootstrap statistics
-		true.boot.lm.high <- do_bootstrap(col2.high, col1.high, n.boot)
-		true.boot.lm.low <- do_bootstrap(col2.low, col1.low, n.boot)
+		true.boot.lm.high <- do_bootstrap(col1.high, col2.high, n.boot)
+		true.boot.lm.low <- do_bootstrap(col1.low, col2.low, n.boot)
 
 		# True slopes
 		slope.low <- true.boot.lm.low$slope
@@ -342,8 +342,8 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 			r.sqr.high.perm <- sum.fit.high.perm$r.squared
 		} else if (bootstrap) {
 			# Simulated bootstrap statistics
-			sim.boot.lm.high <- do_bootstrap(high[,2], high[,1], n.boot)
-			sim.boot.lm.low <- do_bootstrap(low[,2], low[,1], n.boot)
+			sim.boot.lm.high <- do_bootstrap(high[,1], high[,2], n.boot)
+			sim.boot.lm.low <- do_bootstrap(low[,1], low[,2], n.boot)
 
 			# Simulated slopes
 			slope.low.perm <- sim.boot.lm.low$slope
