@@ -126,196 +126,7 @@ summarise_conf_intervals <- function(basin, var1, var2, min.speed = 0, n.sim = 1
 }
 
 
-# Permutation test -----------------------------------------
-
-do_permutation_test <- function(df, var1, var2, min.speed = 0, n.sim = 5000) {
-	# Filter max wind speed
-	df <- df %>%
-		dplyr::filter(max.wind > min.speed)
-
-	# Filter and clean data (low SST)
-	df.low <- df %>%
-		dplyr::filter(sst.class == "low")
-	col1.low <- df.low[[var1]]
-	col2.low <- df.low[[var2]]
-
-	# Filter and clean data (high SST)
-	df.high <- df %>%
-		dplyr::filter(sst.class == "high")
-	col1.high <- df.high[[var1]]
-	col2.high <- df.high[[var2]]
-
-	# Linear regressions statistics
-	fit.low <- lm(log10(col2.low) ~ log10(col1.low))
-	sum.fit.low <- summary(fit.low)
-	fit.high <- lm(log10(col2.high) ~ log10(col1.high))
-	sum.fit.high <- summary(fit.high)
-
-	# True slopes
-	slope.low <- sum.fit.low$coefficients[2]
-	slope.sd.low <- sum.fit.low$coefficients[4]
-	slope.high <- sum.fit.high$coefficients[2]
-	slope.sd.high <- sum.fit.high$coefficients[4]
-
-	# True intercepts
-	inter.low <- sum.fit.low$coefficients[1]
-	inter.sd.low <- sum.fit.low$coefficients[3]
-	inter.high <- sum.fit.high$coefficients[1]
-	inter.sd.high <- sum.fit.high$coefficients[3]
-
-	# True R Squared coefficients
-	r.sqr.low <- sum.fit.low$r.squared
-	r.sqr.high <- sum.fit.high$r.squared
-
-	# True statistics
-	slope.alt.stat.true <- abs(slope.high - slope.low)
-	inter.alt.stat.true <- abs(inter.high - inter.low)
-	slope.stat.true <- slope.alt.stat.true/sqrt(slope.sd.high^2 + slope.sd.low^2)
-	inter.stat.true <- inter.alt.stat.true/sqrt(inter.sd.high^2 + inter.sd.low^2)
-	total.stat.true <- slope.stat.true + inter.stat.true
-	r.sqr.stat.true <- abs(r.sqr.high - r.sqr.low)
-
-	# Construct data
-	data.high <-cbind(col1.high, col2.high)
-	data.low <-cbind(col1.low, col2.low)
-	data.all <- rbind(data.high, data.low)
-
-	n.low <- nrow(data.low)
-	n.high <- nrow(data.high)
-	n.all <- n.low + n.high
-
-	# Prepare variables for the test
-	# n.sim <- 5000  # Number of simulations
-	slope.alt.stat.sim <- numeric(n.sim)
-	inter.alt.stat.sim <- numeric(n.sim)
-	slope.stat.sim <- numeric(n.sim)
-	inter.stat.sim <- numeric(n.sim)
-	total.stat.sim <- numeric(n.sim)
-	r.sqr.stat.sim <- numeric(n.sim)
-
-	# Prepare counters
-	slope.alt.count <- 0
-	inter.alt.count <- 0
-	slope.count <- 0
-	inter.count <- 0
-	total.count <- 0
-	r.sqr.count <- 0
-
-	# Perform the permutation test
-	for (i in 1:n.sim){
-		col1.sample <- sample(data.all[,1], n.all)
-		col2.sample <- sample(data.all[,2], n.all)
-		data.sample <- cbind(col1.sample, col2.sample)
-
-		low <- cbind(data.sample[1:n.low, 1], data.sample[1:n.low, 2])
-		x <- n.low + 1
-		high <- cbind(data.sample[x:n.all, 1], data.sample[x:n.all, 2])
-
-		# Fit the new data
-		fit.low.perm <- lm(log10(low[,2]) ~ log10(low[,1]))
-		sum.fit.low.perm <- summary(fit.low.perm)
-		fit.high.perm <- lm(log10(high[,2]) ~ log10(high[,1]))
-		sum.fit.high.perm <- summary(fit.high.perm)
-
-		# Simulated slopes
-		slope.low.perm <- sum.fit.low.perm$coefficients[2]
-		slope.sd.low.perm <- sum.fit.low.perm$coefficients[4]
-		slope.high.perm <- sum.fit.high.perm$coefficients[2]
-		slope.sd.high.perm <- sum.fit.high.perm$coefficients[4]
-
-		# Simulated intercepts
-		inter.low.perm <- sum.fit.low.perm$coefficients[1]
-		inter.sd.low.perm <- sum.fit.low.perm$coefficients[3]
-		inter.high.perm <- sum.fit.high.perm$coefficients[1]
-		inter.sd.high.perm <- sum.fit.high.perm$coefficients[3]
-
-		# Simulated R Squared coefficients
-		r.sqr.low.perm <- sum.fit.low.perm$r.squared
-		r.sqr.high.perm <- sum.fit.high.perm$r.squared
-
-		# Simulated statistics
-		slope.alt.stat.sim[i] <- abs(slope.high.perm - slope.low.perm)
-		inter.alt.stat.sim[i] <- abs(inter.high.perm - inter.low.perm)
-		slope.stat.sim[i] <- slope.alt.stat.sim[i]/sqrt(slope.sd.high.perm^2 + slope.sd.low.perm^2)
-		inter.stat.sim[i] <- inter.alt.stat.sim[i]/sqrt(inter.sd.high.perm^2 + inter.sd.low.perm^2)
-		total.stat.sim[i] <- slope.stat.sim[i] + inter.stat.sim[i]
-		r.sqr.stat.sim[i] <- abs(r.sqr.high.perm - r.sqr.low.perm)
-
-		# Counters for p-values
-		if (slope.alt.stat.sim[i] > slope.alt.stat.true) {
-			slope.alt.count <- slope.alt.count + 1
-		}
-		if (inter.alt.stat.sim[i] > inter.alt.stat.true) {
-			inter.alt.count <- inter.alt.count + 1
-		}
-		if (slope.stat.sim[i] > slope.stat.true) {
-			slope.count <- slope.count + 1
-		}
-		if (inter.stat.sim[i] > inter.stat.true) {
-			inter.count <- inter.count + 1
-		}
-		if (total.stat.sim[i] > total.stat.true) {
-			total.count <- total.count + 1
-		}
-		if (r.sqr.stat.sim[i] < r.sqr.stat.true) {
-			r.sqr.count <- r.sqr.count + 1
-		}
-		# print(paste("REAL",slope.low))
-		# print(paste("SIM",slope.low.perm))
-	}
-
-	get_pval_error <- function(p) {
-		return(1.96 * (sqrt((p - (p)^2) / n.sim)))
-	}
-
-	# Calculate p-value and its error
-	slope.alt.p.value <- slope.alt.count/n.sim
-	slope.alt.p.value.err <- get_pval_error(slope.alt.p.value)
-
-	inter.alt.p.value <- inter.alt.count/n.sim
-	inter.alt.p.value.err <- get_pval_error(inter.alt.p.value)
-
-	slope.p.value <- slope.count/n.sim
-	slope.p.value.err <- get_pval_error(slope.p.value)
-
-	inter.p.value <- inter.count/n.sim
-	inter.p.value.err <- get_pval_error(inter.p.value)
-
-	total.p.value <- total.count/n.sim
-	total.p.value.err <- get_pval_error(total.p.value)
-
-	r.sqr.p.value <- r.sqr.count/n.sim
-	r.sqr.p.value.err <- get_pval_error(r.sqr.p.value)
-
-	# Format results
-	results.df <- data.frame(
-		cbind(
-			# Slopes (Alt)
-			slope.alt.p.val = slope.alt.p.value,
-			slope.alt.p.val.error = slope.alt.p.value.err,
-			# Intercepts (Alt)
-			inter.alt.p.val = inter.alt.p.value,
-			inter.alt.p.val.error = inter.alt.p.value.err,
-			# Slopes
-			slope.p.val = slope.p.value,
-			slope.p.val.error = slope.p.value.err,
-			# Intercepts
-			inter.p.val = inter.p.value,
-			inter.p.val.error = inter.p.value.err,
-			# Total
-			total.p.val = total.p.value,
-			total.p.val.error = total.p.value.err,
-			# R Squared
-			r.sqr.p.val = r.sqr.p.value,
-			r.sqr.p.val.error = r.sqr.p.value.err
-			)
-		)
-
-	return(results.df)
-}
-
-
-# Permutation + bootstrap ----------------------------------
+# Bootstrap for permutation test ---------------------------
 
 do_bootstrap <- function(col1, col2, n.sim = 500) {
 	# Construct data
@@ -401,7 +212,10 @@ do_bootstrap <- function(col1, col2, n.sim = 500) {
 	return(results.df)
 }
 
-do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.sim.boot = 500, n.sim.perm = 1000) {
+
+# Permutation test -----------------------------------------
+
+do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.sim = 5000, n.boot = 50 ) {
 	# Filter max wind speed
 	df <- df %>%
 		dplyr::filter(max.wind > min.speed)
@@ -418,49 +232,79 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.
 	col1.high <- df.high[[var1]]
 	col2.high <- df.high[[var2]]
 
-	# True bootstrap statistics
-	true.boot.lm.high <- do_bootstrap(col2.high, col1.high, n.sim.boot)
-	true.boot.lm.low <- do_bootstrap(col2.low, col1.low, n.sim.boot)
+	if (!bootstrap) {
+		# Linear regressions statistics (standard)
+		fit.low <- lm(log10(col2.low) ~ log10(col1.low))
+		sum.fit.low <- summary(fit.low)
+		fit.high <- lm(log10(col2.high) ~ log10(col1.high))
+		sum.fit.high <- summary(fit.high)
 
-	# True slopes
-	slope.low <- true.boot.lm.low$slope
-	slope.sd.low <- true.boot.lm.low$slope.sd
-	slope.high <- true.boot.lm.high$slope
-	slope.sd.high <- true.boot.lm.high$slope.sd
+		# True slopes
+		slope.low <- sum.fit.low$coefficients[2]
+		slope.sd.low <- sum.fit.low$coefficients[4]
+		slope.high <- sum.fit.high$coefficients[2]
+		slope.sd.high <- sum.fit.high$coefficients[4]
 
-	# True intercepts
-	inter.low <- true.boot.lm.low$inter
-	inter.sd.low <- true.boot.lm.low$inter.sd
-	inter.high <- true.boot.lm.high$inter
-	inter.sd.high <- true.boot.lm.high$inter.sd
+		# True intercepts
+		inter.low <- sum.fit.low$coefficients[1]
+		inter.sd.low <- sum.fit.low$coefficients[3]
+		inter.high <- sum.fit.high$coefficients[1]
+		inter.sd.high <- sum.fit.high$coefficients[3]
 
-	# True R Squared coefficients
-	r.sqr.low <- true.boot.lm.low$r2
-	r.sqr.high <- true.boot.lm.high$r2
+		# True R Squared coefficients
+		r.sqr.low <- sum.fit.low$r.squared
+		r.sqr.high <- sum.fit.high$r.squared
+	} else if (bootstrap) {
+		# True bootstrap statistics
+		true.boot.lm.high <- do_bootstrap(col2.high, col1.high, n.boot)
+		true.boot.lm.low <- do_bootstrap(col2.low, col1.low, n.boot)
+
+		# True slopes
+		slope.low <- true.boot.lm.low$slope
+		slope.sd.low <- true.boot.lm.low$slope.sd
+		slope.high <- true.boot.lm.high$slope
+		slope.sd.high <- true.boot.lm.high$slope.sd
+
+		# True intercepts
+		inter.low <- true.boot.lm.low$inter
+		inter.sd.low <- true.boot.lm.low$inter.sd
+		inter.high <- true.boot.lm.high$inter
+		inter.sd.high <- true.boot.lm.high$inter.sd
+
+		# True R Squared coefficients
+		r.sqr.low <- true.boot.lm.low$r2
+		r.sqr.high <- true.boot.lm.high$r2
+	}
 
 	# True statistics
-	slope.stat.true <- abs(slope.high - slope.low)/sqrt(slope.sd.high^2 + slope.sd.low^2)
-	inter.stat.true <- abs(inter.high - inter.low)/sqrt(inter.sd.high^2 + inter.sd.low^2)
+	slope.alt.stat.true <- abs(slope.high - slope.low)
+	inter.alt.stat.true <- abs(inter.high - inter.low)
+	slope.stat.true <- slope.alt.stat.true/sqrt(slope.sd.high^2 + slope.sd.low^2)
+	inter.stat.true <- inter.alt.stat.true/sqrt(inter.sd.high^2 + inter.sd.low^2)
 	total.stat.true <- slope.stat.true + inter.stat.true
 	r.sqr.stat.true <- abs(r.sqr.high - r.sqr.low)
 
 	# Construct data
 	data.high <-cbind(col1.high, col2.high)
 	data.low <-cbind(col1.low, col2.low)
-	data.all <- rbind(data.high, data.low)
+	data.all <- as_tibble(rbind(data.high, data.low))
 
 	n.low <- nrow(data.low)
 	n.high <- nrow(data.high)
 	n.all <- n.low + n.high
 
 	# Prepare variables for the test
-	n.sim <- n.sim.perm  # Number of simulations
+	# n.sim <- 5000  # Number of simulations
+	slope.alt.stat.sim <- numeric(n.sim)
+	inter.alt.stat.sim <- numeric(n.sim)
 	slope.stat.sim <- numeric(n.sim)
 	inter.stat.sim <- numeric(n.sim)
 	total.stat.sim <- numeric(n.sim)
 	r.sqr.stat.sim <- numeric(n.sim)
 
 	# Prepare counters
+	slope.alt.count <- 0
+	inter.alt.count <- 0
 	slope.count <- 0
 	inter.count <- 0
 	total.count <- 0
@@ -468,41 +312,71 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.
 
 	# Perform the permutation test
 	for (i in 1:n.sim){
-		col1.sample <- sample(data.all[,1], n.all)
-		col2.sample <- sample(data.all[,2], n.all)
-		data.sample <- cbind(col1.sample, col2.sample)
+		data.sample <- sample_n(data.all, n.all)
 
 		low <- cbind(data.sample[1:n.low, 1], data.sample[1:n.low, 2])
 		x <- n.low + 1
 		high <- cbind(data.sample[x:n.all, 1], data.sample[x:n.all, 2])
 
-		# Simulated bootstrap statistics
-		sim.boot.lm.high <- do_bootstrap(high[,2], high[,1], n.sim.boot)
-		sim.boot.lm.low <- do_bootstrap(low[,2], low[,1], n.sim.boot)
+		if (!bootstrap) {
+			# Fit the new data
+			fit.low.perm <- lm(log10(low[,2]) ~ log10(low[,1]))
+			sum.fit.low.perm <- summary(fit.low.perm)
+			fit.high.perm <- lm(log10(high[,2]) ~ log10(high[,1]))
+			sum.fit.high.perm <- summary(fit.high.perm)
 
-		# Simulated slopes
-		slope.low.sim <- sim.boot.lm.low$slope
-		slope.sd.low.sim <- sim.boot.lm.low$slope.sd
-		slope.high.sim <- sim.boot.lm.high$slope
-		slope.sd.high.sim <- sim.boot.lm.high$slope.sd
+			# Simulated slopes
+			slope.low.perm <- sum.fit.low.perm$coefficients[2]
+			slope.sd.low.perm <- sum.fit.low.perm$coefficients[4]
+			slope.high.perm <- sum.fit.high.perm$coefficients[2]
+			slope.sd.high.perm <- sum.fit.high.perm$coefficients[4]
 
-		# Simulated intercepts
-		inter.low.sim <- sim.boot.lm.low$inter
-		inter.sd.low.sim <- sim.boot.lm.low$inter.sd
-		inter.high.sim <- sim.boot.lm.high$inter
-		inter.sd.high.sim <- sim.boot.lm.high$inter.sd
+			# Simulated intercepts
+			inter.low.perm <- sum.fit.low.perm$coefficients[1]
+			inter.sd.low.perm <- sum.fit.low.perm$coefficients[3]
+			inter.high.perm <- sum.fit.high.perm$coefficients[1]
+			inter.sd.high.perm <- sum.fit.high.perm$coefficients[3]
 
-		# Simulated R Squared coefficients
-		r.sqr.low.sim <- sim.boot.lm.low$r2
-		r.sqr.high.sim <- sim.boot.lm.high$r2
+			# Simulated R Squared coefficients
+			r.sqr.low.perm <- sum.fit.low.perm$r.squared
+			r.sqr.high.perm <- sum.fit.high.perm$r.squared
+		} else if (bootstrap) {
+			# Simulated bootstrap statistics
+			sim.boot.lm.high <- do_bootstrap(high[,2], high[,1], n.boot)
+			sim.boot.lm.low <- do_bootstrap(low[,2], low[,1], n.boot)
+
+			# Simulated slopes
+			slope.low.perm <- sim.boot.lm.low$slope
+			slope.sd.low.perm <- sim.boot.lm.low$slope.sd
+			slope.high.perm <- sim.boot.lm.high$slope
+			slope.sd.high.perm <- sim.boot.lm.high$slope.sd
+
+			# Simulated intercepts
+			inter.low.perm <- sim.boot.lm.low$inter
+			inter.sd.low.perm <- sim.boot.lm.low$inter.sd
+			inter.high.perm <- sim.boot.lm.high$inter
+			inter.sd.high.perm <- sim.boot.lm.high$inter.sd
+
+			# Simulated R Squared coefficients
+			r.sqr.low.perm <- sim.boot.lm.low$r2
+			r.sqr.high.perm <- sim.boot.lm.high$r2
+		}
 
 		# Simulated statistics
-		slope.stat.sim[i] <- abs(slope.high.sim - slope.low.sim)/sqrt(slope.sd.high.sim^2 + slope.sd.low.sim^2)
-		inter.stat.sim[i] <- abs(inter.high.sim - inter.low.sim)/sqrt(inter.sd.high.sim^2 + inter.sd.low.sim^2)
+		slope.alt.stat.sim[i] <- abs(slope.high.perm - slope.low.perm)
+		inter.alt.stat.sim[i] <- abs(inter.high.perm - inter.low.perm)
+		slope.stat.sim[i] <- slope.alt.stat.sim[i]/sqrt(slope.sd.high.perm^2 + slope.sd.low.perm^2)
+		inter.stat.sim[i] <- inter.alt.stat.sim[i]/sqrt(inter.sd.high.perm^2 + inter.sd.low.perm^2)
 		total.stat.sim[i] <- slope.stat.sim[i] + inter.stat.sim[i]
-		r.sqr.stat.sim[i] <- abs(r.sqr.high.sim - r.sqr.low.sim)
+		r.sqr.stat.sim[i] <- abs(r.sqr.high.perm - r.sqr.low.perm)
 
 		# Counters for p-values
+		if (slope.alt.stat.sim[i] > slope.alt.stat.true) {
+			slope.alt.count <- slope.alt.count + 1
+		}
+		if (inter.alt.stat.sim[i] > inter.alt.stat.true) {
+			inter.alt.count <- inter.alt.count + 1
+		}
 		if (slope.stat.sim[i] > slope.stat.true) {
 			slope.count <- slope.count + 1
 		}
@@ -515,8 +389,6 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.
 		if (r.sqr.stat.sim[i] < r.sqr.stat.true) {
 			r.sqr.count <- r.sqr.count + 1
 		}
-		# print(paste("REAL",slope.low))
-		# print(paste("SIM",slope.low.perm))
 	}
 
 	get_pval_error <- function(p) {
@@ -524,6 +396,12 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.
 	}
 
 	# Calculate p-value and its error
+	slope.alt.p.value <- slope.alt.count/n.sim
+	slope.alt.p.value.err <- get_pval_error(slope.alt.p.value)
+
+	inter.alt.p.value <- inter.alt.count/n.sim
+	inter.alt.p.value.err <- get_pval_error(inter.alt.p.value)
+
 	slope.p.value <- slope.count/n.sim
 	slope.p.value.err <- get_pval_error(slope.p.value)
 
@@ -539,6 +417,12 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.
 	# Format results
 	results.df <- data.frame(
 		cbind(
+			# Slopes (Alt)
+			slope.alt.p.val = slope.alt.p.value,
+			slope.alt.p.val.error = slope.alt.p.value.err,
+			# Intercepts (Alt)
+			inter.alt.p.val = inter.alt.p.value,
+			inter.alt.p.val.error = inter.alt.p.value.err,
 			# Slopes
 			slope.p.val = slope.p.value,
 			slope.p.val.error = slope.p.value.err,
@@ -551,8 +435,8 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.
 			# R Squared
 			r.sqr.p.val = r.sqr.p.value,
 			r.sqr.p.val.error = r.sqr.p.value.err
+			)
 		)
-	)
 
 	return(results.df)
 }
@@ -560,22 +444,14 @@ do_permutation_test_with_bootstrap <- function(df, var1, var2, min.speed = 0, n.
 
 # Summarise p-values ---------------------------------------
 
-summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 1000) {
+summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 1000, n.boot = 50) {
 	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
 
-	if (!bootstrap) {
-		# var2 ~ var1 regression (y ~ x)
-		p.val.yx <- do_permutation_test(basin.df, var2, var1, min.speed, n.sim)
+	# var2 ~ var1 regression (y ~ x)
+	p.val.yx <- do_permutation_test(basin.df, var2, var1, min.speed, bootstrap, n.sim, n.boot)
 
-		# var1 ~ var2 regression (x ~ y)
-		p.val.xy <- do_permutation_test(basin.df, var1, var2, min.speed, n.sim)
-	} else	if (bootstrap) {
-		# var2 ~ var1 regression (y ~ x)
-		p.val.yx <- do_permutation_test_with_bootstrap(basin.df, var2, var1, n.sim.perm = n.sim*2, n.sim.boot = n.sim)
-
-		# var1 ~ var2 regression (x ~ y)
-		p.val.xy <- do_permutation_test_with_bootstrap(basin.df, var1, var2, min.speed, n.sim.perm = n.sim*2, n.sim.boot = n.sim)
-	}
+	# var1 ~ var2 regression (x ~ y)
+	p.val.xy <- do_permutation_test(basin.df, var1, var2, min.speed, bootstrap, n.sim, n.boot)
 
 
 	# Construct summarised data frame
