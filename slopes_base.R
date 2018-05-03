@@ -444,8 +444,10 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 
 # Summarise p-values ---------------------------------------
 
-summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 1000, n.boot = 50) {
+summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 1000) {
 	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
+
+	n.boot <- n.sim / 2
 
 	# var2 ~ var1 regression (y ~ x)
 	p.val.yx <- do_permutation_test(basin.df, var2, var1, min.speed, bootstrap, n.sim, n.boot)
