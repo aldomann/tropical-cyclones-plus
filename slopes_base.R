@@ -487,6 +487,42 @@ explore_p_values <- function(p.values.list, alpha = 0.05) {
 	}
 }
 
+
+# Compare statistics and CI methods ------------------------
+
+compare_statistics <- function(p.values.list) {
+	slope.factor <- numeric(length(p.values.list))
+	inter.factor <- numeric(length(p.values.list))
+	for (i in 1:length(p.values.list)) {
+		for (j in 1:2) {
+			slope.factor[i] <- p.values.list[[i]][j, 1] / p.values.list[[i]][j, 5]
+			inter.factor[i] <- p.values.list[[i]][j, 3] / p.values.list[[i]][j, 7]
+		}
+	}
+
+	results <- tibble(
+		stat = c("slope", "intercept"),
+		mean = c(mean(slope.factor), mean(inter.factor)),
+		sd = c(sd(slope.factor) ,sd(inter.factor))
+	)
+
+	return(results)
+}
+
+compare_methods <- function(p.values.list, boot.p.values.list) {
+	for (i in 1:length(p.values.list)) {
+		A <- boot.p.values.list[[i]]
+		B <- p.values.list[[i]]
+
+		num.vars <- grep("p.val$", names(A), value = T)
+		chr.vars <- A[!grepl("p.val", names(A))]
+
+		print(cbind(A[num.vars] - B[match(A$dep.var, B$dep.var), num.vars], chr.vars))
+		print("=================================================================================")
+	}
+}
+
+
 # Scatterplots ---------------------------------------------
 
 plot_scatterplot <- function(basin, var1, var2, min.speed = 0) {

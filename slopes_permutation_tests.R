@@ -16,23 +16,23 @@ pdi.natl <- pdi.all %>%
 pdi.epac <- pdi.all %>%
 	dplyr::filter(basin == "EPAC")
 
-compute.flag <- T
-read.flag <- F
+compute.flag <- F
+read.flag <- T
 save.flag <- F
-bs.flag <- F
+bs.flag <- T
 
 # Load objects from disk -----------------------------------
 
 if (read.flag) {
 	# Standard
-	# p.values.list <- readRDS("slopes_p_values_all.rds")
+	p.values.list <- readRDS("slopes_p_values_all.rds")
 	p.values.list.pdi <- readRDS("slopes_p_values_pdi.rds")
 	p.values.list.max.wind <- readRDS("slopes_p_values_maxwind.rds")
 	p.values.list.mean.wind <- readRDS("slopes_p_values_meanwind.rds")
 	p.values.list.mean.sq.wind <- readRDS("slopes_p_values_meansqwind.rds")
 
 	# With bootstrap
-	# boot.p.values.list <- readRDS("slopes_p_values_boot_all.rds")
+	boot.p.values.list <- readRDS("slopes_p_values_boot_all.rds")
 	boot.p.values.list.pdi <- readRDS("slopes_p_values_boot_pdi.rds")
 	boot.p.values.list.max.wind <- readRDS("slopes_p_values_boot_maxwind.rds")
 	boot.p.values.list.mean.wind <- readRDS("slopes_p_values_boot_meanwind.rds")
@@ -41,10 +41,10 @@ if (read.flag) {
 
 # Permutation tests ----------------------------------------
 
-n.sim.test <- 500
+n.sim.test <- 1000
 
 # Permutation test for all data
-alfR::lok_regar(if (compute.flag) {
+if (compute.flag) {
 	# NATL
 	p.vals.natl.pdi <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 0, bs.flag, n.sim.test)
 	p.vals.natl.max.wind <- summarise_p_values("NATL", "storm.duration", "max.wind", 0, bs.flag, n.sim.test)
@@ -56,11 +56,11 @@ alfR::lok_regar(if (compute.flag) {
 	p.vals.epac.max.wind <- summarise_p_values("EPAC", "storm.duration", "max.wind", 0, bs.flag, n.sim.test)
 	p.vals.epac.mean.wind <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 0, bs.flag, n.sim.test)
 	p.vals.epac.mean.sq.wind <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 0, bs.flag, n.sim.test)
-})
+}
 
 
 # Permutation test for developing systems
-alfR::lok_regar(if (compute.flag) {
+if (compute.flag) {
 	# NATL
 	p.vals.natl.pdi.ds <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33, bs.flag, n.sim.test)
 	p.vals.natl.max.wind.ds <- summarise_p_values("NATL", "storm.duration", "max.wind", 33, bs.flag, n.sim.test)
@@ -72,7 +72,7 @@ alfR::lok_regar(if (compute.flag) {
 	p.vals.epac.max.wind.ds <- summarise_p_values("EPAC", "storm.duration", "max.wind", 33, bs.flag, n.sim.test)
 	p.vals.epac.mean.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.wind", 33, bs.flag, n.sim.test)
 	p.vals.epac.mean.sq.wind.ds <- summarise_p_values("EPAC", "storm.duration", "mean.sq.wind", 33, bs.flag, n.sim.test)
-})
+}
 
 # Tidy p-values in a list ----------------------------------
 
@@ -110,45 +110,17 @@ if (save.flag && bs.flag) {
 explore_p_values(p.values.list, 0.05)
 # explore_p_values(p.values.list.pdi, 0.05)
 # explore_p_values(p.values.list.max.wind, 0.05)
-
-# NATL (all storms)
-# p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0][[4]]
-#
-# # NATL (all storms)
-# p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0][[4]]
-#
-# # NATL (developing systems)
-# p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0][[4]]
-#
-# # EPAC (developing systems)
-# p.values.list[lapply(purrr::map(p.values.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0][[4]]
-
-
-# # Compare raw permutation & bootstrap-powered permutation
-# for (i in 1:4) {
-# 	print(boot.p.values.list.pdi[[i]])
-# 	print(p.values.list.pdi[[i]])
-# 	print("=======================================================================")
-# }
-#
-# for (i in 1:4) {
-# 	print(boot.p.values.list.max.wind[[i]])
-# 	print(p.values.list.max.wind[[i]])
-# 	print("=======================================================================")
-# }
-
+explore_p_values(boot.p.values.list.mean.sq.wind, 0.05)
 
 # Compare slope/intercept with alt calculation -------------
 
-slope.factor <- numeric(16)
-inter.factor <- numeric(16)
-for (i in 1:length(p.values.list)) {
-	for (j in 1:2) {
-		slope.factor[i] <- p.values.list[[i]][j, 1] / p.values.list[[i]][j, 5]
-		inter.factor[i] <- p.values.list[[i]][j, 3] / p.values.list[[i]][j, 7]
-	}
-}
-mean(slope.factor)
-sd(slope.factor)
-mean(inter.factor)
-sd(inter.factor)
+compare_statistics(p.values.list)
+compare_statistics(boot.p.values.list.max)
+
+
+compare_methods(p.values.list.max.wind, boot.p.values.list.max.wind)
+
+
+
+
+
