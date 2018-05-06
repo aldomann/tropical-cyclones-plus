@@ -108,19 +108,14 @@ if (save.flag && bs.flag) {
 
 # Print regressions with p-value <= alpha
 explore_p_values(p.values.list, 0.05)
-# explore_p_values(p.values.list.pdi, 0.05)
-# explore_p_values(p.values.list.max.wind, 0.05)
-explore_p_values(boot.p.values.list.mean.sq.wind, 0.05)
+explore_p_values(boot.p.values.list, 0.05)
 
-# Compare slope/intercept with alt calculation -------------
+# Compare statistics and methods ---------------------------
 
+# Compare slope/intercept with alt calculation
 compare_statistics(p.values.list)
-compare_statistics(boot.p.values.list.max)
+compare_statistics(boot.p.values.list)
 
-
-compare_methods(p.values.list.max.wind, boot.p.values.list.max.wind)
-
-
-
-
+# Compare CI methods
+compare_methods(p.values.list, boot.p.values.list, 1.75)
 

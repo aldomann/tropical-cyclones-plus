@@ -510,7 +510,7 @@ compare_statistics <- function(p.values.list) {
 	return(results)
 }
 
-compare_methods <- function(p.values.list, boot.p.values.list) {
+compare_methods <- function(p.values.list, boot.p.values.list, alpha = 1.75) {
 	for (i in 1:length(p.values.list)) {
 		A <- p.values.list[[i]]
 		B <- boot.p.values.list[[i]]
@@ -520,10 +520,9 @@ compare_methods <- function(p.values.list, boot.p.values.list) {
 
 		R <- cbind(A[num.vars] / B[match(A$dep.var, B$dep.var), num.vars], chr.vars)
 
-		print(R)
-		print("=================================================================================")
+		# print(R)
+		# print("=================================================================================")
 
-		alpha <- 2
 		for (k in 1:(length(R)-4)) {
 			for (j in 1:2) {
 				if ( R[j, k] >= alpha ) {
