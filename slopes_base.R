@@ -481,12 +481,13 @@ explore_p_values <- function(p.values.list, alpha = 0.05) {
 					 (p.values.list[[i]][["inter.p.val"]][j] <= alpha) |
 					 (p.values.list[[i]][["total.p.val"]][j] <= alpha) |
 					 (p.values.list[[i]][["r.sqr.p.val"]][j] <= alpha) ) {
-				print(p.values.list[[i]][j,])
+				# Print regression results
+				print(paste("Element in list:", i))
+				print(p.values.list[[i]][j, ])
 			}
 		}
 	}
 }
-
 
 # Compare statistics and CI methods ------------------------
 
@@ -511,17 +512,29 @@ compare_statistics <- function(p.values.list) {
 
 compare_methods <- function(p.values.list, boot.p.values.list) {
 	for (i in 1:length(p.values.list)) {
-		A <- boot.p.values.list[[i]]
-		B <- p.values.list[[i]]
+		A <- p.values.list[[i]]
+		B <- boot.p.values.list[[i]]
 
 		num.vars <- grep("p.val$", names(A), value = T)
 		chr.vars <- A[!grepl("p.val", names(A))]
 
-		print(cbind(A[num.vars] - B[match(A$dep.var, B$dep.var), num.vars], chr.vars))
+		R <- cbind(A[num.vars] / B[match(A$dep.var, B$dep.var), num.vars], chr.vars)
+
+		print(R)
 		print("=================================================================================")
+
+		alpha <- 2
+		for (k in 1:(length(R)-4)) {
+			for (j in 1:2) {
+				if ( R[j, k] >= alpha ) {
+					print(paste("Element in list:", i))
+					print(paste("row:", j, "col:", k))
+					print(paste("Value:", R[j, k]))
+				}
+			}
+		}
 	}
 }
-
 
 # Scatterplots ---------------------------------------------
 
