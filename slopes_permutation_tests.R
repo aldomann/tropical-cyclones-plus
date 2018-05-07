@@ -113,9 +113,14 @@ explore_p_values(boot.p.values.list, 0.05)
 # Compare statistics and methods ---------------------------
 
 # Compare slope/intercept with alt calculation
-compare_statistics(p.values.list)
-compare_statistics(boot.p.values.list)
+stats.std <- compare_statistics(p.values.list)
+stats.boot <- compare_statistics(boot.p.values.list)
+
+stats.std[[1]]
+stats.std[[2]]
+stats.boot[[1]]
+stats.boot[[2]]
 
 # Compare CI methods
-compare_methods(p.values.list, boot.p.values.list, 1.75)
+compare_methods(p.values.list, boot.p.values.list, 1.75, 0.6)
 

@@ -496,10 +496,16 @@ compare_statistics <- function(p.values.list) {
 	inter.factor <- numeric(length(p.values.list))
 	for (i in 1:length(p.values.list)) {
 		for (j in 1:2) {
-			slope.factor[i] <- p.values.list[[i]][j, 1] / p.values.list[[i]][j, 5]
-			inter.factor[i] <- p.values.list[[i]][j, 3] / p.values.list[[i]][j, 7]
+			slope.factor[i] <- p.values.list[[i]][j, "slope.alt.p.val"] / p.values.list[[i]][j, "slope.p.val"]
+			inter.factor[i] <- p.values.list[[i]][j, "inter.alt.p.val"] / p.values.list[[i]][j, "inter.p.val"]
 		}
 	}
+
+	data <- tibble(
+		n = seq(1:length(p.values.list)),
+		slope.factor = slope.factor,
+		inter.factor = inter.factor
+	)
 
 	results <- tibble(
 		stat = c("slope", "intercept"),
@@ -507,10 +513,24 @@ compare_statistics <- function(p.values.list) {
 		sd = c(sd(slope.factor) ,sd(inter.factor))
 	)
 
-	return(results)
+	gg.slope <- ggplot(data) +
+		geom_histogram(aes(x = slope.factor), binwidth = 0.01, fill = "white", colour = "black") +
+		labs(title = "Slope factor")
+
+	gg.inter <- ggplot(data) +
+		geom_histogram(aes(x = inter.factor), binwidth = 0.01, fill = "white", colour = "black") +
+		labs(title = "Intercept factor")
+
+	# return(results)
+	return(list(gg.slope, gg.inter))
 }
 
-compare_methods <- function(p.values.list, boot.p.values.list, alpha = 1.75) {
+compare_methods <- function(p.values.list, boot.p.values.list, alpha = 1.75, beta =0.7) {
+	dim <- 6 * 2 * length(p.values.list)
+	count = 0
+
+	comp.vect <- numeric(dim)
+
 	for (i in 1:length(p.values.list)) {
 		A <- p.values.list[[i]]
 		B <- boot.p.values.list[[i]]
@@ -518,14 +538,23 @@ compare_methods <- function(p.values.list, boot.p.values.list, alpha = 1.75) {
 		num.vars <- grep("p.val$", names(A), value = T)
 		chr.vars <- A[!grepl("p.val", names(A))]
 
-		R <- cbind(A[num.vars] / B[match(A$dep.var, B$dep.var), num.vars], chr.vars)
+		S <- A[num.vars] / B[match(A$dep.var, B$dep.var), num.vars]
+
+		for (k in 1:length(S)) {
+			for (j in 1:2) {
+				comp.vect[count] <- S[j, k]
+				count = count + 1
+			}
+		}
+
+		R <- cbind(S, chr.vars)
 
 		# print(R)
 		# print("=================================================================================")
 
 		for (k in 1:(length(R)-4)) {
 			for (j in 1:2) {
-				if ( R[j, k] >= alpha ) {
+				if ( R[j, k] >= alpha | R[j, k] <= beta ) {
 					print(paste("Element in list:", i))
 					print(paste("row:", j, "col:", k))
 					print(paste("Value:", R[j, k]))
@@ -533,6 +562,13 @@ compare_methods <- function(p.values.list, boot.p.values.list, alpha = 1.75) {
 			}
 		}
 	}
+
+	gg <- ggplot(tibble(n = seq(1:length(comp.vect)),
+								comp.vect = comp.vect)) +
+		geom_histogram(aes(x = comp.vect), binwidth = 0.05, fill = "white", colour = "black") +
+		labs(title = "Ordinary / Bootstrap factor")
+
+	return(gg)
 }
 
 # Scatterplots ---------------------------------------------
