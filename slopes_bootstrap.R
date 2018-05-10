@@ -60,6 +60,44 @@ if (compute.flag) {
 }
 
 
+# Factors of CI --------------------------------------------
+
+# Confidence interval for all storms -----------------------
+
+alfR::lok_regar(if (compute.flag) {
+	# NATL
+	fact.natl.pdi <- summarise_conf_intervals_factors("NATL", "storm.duration", "storm.pdi")
+	fact.natl.max.wind <- summarise_conf_intervals_factors("NATL", "storm.duration", "max.wind")
+	fact.natl.mean.wind <- summarise_conf_intervals_factors("NATL", "storm.duration", "mean.wind")
+	fact.natl.mean.sq.wind <- summarise_conf_intervals_factors("NATL", "storm.duration", "mean.sq.wind")
+
+	# EPAC
+	fact.epac.pdi <- summarise_conf_intervals_factors("EPAC", "storm.duration", "storm.pdi")
+	fact.epac.max.wind <- summarise_conf_intervals_factors("EPAC", "storm.duration", "max.wind")
+	fact.epac.mean.wind <- summarise_conf_intervals_factors("EPAC", "storm.duration", "mean.wind")
+	fact.epac.mean.sq.wind <- summarise_conf_intervals_factors("EPAC", "storm.duration", "mean.sq.wind")
+})
+
+
+# Confidence interval for developing systems ---------------
+
+alfR::lok_regar(if (compute.flag) {
+	# NATL
+	fact.natl.pdi.ds <- summarise_conf_intervals_factors("NATL", "storm.duration", "storm.pdi", 33)
+	fact.natl.max.wind.ds <- summarise_conf_intervals_factors("NATL", "storm.duration", "max.wind", 33)
+	fact.natl.mean.wind.ds <- summarise_conf_intervals_factors("NATL", "storm.duration", "mean.wind", 33)
+	fact.natl.mean.sq.wind.ds <- summarise_conf_intervals_factors("NATL", "storm.duration", "mean.sq.wind", 33)
+
+	# EPAC
+	fact.epac.pdi.ds <- summarise_conf_intervals_factors("EPAC", "storm.duration", "storm.pdi", 33)
+	fact.epac.max.wind.ds <- summarise_conf_intervals_factors("EPAC", "storm.duration", "max.wind", 33)
+	fact.epac.mean.wind.ds <- summarise_conf_intervals_factors("EPAC", "storm.duration", "mean.wind", 33)
+	fact.epac.mean.sq.wind.ds <- summarise_conf_intervals_factors("EPAC", "storm.duration", "mean.sq.wind", 33)
+})
+
+
+
+
 # Scatterplots (all storms) --------------------------------
 
 # NATL
@@ -96,6 +134,7 @@ plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind", 33)
 if (compute.flag) {
 	rm(ci.list)
 	ci.list <- lapply(ls(patt='^ci.'), get)
+	factors.ci.list <- lapply(ls(patt='^fact.'), get)
 	saveRDS(ci.list, "slopes_ci_list.rds")
 	# rm(list=ls(pattern="^ci.epac"))
 	# rm(list=ls(pattern="^ci.natl"))
@@ -112,3 +151,8 @@ ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "NATL", min.speed
 
 # EPAC (developing systems)
 ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0]
+
+
+# Compare CI methods ---------------------------------------
+
+compare_ci_methods(factors.ci.list)
