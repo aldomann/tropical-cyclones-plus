@@ -23,6 +23,7 @@ compute.flag <- T
 
 if (!compute.flag) {
 	ci.list <- readRDS("slopes_ci_list.rds")
+	factors.ci.list <- readRDS("slopes_ci_fact_list.rds")
 }
 
 
@@ -136,6 +137,7 @@ if (compute.flag) {
 	ci.list <- lapply(ls(patt='^ci.'), get)
 	factors.ci.list <- lapply(ls(patt='^fact.'), get)
 	saveRDS(ci.list, "slopes_ci_list.rds")
+	saveRDS(factors.ci.list, "slopes_ci_fact_list.rds")
 	# rm(list=ls(pattern="^ci.epac"))
 	# rm(list=ls(pattern="^ci.natl"))
 }
