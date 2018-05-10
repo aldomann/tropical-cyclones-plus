@@ -1,4 +1,4 @@
-# Base code to perform different statistical tests to analise the slopes of PDI vs duration
+# Code simulate bivariate lognormal distributions for hurricane observations
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 
@@ -53,10 +53,15 @@ ggplot(pdi.natl %>% dplyr::filter(max.wind > 33)) +
 
 # Estimate confidence intervals
 (ci.natl.pdi.ds <- summarise_conf_intervals("NATL", "storm.duration", "storm.pdi", 33))
-(ci.natl.sim.pdi.ds <- summarise_conf_intervals("NATL", "storm.duration", "storm.pdi", 33))
+(ci.natl.sim.pdi.ds <- summarise_conf_intervals("NATL.sim", "storm.duration", "storm.pdi", 33))
 
-# Perform permutation tests
+# Permutation tests ----------------------------------------
+
+# Permutation tests (OLS)
 n.sim.test <- 1000
-p.vals.natl.pdi.ds.std <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33, F, n.sim.test)
-p.vals.natl.pdi.ds.boot <- summarise_p_values("NATL", "storm.duration", "storm.pdi", 33, T, n.sim.test)
+(true.p.vals.natl.pdi.ds.std <- readRDS("slopes_p_values_pdi.rds")[[4]])
+(p.vals.natl.pdi.ds.std <- summarise_p_values("NATL.sim", "storm.duration", "storm.pdi", 33, F, n.sim.test))
 
+# Permutation tests (bootstrap)
+(p.vals.natl.pdi.ds.boot <- summarise_p_values("NATL.sim", "storm.duration", "storm.pdi", 33, T, n.sim.test))
+(true.p.vals.natl.pdi.ds.boot <- readRDS("slopes_p_values_boot_pdi.rds")[[4]])

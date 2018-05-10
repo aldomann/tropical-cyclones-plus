@@ -72,11 +72,11 @@ simulate_hurricane_obs <- function(basin.name, var1, var2, min.speed) {
 
 	# Simulate the data
 	sim.df.low <- simulate_bvlnd(df.low) %>%
-		mutate(sst.class = "low") %>%
+		mutate(sst.class = "low", max.wind = min.speed + 1) %>%
 		rename_(.dots = setNames(c("V1", "V2"),
 														 c(var1, var2)))
 	sim.df.high <- simulate_bvlnd(df.high) %>%
-		mutate(sst.class = "high") %>%
+		mutate(sst.class = "high", max.wind = min.speed + 1) %>%
 		rename_(.dots = setNames(c("V1", "V2"),
 														 c(var1, var2)))
 
