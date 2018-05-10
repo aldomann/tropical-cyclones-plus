@@ -7,7 +7,15 @@ library(lubridate)
 
 # Confidence intervals -------------------------------------
 
+
+
 get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000) {
+	get_r_error <- function(r2, n){
+		r.std <- sqrt((1 - r2) / (n - 2))
+		r2.std <- 2 * r2 * r.std
+		return(r2.std)
+	}
+
 	# Filter and clean data
 	df <- df %>%
 		dplyr::filter(max.wind > min.speed) %>%
@@ -27,6 +35,7 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000
 	inter <- sum.fit$coefficients[1]
 	inter.sd <- sum.fit$coefficients[3]
 	r.squared <- sum.fit$r.squared
+	r.squared.sd <- get_r_error(r.squared, n) # NEW
 
 	# Prepare variables for the simulation
 	# n.sim <- 1000 # Number of simulations
@@ -74,23 +83,24 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000
 
 	# Estimation of the correlation coefficient
 	r.squared.sim <- r.squared.sim[order(r.squared.sim)]
-	r.sq.low <- quantile(r.squared.sim, 0.025)
-	r.sq.upp <- quantile(r.squared.sim, 0.975)
-	r.sq.sd <- (r.sq.upp - r.sq.low) / 2
-	boot.r.sq <- r.sq.upp - r.sq.sd
+	boot.r.sq.low <- quantile(r.squared.sim, 0.025)
+	boot.r.sq.upp <- quantile(r.squared.sim, 0.975)
+	boot.r.sq.sd <- (boot.r.sq.upp - boot.r.sq.low) / 2
+	boot.r.sq <- boot.r.sq.upp - boot.r.sq.sd
 
 	# Summarise results
 	results.df <- data.frame(
-		method = c("lm", "bootstrap-t"),
-		sst.class = rep(class, 2),
-		slope = c(slope, boot.slope),
-		slope.sd = c(slope.sd, boot.slope.sd),
-		inter = c(inter, boot.inter),
-		inter.sd = c(inter.sd, boot.inter.sd),
-		r2 = c(r.squared, boot.r.sq),
-		dep.var = rep(var2, 2),
-		indep.var = rep(var1, 2),
-		row.names = 1
+		metric      = c("lm",         "bootstrap",   "factor"),
+		sst.class   = rep(class, 3),
+		slope       = c(slope,        boot.slope,    boot.slope / slope),
+		slope.sd    = c(slope.sd,     boot.slope.sd, boot.slope.sd / slope.sd),
+		inter       = c(inter,        boot.inter,    boot.inter / inter),
+		inter.sd    = c(inter.sd,     boot.inter.sd, boot.inter.sd / inter.sd),
+		r2          = c(r.squared,    boot.r.sq,     boot.r.sq / r.squared),
+		r2.sd       = c(r.squared.sd, boot.r.sq.sd,  boot.r.sq.sd / r.squared.sd), # NEW
+		dep.var     = rep(var2, 3),
+		indep.var   = rep(var1, 3),
+		row.names   = 1
 	)
 
 	i <- sapply(results.df, is.factor)
@@ -114,10 +124,36 @@ summarise_conf_intervals <- function(basin, var1, var2, min.speed = 0, n.sim = 1
 	# Construct summarised data frame
 	results <- data.frame(
 		rbind(
-			cbind(ci.yx.low["bootstrap-t",], basin = toupper(basin), min.speed = min.speed),
-			cbind(ci.yx.high["bootstrap-t",], basin = toupper(basin), min.speed = min.speed),
-			cbind(ci.xy.low["bootstrap-t",], basin = toupper(basin), min.speed = min.speed),
-			cbind(ci.xy.high["bootstrap-t",], basin = toupper(basin), min.speed = min.speed)
+			cbind(ci.yx.low["bootstrap",], basin = toupper(basin), min.speed = min.speed),
+			cbind(ci.yx.high["bootstrap",], basin = toupper(basin), min.speed = min.speed),
+			cbind(ci.xy.low["bootstrap",], basin = toupper(basin), min.speed = min.speed),
+			cbind(ci.xy.high["bootstrap",], basin = toupper(basin), min.speed = min.speed)
+		)
+	)
+	rownames(results) <- c()
+
+	return(results)
+}
+
+summarise_conf_intervals_factors <- function(basin, var1, var2, min.speed = 0, n.sim = 1000) {
+	# Parse the basin PDI data frame
+	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
+
+	# var2 ~ var1 regression (y ~ x)
+	ci.yx.low <-  get_conf_interval(basin.df, "low",  var1, var2, min.speed, n.sim)
+	ci.yx.high <- get_conf_interval(basin.df, "high", var1, var2, min.speed, n.sim)
+
+	# var1 ~ var2 regression (x ~ y)
+	ci.xy.low <-  get_conf_interval(basin.df, "low",  var2, var1, min.speed)
+	ci.xy.high <- get_conf_interval(basin.df, "high", var2, var1, min.speed)
+
+	# Construct summarised data frame
+	results <- data.frame(
+		rbind(
+			cbind(ci.yx.low["factor",], basin = toupper(basin), min.speed = min.speed),
+			cbind(ci.yx.high["factor",], basin = toupper(basin), min.speed = min.speed),
+			cbind(ci.xy.low["factor",], basin = toupper(basin), min.speed = min.speed),
+			cbind(ci.xy.high["factor",], basin = toupper(basin), min.speed = min.speed)
 		)
 	)
 	rownames(results) <- c()
@@ -491,18 +527,22 @@ explore_p_values <- function(p.values.list, alpha = 0.05) {
 
 # Compare statistics and CI methods ------------------------
 
-compare_statistics <- function(p.values.list) {
-	slope.factor <- numeric(length(p.values.list))
-	inter.factor <- numeric(length(p.values.list))
+compare_perm_statistics <- function(p.values.list) {
+	dim <- 2*length(p.values.list)
+	slope.factor <- numeric(dim)
+	inter.factor <- numeric(dim)
+	k <- 1
+
 	for (i in 1:length(p.values.list)) {
 		for (j in 1:2) {
-			slope.factor[i] <- p.values.list[[i]][j, "slope.alt.p.val"] / p.values.list[[i]][j, "slope.p.val"]
-			inter.factor[i] <- p.values.list[[i]][j, "inter.alt.p.val"] / p.values.list[[i]][j, "inter.p.val"]
+			slope.factor[k] <- p.values.list[[i]][j, "slope.alt.p.val"] / p.values.list[[i]][j, "slope.p.val"]
+			inter.factor[k] <- p.values.list[[i]][j, "inter.alt.p.val"] / p.values.list[[i]][j, "inter.p.val"]
+			k <- k + 1
 		}
 	}
 
 	data <- tibble(
-		n = seq(1:length(p.values.list)),
+		n = seq(1:dim),
 		slope.factor = slope.factor,
 		inter.factor = inter.factor
 	)
@@ -521,11 +561,12 @@ compare_statistics <- function(p.values.list) {
 		geom_histogram(aes(x = inter.factor), binwidth = 0.01, fill = "white", colour = "black") +
 		labs(title = "Intercept factor")
 
+	# return(data)
 	# return(results)
 	return(list(gg.slope, gg.inter))
 }
 
-compare_methods <- function(p.values.list, boot.p.values.list, alpha = 1.75, beta =0.7) {
+compare_perm_methods <- function(p.values.list, boot.p.values.list, alpha = 1.75, beta =0.7) {
 	dim <- 6 * 2 * length(p.values.list)
 	count = 0
 
@@ -549,8 +590,8 @@ compare_methods <- function(p.values.list, boot.p.values.list, alpha = 1.75, bet
 
 		R <- cbind(S, chr.vars)
 
-		# print(R)
-		# print("=================================================================================")
+		print(R)
+		print("=================================================================================")
 
 		for (k in 1:(length(R)-4)) {
 			for (j in 1:2) {
@@ -570,6 +611,43 @@ compare_methods <- function(p.values.list, boot.p.values.list, alpha = 1.75, bet
 
 	return(gg)
 }
+
+compare_ci_methods <- function(factors.ci.list) {
+	dim <- 4*length(factors.ci.list)
+	slope.factor <- numeric(dim)
+	slope.sd.factor <- numeric(dim)
+	inter.factor <- numeric(dim)
+	inter.sd.factor <- numeric(dim)
+	r.sqr.factor <- numeric(dim)
+	r.sqr.sd.factor <- numeric(dim)
+	k <- 1
+
+	for (i in 1:length(factors.ci.list)) {
+		for (j in 1:4) {
+			slope.factor[k] <- factors.ci.list[[i]][j, "slope"]
+			slope.sd.factor[k] <- factors.ci.list[[i]][j, "slope.sd"]
+			inter.factor[k] <- factors.ci.list[[i]][j, "inter"]
+			inter.sd.factor[k] <- factors.ci.list[[i]][j, "inter.sd"]
+			r.sqr.factor[k] <- factors.ci.list[[i]][j, "r2"]
+			r.sqr.sd.factor[k] <- factors.ci.list[[i]][j, "r2.sd"]
+			k <- k + 1
+		}
+	}
+
+	data <- tibble(
+		n = seq(1:dim),
+		slope.factor = slope.factor,
+		slope.sd.factor = slope.sd.factor,
+		inter.factor = inter.factor,
+		inter.sd.factor = inter.sd.factor,
+		r.sqr.factor = r.sqr.factor,
+		r.sqr.sd.factor = r.sqr.sd.factor
+	)
+
+
+	return(summary(data))
+}
+
 
 # Scatterplots ---------------------------------------------
 
