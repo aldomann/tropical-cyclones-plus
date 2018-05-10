@@ -7,8 +7,6 @@ library(lubridate)
 
 # Confidence intervals -------------------------------------
 
-
-
 get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000) {
 	get_r_error <- function(r2, n){
 		r.std <- sqrt((1 - r2) / (n - 2))

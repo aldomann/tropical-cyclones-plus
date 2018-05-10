@@ -1,6 +1,5 @@
-# Base code to perform different statistical tests to analise the slopes of PDI vs duration
+# Base code simulate bivariate lognormal distributions for hurricane observations
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
-
 
 
 # Generic bivariate simulation functions -------------------
