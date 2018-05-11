@@ -45,6 +45,13 @@ plot_dev_systems_ratio <- function(pdi.df, type = "ratio") {
 			scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0,10)) +
 			labs(title = "Number of tropical depressions (v ≤ 33) per year",
 					 colour = "SST Class")
+	} else if (type == "total-ds") {
+		gg <- gg +
+			geom_line(aes(y = ds) ) +
+			geom_point(aes(y = ds, colour = interaction(basin, sst.class))) +
+			# scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0,10)) +
+			labs(title = "Number of tropical-cyclones (v > 33) per year",
+					 colour = "SST Class")
 	}
 
 
@@ -57,6 +64,34 @@ plot_dev_systems_ratio <- function(pdi.df, type = "ratio") {
 	return(gg)
 }
 
-plot_dev_systems_ratio(pdi.natl, "total") + facet_wrap(~ sst.class, nrow = 2)
-plot_dev_systems_ratio(pdi.epac) + facet_grid(sst.class ~ basin)#+ facet_wrap(~ sst.class, nrow = 2)
-plot_dev_systems_ratio(pdi.all, "ratio") + facet_grid(~ basin)
+plot_dev_systems_ratio(pdi.natl, "total") +
+	facet_wrap(~ sst.class, nrow = 2) +
+	guides(colour = FALSE) +
+	ggsave(filename = "ds-natl-total.pdf", width = 4, height = 4, dpi = 96, device = cairo_pdf)
+
+plot_dev_systems_ratio(pdi.natl) + facet_wrap(~ sst.class, nrow = 2) +
+	facet_wrap(~ sst.class, nrow = 2) +
+	guides(colour = FALSE) +
+	ggsave(filename = "ds-natl-ratio.pdf", width = 4, height = 4, dpi = 96, device = cairo_pdf)
+
+
+plot_dev_systems_ratio(pdi.epac, "total") + facet_wrap(~ sst.class, nrow = 2) +
+	facet_wrap(~ sst.class, nrow = 2) +
+	guides(colour = FALSE) +
+	ggsave(filename = "ds-epac-total.pdf", width = 4, height = 4, dpi = 96, device = cairo_pdf)
+plot_dev_systems_ratio(pdi.epac) + facet_wrap(~ sst.class, nrow = 2) +
+	facet_wrap(~ sst.class, nrow = 2) +
+	guides(colour = FALSE) +
+	ggsave(filename = "ds-epac-ratio.pdf", width = 4, height = 4, dpi = 96, device = cairo_pdf)
+
+plot_dev_systems_ratio(pdi.all, "total") +
+	facet_grid(~ basin) +
+	ggsave(filename = "ds-all-total.pdf", width = 6, height = 3, dpi = 96, device = cairo_pdf)
+
+plot_dev_systems_ratio(pdi.all) +
+	facet_grid(~ basin) +
+	ggsave(filename = "ds-all-ratio.pdf", width = 6, height = 3, dpi = 96, device = cairo_pdf)
+
+plot_dev_systems_ratio(pdi.all, "total-ds") +
+	facet_grid(~ basin) +
+	ggsave(filename = "ds-all-total-ds.pdf", width = 6, height = 3, dpi = 96, device = cairo_pdf)
