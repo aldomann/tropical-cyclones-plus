@@ -35,6 +35,7 @@ plot_dev_systems_ratio <- function(pdi.df, type = "ratio") {
 		gg <- gg +
 			geom_line(aes(y = ratio)) +
 			geom_point(aes(y = ratio, colour = interaction(basin, sst.class))) +
+			geom_hline( aes(yintercept = mean(ratio)), linetype = "dashed") +
 			scale_y_continuous(limits = c(0, 1)) +
 			labs(title = "Ratio of tropical depressions (v ≤ 33) per year",
 					 colour = "SST Class")
@@ -42,6 +43,7 @@ plot_dev_systems_ratio <- function(pdi.df, type = "ratio") {
 		gg <- gg +
 			geom_line(aes(y = nds)) +
 			geom_point(aes(y = nds, colour = interaction(basin, sst.class))) +
+			geom_hline( aes(yintercept = mean(nds)), linetype = "dashed") +
 			scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0,10)) +
 			labs(title = "Number of tropical depressions (v ≤ 33) per year",
 					 colour = "SST Class")
@@ -49,6 +51,7 @@ plot_dev_systems_ratio <- function(pdi.df, type = "ratio") {
 		gg <- gg +
 			geom_line(aes(y = ds) ) +
 			geom_point(aes(y = ds, colour = interaction(basin, sst.class))) +
+			geom_hline( aes(yintercept = mean(ds)), linetype = "dashed") +
 			# scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0,10)) +
 			labs(title = "Number of tropical-cyclones (v > 33) per year",
 					 colour = "SST Class")
