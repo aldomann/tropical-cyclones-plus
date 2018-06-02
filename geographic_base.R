@@ -113,7 +113,54 @@ map_region_hurrs <- function(storms.obs, coords, rect.coords, steps = c(5,5), xt
 						 ymin = as.integer(rect.coords[3]), ymax = as.integer(rect.coords[4]),
 						 colour = "green", alpha = 0.2) +
 		scale_colour_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
-		scale_size_continuous(range = c(0.2,1))
+		scale_size_continuous(range = c(0.2,1)) +
+		labs(colour = "SST class")
+
+	if (facet == T) {
+		gg <- gg +
+			facet_wrap(~sst.class)
+	}
+
+	return(gg)
+}
+
+map_region_hurrs_full <- function(storms.obs, coords, rect.coords.a, rect.coords.b, steps = c(5,5), xtra.lims = c(1.5,1.5), facet = F){
+	# Populate SST Class into storms data frame
+	storms.obs <- plyr::join(storms.obs,
+													 storms.joint %>% select(storm.id, sst.class, distance))
+
+	# Coordinates
+	coords <- morph_coords(coords)
+	rect.coords.a <- morph_coords(rect.coords.a)
+	rect.coords.b <- morph_coords(rect.coords.b)
+
+	# World map
+	world_map <- map_data("world")
+	world_map <- subset(world_map, region!="Antarctica")
+
+	# Create map
+	gg <- ggplot(data = world_map, aes(x = long, y = lat, group = group)) +
+		geom_cartogram(map = world_map, aes(map_id = region), colour = "white", fill = "grey50") +
+		scale_x_longitude(xmin = as.numeric(coords[1]), xmax = as.numeric(coords[2]),
+											step = steps[1], xtra.lim = xtra.lims[1]) +
+		scale_y_latitude(ymin = as.numeric(coords[3]), ymax = as.numeric(coords[4]),
+										 step = steps[2], xtra.lim = xtra.lims[2]) +
+		coord_proj("+proj=merc") +
+		geom_path(data = storms.obs %>% dplyr::filter(sst.class == "low"),
+							aes(x = long, y = lat, group = storm.id, colour = "low"), #size = distance),
+							alpha = 0.2, size = 0.2) +
+		geom_path(data = storms.obs %>% dplyr::filter(sst.class == "high"),
+							aes(x = long, y = lat, group = storm.id, colour = "high"), #size = distance),
+							alpha = 0.2, size = 0.2) +
+		annotate("rect", xmin = as.integer(rect.coords.a[1]), xmax = as.integer(rect.coords.a[2]),
+						 ymin = as.integer(rect.coords.a[3]), ymax = as.integer(rect.coords.a[4]),
+						 colour = "green", alpha = 0.2) +
+		annotate("rect", xmin = as.integer(rect.coords.b[1]), xmax = as.integer(rect.coords.b[2]),
+						 ymin = as.integer(rect.coords.b[3]), ymax = as.integer(rect.coords.b[4]),
+						 colour = "green", alpha = 0.2) +
+		scale_colour_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		scale_size_continuous(range = c(0.2,1)) +
+		labs(colour = "SST class")
 
 	if (facet == T) {
 		gg <- gg +
