@@ -1,10 +1,10 @@
-# Code to perform different statistical tests to analise the slopes of PDI vs duration
+# Code to perform hypothesis testing using permutation tests to analise the slopes of PDI vs duration
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 
 # Source base code -----------------------------------------
-source("slopes_base.R")
-# load("slopes_analysis.RData")
+source("regression_base.R")
+# load("regression_analysis.RData")
 
 # Get RAW data ---------------------------------------------
 
@@ -25,18 +25,18 @@ bs.flag <- T
 
 if (read.flag) {
 	# Standard
-	p.values.list <- readRDS("slopes_p_values_all.rds")
-	p.values.list.pdi <- readRDS("slopes_p_values_pdi.rds")
-	p.values.list.max.wind <- readRDS("slopes_p_values_maxwind.rds")
-	p.values.list.mean.wind <- readRDS("slopes_p_values_meanwind.rds")
-	p.values.list.mean.sq.wind <- readRDS("slopes_p_values_meansqwind.rds")
+	p.values.list <- readRDS("regression_p_values_all.rds")
+	p.values.list.pdi <- readRDS("regression_p_values_pdi.rds")
+	p.values.list.max.wind <- readRDS("regression_p_values_maxwind.rds")
+	p.values.list.mean.wind <- readRDS("regression_p_values_meanwind.rds")
+	p.values.list.mean.sq.wind <- readRDS("regression_p_values_meansqwind.rds")
 
 	# With bootstrap
-	boot.p.values.list <- readRDS("slopes_p_values_boot_all.rds")
-	boot.p.values.list.pdi <- readRDS("slopes_p_values_boot_pdi.rds")
-	boot.p.values.list.max.wind <- readRDS("slopes_p_values_boot_maxwind.rds")
-	boot.p.values.list.mean.wind <- readRDS("slopes_p_values_boot_meanwind.rds")
-	boot.p.values.list.mean.sq.wind <- readRDS("slopes_p_values_boot_meansqwind.rds")
+	boot.p.values.list <- readRDS("regression_p_values_boot_all.rds")
+	boot.p.values.list.pdi <- readRDS("regression_p_values_boot_pdi.rds")
+	boot.p.values.list.max.wind <- readRDS("regression_p_values_boot_maxwind.rds")
+	boot.p.values.list.mean.wind <- readRDS("regression_p_values_boot_meanwind.rds")
+	boot.p.values.list.mean.sq.wind <- readRDS("regression_p_values_boot_meansqwind.rds")
 }
 
 # Permutation tests ----------------------------------------
@@ -89,19 +89,19 @@ if (compute.flag) {
 
 # Save into RDS files
 if (save.flag && !bs.flag) {
-	saveRDS(p.values.list, "slopes_p_values_all.rds")
-	saveRDS(p.values.list.pdi, "slopes_p_values_pdi.rds")
-	saveRDS(p.values.list.max.wind, "slopes_p_values_maxwind.rds")
-	saveRDS(p.values.list.mean.wind, "slopes_p_values_meanwind.rds")
-	saveRDS(p.values.list.mean.sq.wind, "slopes_p_values_meansqwind.rds")
+	saveRDS(p.values.list, "regression_p_values_all.rds")
+	saveRDS(p.values.list.pdi, "regression_p_values_pdi.rds")
+	saveRDS(p.values.list.max.wind, "regression_p_values_maxwind.rds")
+	saveRDS(p.values.list.mean.wind, "regression_p_values_meanwind.rds")
+	saveRDS(p.values.list.mean.sq.wind, "regression_p_values_meansqwind.rds")
 }
 
 if (save.flag && bs.flag) {
-	saveRDS(p.values.list, "slopes_p_values_boot_all.rds")
-	saveRDS(p.values.list.pdi, "slopes_p_values_boot_pdi.rds")
-	saveRDS(p.values.list.max.wind, "slopes_p_values_boot_maxwind.rds")
-	saveRDS(p.values.list.mean.wind, "slopes_p_values_boot_meanwind.rds")
-	saveRDS(p.values.list.mean.sq.wind, "slopes_p_values_boot_meansqwind.rds")
+	saveRDS(p.values.list, "regression_p_values_boot_all.rds")
+	saveRDS(p.values.list.pdi, "regression_p_values_boot_pdi.rds")
+	saveRDS(p.values.list.max.wind, "regression_p_values_boot_maxwind.rds")
+	saveRDS(p.values.list.mean.wind, "regression_p_values_boot_meanwind.rds")
+	saveRDS(p.values.list.mean.sq.wind, "regression_p_values_boot_meansqwind.rds")
 }
 
 # Analyse p-values -----------------------------------------
@@ -113,8 +113,8 @@ explore_p_values(boot.p.values.list, 0.05)
 # Compare statistics and methods ---------------------------
 
 # Compare slope/intercept with alt calculation
-stats.std <- compare_perm_statistics(p.values.list)
-stats.boot <- compare_perm_statistics(boot.p.values.list)
+(stats.std <- compare_perm_statistics(p.values.list))
+(stats.boot <- compare_perm_statistics(boot.p.values.list))
 
 stats.std[[1]]
 stats.std[[2]]
@@ -123,4 +123,3 @@ stats.boot[[2]]
 
 # Compare CI methods
 compare_perm_methods(p.values.list, boot.p.values.list, 1.75, 0.6)
-

@@ -1,10 +1,10 @@
-# Code to perform different statistical tests to analise the slopes of PDI vs duration
+# Code to perform different statistical tests to analise the regression coefficients of PDI vs duration
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 
 # Source base code -----------------------------------------
-source("slopes_base.R")
-# load("slopes_analysis.RData")
+source("regression_base.R")
+# load("regression_analysis.RData")
 
 
 # Get RAW data ---------------------------------------------
@@ -17,13 +17,13 @@ pdi.natl <- pdi.all %>%
 pdi.epac <- pdi.all %>%
 	dplyr::filter(basin == "EPAC")
 
-compute.flag <- T
+compute.flag <- F
 
 # Load objects from disk -----------------------------------
 
 if (!compute.flag) {
-	ci.list <- readRDS("slopes_ci_list.rds")
-	factors.ci.list <- readRDS("slopes_ci_fact_list.rds")
+	ci.list <- readRDS("regression_ci_list.rds")
+	factors.ci.list <- readRDS("regression_ci_fact_list.rds")
 }
 
 
@@ -136,8 +136,8 @@ if (compute.flag) {
 	rm(ci.list)
 	ci.list <- lapply(ls(patt='^ci.'), get)
 	factors.ci.list <- lapply(ls(patt='^fact.'), get)
-	saveRDS(ci.list, "slopes_ci_list.rds")
-	saveRDS(factors.ci.list, "slopes_ci_fact_list.rds")
+	saveRDS(ci.list, "regression_ci_list.rds")
+	saveRDS(factors.ci.list, "regression_ci_fact_list.rds")
 	# rm(list=ls(pattern="^ci.epac"))
 	# rm(list=ls(pattern="^ci.natl"))
 }
