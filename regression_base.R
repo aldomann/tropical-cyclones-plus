@@ -9,7 +9,7 @@ library(lubridate)
 
 # Non-parametric bootstrap ---------------------------------
 
-perform_bootstrap <- function(col1, col2, n.sim = 500) {
+perform_bootstrap <- function(col1, col2, n.sim = 500, full = F) {
 	# Construct data
 	data <- cbind(log10(col1), log10(col2))
 	n <- nrow(data)
@@ -93,7 +93,11 @@ perform_bootstrap <- function(col1, col2, n.sim = 500) {
 	# i <- sapply(results.df, is.factor)
 	# results.df[i] <- lapply(results.df[i], as.character)
 
-	return(results.df)
+	if (!full) {
+		return(results.df)
+	} else {
+		return(full.results.df)
+	}
 }
 
 # Confidence intervals -------------------------------------
