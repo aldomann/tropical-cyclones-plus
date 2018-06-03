@@ -6,33 +6,26 @@ library(tidyverse)
 library(lubridate)
 
 
-
 # Non-parametric bootstrap ---------------------------------
 
-perform_bootstrap <- function(col1, col2, n.sim = 500, full = F) {
+perform_bootstrap <- function(col.x, col.y, n.sim = 500) {
 	# Construct data
-	data <- cbind(log10(col1), log10(col2))
+	data <- cbind(log10(col.x), log10(col.y))
 	n <- nrow(data)
 
 	# Linear regression
 	fit <- lm(data[,2] ~ data[,1])
 	sum.fit <- summary(fit)
 	slope <- sum.fit$coefficients[2]
-	# slope.sd <- sum.fit$coefficients[4]
 	inter <- sum.fit$coefficients[1]
-	# inter.sd <- sum.fit$coefficients[3]
 	r.squared <- sum.fit$r.squared
 
 	# Prepare variables for the simulation
 	# n.sim <- 500 # Number of simulations
 	data.seq <- seq(1, n)
 	slope.sim <- numeric(n.sim)
-	# slope.sd.sim <- numeric(n.sim)
 	inter.sim <- numeric(n.sim)
-	# inter.sd.sim <- numeric(n.sim)
 	r.squared.sim <- numeric(n.sim)
-	# t.value.slope.sim <- numeric(n.sim)
-	# t.value.inter.sim <- numeric(n.sim)
 
 	# Perform the simulation
 	for (i in 1:n.sim) {
@@ -43,36 +36,11 @@ perform_bootstrap <- function(col1, col2, n.sim = 500, full = F) {
 		sum.fit.value.sim <- summary(fit.value.sim)
 		# Slope
 		slope.sim[i] <- sum.fit.value.sim$coefficients[2]
-		# slope.sd.sim[i] <- sum.fit.value.sim$coefficients[4]
 		# Intercept
 		inter.sim[i] <- sum.fit.value.sim$coefficients[1]
-		# inter.sd.sim[i] <- sum.fit.value.sim$coefficients[3]
 		# R-Squared
 		r.squared.sim[i] <- sum.fit.value.sim$r.squared
-
-		# t-values
-		# t.value.slope.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
-		# t.value.inter.sim[i] <- (inter.sim[i] - inter) / inter.sd.sim[i]
 	}
-
-	# # Bootstrap-t 95% method (slopes)
-	# boot.slope.low <- slope + slope.sd * quantile(t.value.slope.sim, 0.025)
-	# boot.slope.upp <- slope + slope.sd * quantile(t.value.slope.sim, 0.975)
-	# boot.slope.sd <- (boot.slope.upp - boot.slope.low) / 2
-	# boot.slope <- boot.slope.upp - boot.slope.sd
-	#
-	# # Bootstrap-t 95% method (intercepts)
-	# boot.inter.low <- inter + inter.sd * quantile(t.value.inter.sim, 0.025)
-	# boot.inter.upp <- inter + inter.sd * quantile(t.value.inter.sim, 0.975)
-	# boot.inter.sd <- (boot.inter.upp - boot.inter.low) / 2
-	# boot.inter <- boot.inter.upp - boot.inter.sd
-	#
-	# # Estimation of the correlation coefficient
-	# r.squared.sim <- r.squared.sim[order(r.squared.sim)]
-	# r.sq.low <- quantile(r.squared.sim, 0.025)
-	# r.sq.upp <- quantile(r.squared.sim, 0.975)
-	# r.sq.sd <- (r.sq.upp - r.sq.low) / 2
-	# boot.r.sq <- r.sq.upp - r.sq.sd
 
 	# Summarise results
 	full.results.df <- data.frame(
@@ -90,17 +58,11 @@ perform_bootstrap <- function(col1, col2, n.sim = 500, full = F) {
 		r2 = mean(r.squared.sim)
 	)
 
-	# i <- sapply(results.df, is.factor)
-	# results.df[i] <- lapply(results.df[i], as.character)
-
-	if (!full) {
-		return(results.df)
-	} else {
-		return(full.results.df)
-	}
+	return(list(results.df, full.results.df))
 }
 
 # Confidence intervals -------------------------------------
+
 
 get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000) {
 	get_r_error <- function(r2, n){
@@ -113,11 +75,11 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000
 	df <- df %>%
 		dplyr::filter(max.wind > min.speed) %>%
 		dplyr::filter(sst.class == class)
-	col1 <- df[,var1]
-	col2 <- df[,var2]
+	col.x <- df[,var1]
+	col.y <- df[,var2]
 
 	# Construct data
-	data <- cbind(log10(col1), log10(col2))
+	data <- cbind(log10(col.x), log10(col.y))
 	n <- nrow(data)
 
 	# Linear regression
@@ -265,9 +227,9 @@ summarise_conf_intervals_factors <- function(basin, var1, var2, min.speed = 0, n
 
 # Bootstrap for permutation test ---------------------------
 
-do_bootstrap <- function(col1, col2, n.sim = 500) {
+do_bootstrap <- function(col.x, col.y, n.sim = 500) {
 	# Construct data
-	data <- cbind(log10(col1), log10(col2))
+	data <- cbind(log10(col.x), log10(col.y))
 	n <- nrow(data)
 
 	# Linear regression
@@ -360,20 +322,20 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 	# Filter and clean data (low SST)
 	df.low <- df %>%
 		dplyr::filter(sst.class == "low")
-	col1.low <- df.low[[var1]]
-	col2.low <- df.low[[var2]]
+	col.x.low <- df.low[[var1]]
+	col.y.low <- df.low[[var2]]
 
 	# Filter and clean data (high SST)
 	df.high <- df %>%
 		dplyr::filter(sst.class == "high")
-	col1.high <- df.high[[var1]]
-	col2.high <- df.high[[var2]]
+	col.x.high <- df.high[[var1]]
+	col.y.high <- df.high[[var2]]
 
 	if (!bootstrap) {
 		# Linear regressions statistics (standard)
-		fit.low <- lm(log10(col2.low) ~ log10(col1.low))
+		fit.low <- lm(log10(col.y.low) ~ log10(col.x.low))
 		sum.fit.low <- summary(fit.low)
-		fit.high <- lm(log10(col2.high) ~ log10(col1.high))
+		fit.high <- lm(log10(col.y.high) ~ log10(col.x.high))
 		sum.fit.high <- summary(fit.high)
 
 		# True slopes
@@ -393,11 +355,11 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 		r.sqr.high <- sum.fit.high$r.squared
 	} else if (bootstrap) {
 		# True bootstrap statistics
-		# true.boot.lm.high <- do_bootstrap(col1.high, col2.high, n.boot)
-		# true.boot.lm.low <- do_bootstrap(col1.low, col2.low, n.boot)
+		# true.boot.lm.high <- do_bootstrap(col.x.high, col.y.high, n.boot)
+		# true.boot.lm.low <- do_bootstrap(col.x.low, col.y.low, n.boot)
 
-		true.boot.lm.high <- perform_bootstrap(col1.high, col2.high, n.boot)
-		true.boot.lm.low <- perform_bootstrap(col1.low, col2.low, n.boot)
+		true.boot.lm.high <- perform_bootstrap(col.x.high, col.y.high, n.boot)
+		true.boot.lm.low <- perform_bootstrap(col.x.low, col.y.low, n.boot)
 
 		# True slopes
 		slope.low <- true.boot.lm.low$slope
@@ -425,8 +387,8 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 	r.sqr.stat.true <- abs(r.sqr.high - r.sqr.low)
 
 	# Construct data
-	data.high <-cbind(col1.high, col2.high)
-	data.low <-cbind(col1.low, col2.low)
+	data.high <-cbind(col.x.high, col.y.high)
+	data.low <-cbind(col.x.low, col.y.low)
 	data.all <- as_tibble(rbind(data.high, data.low))
 
 	n.low <- nrow(data.low)
@@ -751,7 +713,6 @@ compare_ci_methods <- function(factors.ci.list) {
 		r.sqr.sd.factor = r.sqr.sd.factor
 	)
 
-
 	return(summary(data))
 }
 
@@ -771,15 +732,15 @@ plot_scatterplot <- function(basin, var1, var2, min.speed = 0) {
 		dplyr::filter(sst.class == "high")
 
 	# Extract data vectors
-	col1.low <- df.low[[var1]]
-	col2.low <- df.low[[var2]]
-	col1.high <- df.high[[var1]]
-	col2.high <- df.high[[var2]]
+	col.x.low <- df.low[[var1]]
+	col.y.low <- df.low[[var2]]
+	col.x.high <- df.high[[var1]]
+	col.y.high <- df.high[[var2]]
 
-	lm.high.y <- lm(log10(col2.high) ~ log10(col1.high))
-	lm.low.y <- lm(log10(col2.low) ~ log10(col1.low))
-	lm.high.x <- lm(log10(col1.high) ~ log10(col2.high))
-	lm.low.x <- lm(log10(col1.low) ~ log10(col2.low))
+	lm.high.y <- lm(log10(col.y.high) ~ log10(col.x.high))
+	lm.low.y <- lm(log10(col.y.low) ~ log10(col.x.low))
+	lm.high.x <- lm(log10(col.x.high) ~ log10(col.y.high))
+	lm.low.x <- lm(log10(col.x.low) ~ log10(col.y.low))
 
 	# Automatic plot title
 	if (min.speed == 0) {
@@ -792,8 +753,8 @@ plot_scatterplot <- function(basin, var1, var2, min.speed = 0) {
 
 	gg <- ggplot() +
 		# Scatterplot
-		geom_point(data = df.low, aes(x = col1.low, y = col2.low, colour = "low"), shape = 5, size = 1) +
-		geom_point(data = df.high, aes(x = col1.high, y = col2.high, colour = "high"), shape = 1, size = 1) +
+		geom_point(data = df.low, aes(x = col.x.low, y = col.y.low, colour = "low"), shape = 5, size = 1) +
+		geom_point(data = df.high, aes(x = col.x.high, y = col.y.high, colour = "high"), shape = 1, size = 1) +
 		# Regression lines
 		geom_abline(aes(slope = coef(lm.low.y)[[2]],
 										intercept = coef(lm.low.y)[[1]],
