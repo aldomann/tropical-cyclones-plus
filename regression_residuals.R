@@ -6,7 +6,7 @@
 library(qqplotr)
 
 # Source base code -----------------------------------------
-source("slopes_base.R")
+source("regression_base.R")
 
 # Get RAW data ---------------------------------------------
 
@@ -35,24 +35,25 @@ data.high <- pdi.natl %>%
 fit.low <- lm(data = data.low, log10(storm.pdi) ~ log10(storm.duration))
 fit.high <- lm(data = data.high, log10(storm.pdi) ~ log10(storm.duration))
 
-boot.low <- perform_bootstrap(data.low$storm.duration, data.low$storm.pdi, 5000, full = T)
-boot.low.stats <- perform_bootstrap(data.low$storm.duration, data.low$storm.pdi, 5000)
+# boot.low <- perform_bootstrap(data.low$storm.duration, data.low$storm.pdi, 5000)
+boot.low.stats <- boot.low[[1]]
+boot.low.data <- boot.low[[2]]
 
-boot.high <- perform_bootstrap(data.high$storm.duration, data.high$storm.pdi, 5000, full = T)
-boot.high.stats <- perform_bootstrap(data.high$storm.duration, data.high$storm.pdi, 5000)
+# boot.high <- perform_bootstrap(data.high$storm.duration, data.high$storm.pdi, 5000)
+boot.high.stats <- boot.high[[1]]
+boot.high.data <- boot.high[[2]]
 
 
 # Histograms of sample -------------------------------------
 
-ggplot(boot.low) +
+ggplot(boot.low.data) +
 	geom_histogram(aes(x = slope), binwidth = 0.01)
 
-ggplot(boot.low) +
+ggplot(boot.low.data) +
 	geom_histogram(aes(x = inter), binwidth = 0.025)
 
-ggplot(boot.low) +
+ggplot(boot.low.data) +
 	geom_histogram(aes(x = r2), binwidth = 0.005)
-
 
 
 # Residuals vs fitted values -------------------------------
@@ -74,8 +75,8 @@ plot_resid_vs_fitted(fit.low)
 plot_resid_vs_fitted(fit.high)
 
 
-# QQ Plots -------------------------------------------------
-plot_qqplot <- function(fit) {
+# QQ Plots (residuals) -------------------------------------
+plot_resid_qqplot <- function(fit) {
 	res.data <-  tibble(resid = resid(fit))
 	gg <- ggplot(res.data, aes( sample = resid )) +
 		stat_qq_line() +
@@ -86,5 +87,42 @@ plot_qqplot <- function(fit) {
 	return(gg)
 }
 
-plot_qqplot(fit.low)
-plot_qqplot(fit.high)
+plot_resid_qqplot(fit.low)
+plot_resid_qqplot(fit.high)
+
+get_boot_residuals <- function(col.x, col.y, boot.stats) {
+	slope <- boot.stats$slope
+	inter <- boot.stats$inter
+
+	data <- tibble(x = log10(col.x),
+								 y = log10(col.y))
+
+	data <- data %>%
+		mutate(
+			y.pred = inter + x * slope,
+			resid = y - y.pred)
+
+	return(data)
+}
+
+boot.low.resid <- get_boot_residuals(data.low$storm.duration, data.low$storm.pdi, boot.low.stats)
+
+plot_qqplot(boot.low.resid[["resid"]], "Residuals")
+
+
+
+# Q-Q Plots (any variable) ---------------------------------
+
+plot_qqplot <- function(col, name) {
+	var.data <-  tibble(variable = col)
+	gg <- ggplot(var.data, aes( sample = variable )) +
+		stat_qq_line() +
+		stat_qq_point(shape = 1, size = 2.5) +
+		labs(x = "Theoretical Quantiles", y = name) +
+		theme_bw()
+
+	return(gg)
+}
+
+plot_qqplot(boot.low.data[["slope"]], "Slope")
+plot_qqplot(boot.low.data[["inter"]], "Intercept")
