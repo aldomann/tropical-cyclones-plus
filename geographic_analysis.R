@@ -25,6 +25,9 @@ storms.epac <- arrange(storms.epac, date.time)
 
 storms.all <- rbind(storms.natl, storms.epac)
 
+# write_csv(storms.natl, "data/hurdat2-natl.csv")
+# write_csv(storms.epac, "data/hurdat2-epac.csv")
+
 
 # Summarise geographical information -----------------------
 
