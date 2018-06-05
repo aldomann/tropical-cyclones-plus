@@ -63,8 +63,10 @@ plot_resid_vs_fitted <- function(fit) {
 								 resid = resid(fit))
 
 	gg <- ggplot(data) +
-		geom_point(aes(x = fitted, y = resid),
-							 shape = 1, size = 2.5) +
+		aes(x = fitted, y = resid) +
+		geom_point(shape = 1, size = 2.5) +
+		geom_smooth(se = F, method = "auto", colour = "red") +
+		geom_hline(yintercept = 0, linetype = "dashed") +
 		labs(x = "Fitted values", y = "Residuals") +
 		theme_bw()
 
