@@ -31,6 +31,47 @@ summary(lm(data = data, Y ~ X))
 summary(data)
 
 
+resid.data <- tibble(
+	x = runif(75, 10, 15)
+)
+set.seed(19)
+resid.data$resid <- rnorm(75, 0, 0.5)
+set.seed(5)
+resid.data$resid.b <- rnorm(75, 0, 0.5)^2 + runif(75, 0 ,1) ^2
+
+resid.data <- resid.data %>%
+	dplyr::mutate(
+		y = 3 * x + resid,
+		y.b = 3 * x + resid.b
+		)
+
+plot_qqplot(resid.data[["resid"]], "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-norm-example.pdf", width = 3, height = 3, dpi = 96, device = cairo_pdf)
+
+plot_qqplot(resid.data[["resid.b"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-bad-example.pdf", width = 3, height = 3, dpi = 96, device = cairo_pdf)
+
+
+plot_resid_vs_fitted_from_data <- function(data, formula) {
+
+	fit <- lm(data = data, eval(formula))
+	fit.data <- tibble(
+		fitted = fitted(fit),
+		resid = resid(fit)
+		# resid = data[["resid"]]
+		)
+
+	gg <- ggplot(fit.data) +
+		aes(x = fitted, y = resid) +
+		geom_point(shape = 1, size = 2.5) +
+		geom_smooth(se = F, method = "auto", colour = "red") +
+		geom_hline(yintercept = 0, linetype = "dashed") +
+		labs(x = "Fitted values", y = "Residuals") +
+		theme_bw()
+
+	return(gg)
+}
+
+plot_resid_vs_fitted_from_data(resid.data, "y ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-norm-example.pdf", width = 3, height = 3, dpi = 96, device = cairo_pdf)
+plot_resid_vs_fitted_from_data(resid.data, "y.b ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-bad-example.pdf", width = 3, height = 3, dpi = 96, device = cairo_pdf)
 
 
 # Poster ---------------------------------------------------
