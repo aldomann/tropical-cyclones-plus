@@ -35,11 +35,11 @@ data.high <- pdi.natl %>%
 fit.low <- lm(data = data.low, log10(storm.pdi) ~ log10(storm.duration))
 fit.high <- lm(data = data.high, log10(storm.pdi) ~ log10(storm.duration))
 
-# boot.low <- perform_bootstrap(data.low$storm.duration, data.low$storm.pdi, 5000)
+boot.low <- perform_bootstrap(data.low$storm.duration, data.low$storm.pdi, 5000)
 boot.low.stats <- boot.low[[1]]
 boot.low.data <- boot.low[[2]]
 
-# boot.high <- perform_bootstrap(data.high$storm.duration, data.high$storm.pdi, 5000)
+boot.high <- perform_bootstrap(data.high$storm.duration, data.high$storm.pdi, 5000)
 boot.high.stats <- boot.high[[1]]
 boot.high.data <- boot.high[[2]]
 
@@ -62,10 +62,12 @@ plot_resid_vs_fitted <- function(fit) {
 	data <- tibble(fitted = fitted(fit),
 								 resid = resid(fit))
 
+	smooth <-  as_tibble(lowess(data))
+
 	gg <- ggplot(data) +
 		aes(x = fitted, y = resid) +
 		geom_point(shape = 1, size = 2.5) +
-		geom_smooth(se = F, method = "auto", colour = "red") +
+		geom_line(data = smooth, aes(x = x, y = y), colour = "red")+
 		geom_hline(yintercept = 0, linetype = "dashed") +
 		labs(x = "Fitted values", y = "Residuals") +
 		theme_bw()
@@ -76,6 +78,24 @@ plot_resid_vs_fitted <- function(fit) {
 plot_resid_vs_fitted(fit.low)
 plot_resid_vs_fitted(fit.high)
 
+plot_resid_vs_fitted_from_data <- function(data, formula) {
+
+	fit <- lm(data = data, eval(formula))
+	fit.data <- tibble(fitted = fitted(fit),
+										 resid = resid(fit))
+
+	smooth <-  as_tibble(lowess(fit.data))
+
+	gg <- ggplot(fit.data) +
+		aes(x = fitted, y = resid) +
+		geom_point(shape = 1, size = 2.5) +
+		geom_line(data = smooth, aes(x = x, y = y), colour = "red") +
+		geom_hline(yintercept = 0, linetype = "dashed") +
+		labs(x = "Fitted values", y = "Residuals") +
+		theme_bw()
+
+	return(gg)
+}
 
 # QQ Plots (residuals) -------------------------------------
 plot_resid_qqplot <- function(fit) {
