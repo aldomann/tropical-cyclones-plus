@@ -1,4 +1,6 @@
 library(tidyverse)
+library(tidyquant)
+source("regression_base.R")
 
 # extrafont::font_import(paths = "/home/aldomann/Design/Typefaces/2. Sans Serif/1. Humanist/Raleway")
 # extrafont::font_import(paths = "/home/aldomann/Downloads/newpx/ttf")
@@ -31,47 +33,38 @@ summary(lm(data = data, Y ~ X))
 summary(data)
 
 
+# Residuals in lm ------------------------------------------
+
+set.seed(10)
 resid.data <- tibble(
-	x = runif(75, 10, 15)
+	x = runif(75, 10, 150)
 )
-set.seed(19)
+
+set.seed(13)
 resid.data$resid <- rnorm(75, 0, 0.5)
+summary(resid.data$resid)
+
 set.seed(5)
 resid.data$resid.b <- rnorm(75, 0, 0.5)^2 + runif(75, 0 ,1) ^2
+set.seed(12)
+resid.data$resid.c <- rnorm(75, 0, 0.5)
 
 resid.data <- resid.data %>%
 	dplyr::mutate(
 		y = 3 * x + resid,
-		y.b = 3 * x + resid.b
-		)
+		y.b = 3 * x + resid.b,
+		y.c = 3 * x + (1 + x) * resid.c
+	)
 
-plot_qqplot(resid.data[["resid"]], "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-norm-example.pdf", width = 3, height = 3, dpi = 96, device = cairo_pdf)
+plot_qqplot(resid.data[["resid"]], "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-norm-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
-plot_qqplot(resid.data[["resid.b"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-bad-example.pdf", width = 3, height = 3, dpi = 96, device = cairo_pdf)
+plot_qqplot(resid.data[["resid.b"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-skewed-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
+plot_qqplot(resid.data[["resid.c"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-hetero-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
-plot_resid_vs_fitted_from_data <- function(data, formula) {
-
-	fit <- lm(data = data, eval(formula))
-	fit.data <- tibble(
-		fitted = fitted(fit),
-		resid = resid(fit)
-		# resid = data[["resid"]]
-		)
-
-	gg <- ggplot(fit.data) +
-		aes(x = fitted, y = resid) +
-		geom_point(shape = 1, size = 2.5) +
-		geom_smooth(se = F, method = "auto", colour = "red") +
-		geom_hline(yintercept = 0, linetype = "dashed") +
-		labs(x = "Fitted values", y = "Residuals") +
-		theme_bw()
-
-	return(gg)
-}
-
-plot_resid_vs_fitted_from_data(resid.data, "y ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-norm-example.pdf", width = 3, height = 3, dpi = 96, device = cairo_pdf)
-plot_resid_vs_fitted_from_data(resid.data, "y.b ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-bad-example.pdf", width = 3, height = 3, dpi = 96, device = cairo_pdf)
+plot_resid_vs_fitted_from_data(resid.data, "y ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-norm-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_resid_vs_fitted_from_data(resid.data, "y.b ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-skewed-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_resid_vs_fitted_from_data(resid.data, "y.c ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-hetero-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
 
 # Poster ---------------------------------------------------

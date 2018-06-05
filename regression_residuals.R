@@ -66,7 +66,7 @@ plot_resid_vs_fitted <- function(fit) {
 
 	gg <- ggplot(data) +
 		aes(x = fitted, y = resid) +
-		geom_point(shape = 1, size = 2.5) +
+		geom_point(shape = 1, size = 1.5) +
 		geom_line(data = smooth, aes(x = x, y = y), colour = "red")+
 		geom_hline(yintercept = 0, linetype = "dashed") +
 		labs(x = "Fitted values", y = "Residuals") +
@@ -88,7 +88,7 @@ plot_resid_vs_fitted_from_data <- function(data, formula) {
 
 	gg <- ggplot(fit.data) +
 		aes(x = fitted, y = resid) +
-		geom_point(shape = 1, size = 2.5) +
+		geom_point(shape = 1, size = 1.5) +
 		geom_line(data = smooth, aes(x = x, y = y), colour = "red") +
 		geom_hline(yintercept = 0, linetype = "dashed") +
 		labs(x = "Fitted values", y = "Residuals") +
@@ -102,7 +102,7 @@ plot_resid_qqplot <- function(fit) {
 	res.data <-  tibble(resid = resid(fit))
 	gg <- ggplot(res.data, aes( sample = resid )) +
 		stat_qq_line() +
-		stat_qq_point(shape = 1, size = 2.5) +
+		stat_qq_point(shape = 1, size = 1.5) +
 		labs(x = "Theoretical Quantiles", y = "Sample Quantiles") +
 		theme_bw()
 
@@ -139,7 +139,7 @@ plot_qqplot <- function(col, name) {
 	var.data <-  tibble(variable = col)
 	gg <- ggplot(var.data, aes( sample = variable )) +
 		stat_qq_line() +
-		stat_qq_point(shape = 1, size = 2.5) +
+		stat_qq_point(shape = 1, size = 1.5) +
 		labs(x = "Theoretical Quantiles", y = name) +
 		theme_bw()
 
