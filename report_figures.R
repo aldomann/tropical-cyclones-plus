@@ -56,6 +56,25 @@ resid.data <- resid.data %>%
 		y.c = 3 * x + (1 + x) * resid.c
 	)
 
+
+gg.models <- ggplot(resid.data) +
+	geom_jitter(aes(x = x, y = y.b, colour = "Skewed", shape = "skewed"), height = 20) +
+	geom_point(aes(x = x, y = y.c, colour = "Heteroscedastic", shape = "hetero")) +
+	geom_jitter(aes(x = x, y = y, colour = "Homoscedastic", shape = "homo"), height = 20) +
+	scale_shape_manual(values = c("homo"   = 0,
+																"hetero" = 1,
+																"skewed" = 2),
+										 guide = F) +
+	scale_colour_manual(values = c("Homoscedastic"   = "orangered1",
+																 "Heteroscedastic" = "forestgreen",
+																 "Skewed"          = "purple3"),
+											breaks = c("Homoscedastic", "Heteroscedastic", "Skewed")) +
+	labs(x = "Predictor X", y = "Response Y", colour = "Model") +
+	theme_bw()
+
+gg.models #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "models-example.pdf", width = 5.5, height = 3, dpi = 96, device = cairo_pdf)
+
+
 plot_qqplot(resid.data[["resid"]], "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-norm-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
 plot_qqplot(resid.data[["resid.b"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-skewed-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
