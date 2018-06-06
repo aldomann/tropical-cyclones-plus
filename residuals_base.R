@@ -15,12 +15,14 @@ plot_resid_vs_fitted <- function(fit) {
 	data <- tibble(fitted = fitted(fit),
 								 resid = resid(fit))
 
+	alpha <- 0.05
 	smooth <-  as_tibble(lowess(data))
 
 	gg <- ggplot(data) +
 		aes(x = fitted, y = resid) +
 		geom_point(shape = 1, size = 1.5) +
 		geom_line(data = smooth, aes(x = x, y = y), colour = "red")+
+		geom_quantile(quantiles = c(alpha, 1 - alpha), method = "rq", colour = "blue") +
 		geom_hline(yintercept = 0, linetype = "dashed") +
 		labs(x = "Fitted values", y = "Residuals") +
 		theme_bw()
@@ -35,7 +37,7 @@ plot_resid_vs_fitted_from_data <- function(data, formula) {
 										 resid = resid(fit))
 
 	alpha <- 0.05
-	smooth <-  as_tibble(lowess(fit.data))
+	smooth <- as_tibble(lowess(fit.data))
 
 	gg <- ggplot(fit.data) +
 		aes(x = fitted, y = resid) +
