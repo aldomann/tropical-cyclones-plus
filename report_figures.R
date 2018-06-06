@@ -1,6 +1,7 @@
 library(tidyverse)
-library(tidyquant)
+# library(tidyquant)
 source("regression_base.R")
+source("residuals_base.R")
 
 # extrafont::font_import(paths = "/home/aldomann/Design/Typefaces/2. Sans Serif/1. Humanist/Raleway")
 # extrafont::font_import(paths = "/home/aldomann/Downloads/newpx/ttf")
@@ -34,17 +35,16 @@ summary(data)
 
 
 # Residuals in lm ------------------------------------------
+library(quantreg)
 
 set.seed(10)
 resid.data <- tibble(
 	x = runif(75, 10, 150)
 )
 
-set.seed(13)
+set.seed(10)
 resid.data$resid <- rnorm(75, 0, 0.5)
-summary(resid.data$resid)
-
-set.seed(5)
+set.seed(94)
 resid.data$resid.b <- rnorm(75, 0, 0.5)^2 + runif(75, 0 ,1) ^2
 set.seed(12)
 resid.data$resid.c <- rnorm(75, 0, 0.5)
@@ -55,7 +55,6 @@ resid.data <- resid.data %>%
 		y.b = 3 * x + resid.b,
 		y.c = 3 * x + (1 + x) * resid.c
 	)
-
 
 gg.models <- ggplot(resid.data) +
 	geom_jitter(aes(x = x, y = y.b, colour = "Skewed", shape = "skewed"), height = 20) +
@@ -147,7 +146,7 @@ map_region_hurrs_full(storms.all, coords.all.map, coords.natl, coords.epac, step
 
 
 # Source base code -----------------------------------------
-source("slopes_base.R")
+# source("regression_base.R")
 # load("slopes_analysis.RData")
 
 
