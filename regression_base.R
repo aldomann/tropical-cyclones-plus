@@ -5,6 +5,76 @@
 library(tidyverse)
 library(lubridate)
 
+# Scatterplots ---------------------------------------------
+
+plot_scatterplot <- function(basin, var1, var2, min.speed = 0) {
+	# Parse the basin PDI data frame
+	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
+
+	# Filter data frames
+	basin.df <- basin.df %>%
+		dplyr::filter(max.wind > min.speed)
+	df.low <- basin.df %>%
+		dplyr::filter(sst.class == "low")
+	df.high <- basin.df %>%
+		dplyr::filter(sst.class == "high")
+
+	# Extract data vectors
+	col.x.low <- df.low[[var1]]
+	col.y.low <- df.low[[var2]]
+	col.x.high <- df.high[[var1]]
+	col.y.high <- df.high[[var2]]
+
+	lm.high.y <- lm(log10(col.y.high) ~ log10(col.x.high))
+	lm.low.y <- lm(log10(col.y.low) ~ log10(col.x.low))
+	lm.high.x <- lm(log10(col.x.high) ~ log10(col.y.high))
+	lm.low.x <- lm(log10(col.x.low) ~ log10(col.y.low))
+
+	# Automatic plot title
+	if (min.speed == 0) {
+		storms.str <- "all storms"
+	} else {
+		storms.str <- paste("wind speed >", min.speed)
+	}
+	years.str <- paste0( min(basin.df$storm.year), "-", max(basin.df$storm.year))
+	title.str <- paste0(basin, " (", storms.str, "; ", years.str, ")" )
+
+	gg <- ggplot() +
+		# Scatterplot
+		geom_point(data = df.low, aes(x = col.x.low, y = col.y.low, colour = "low"), shape = 5, size = 1) +
+		geom_point(data = df.high, aes(x = col.x.high, y = col.y.high, colour = "high"), shape = 1, size = 1) +
+		# Regression lines
+		geom_abline(aes(slope = coef(lm.low.y)[[2]],
+										intercept = coef(lm.low.y)[[1]],
+										colour = "low", linetype = "y(x)")) +
+		geom_abline(aes(slope = 1/coef(lm.low.x)[[2]],
+										intercept = -coef(lm.low.x)[[1]]/coef(lm.low.x)[[2]],
+										colour = "low", linetype = "x(y)")) +
+		geom_abline(aes(slope = coef(lm.high.y)[[2]],
+										intercept = coef(lm.high.y)[[1]],
+										colour = "high", linetype = "y(x)")) +
+		geom_abline(aes(slope = 1/coef(lm.high.x)[[2]],
+										intercept = -coef(lm.high.x)[[1]]/coef(lm.high.x)[[2]],
+										colour = "high", linetype = "x(y)")) +
+		# Scales and legend
+		scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
+		scale_y_log10() +
+		guides(colour = guide_legend(order = 1, override.aes = list(linetype = c(0,0), shape = c(1,5))),
+					 linetype = guide_legend(order = 2, override.aes = list(colour = c("black", "black")))) +
+		scale_colour_manual(labels = c(bquote(.(paste0("high; ")) ~ r^2 ~
+																						.(paste0("= ", format(summary(lm.high.y)$r.squared, digits = 2)))),
+																	 bquote(.(paste0("low;  ")) ~ r^2 ~
+																	 			 	.(paste0("= ", format(summary(lm.low.y)$r.squared, digits = 2))))),
+												values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		scale_linetype_manual(values = c("x(y)" = "longdash", "y(x)" = "solid")) +
+		labs(title = title.str,
+				 x = paste(eval(var1)), y = paste(eval(var2)),
+				 colour = "SST class", linetype = "Regression")
+
+	return(gg + theme_bw())
+}
+
+
 # Explore p-values -----------------------------------------
 
 explore_p_values <- function(p.values.list, alpha = 0.05) {
@@ -145,71 +215,35 @@ compare_ci_methods <- function(factors.ci.list) {
 }
 
 
-# Scatterplots ---------------------------------------------
+# Histograms of sample -------------------------------------
 
-plot_scatterplot <- function(basin, var1, var2, min.speed = 0) {
-	# Parse the basin PDI data frame
-	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
+plot_boot_coefs_hist <- function(data.low, data.high, stat) {
+	all.data <- rbind(
+		cbind(data.low, sst.class = "low"),
+		cbind(data.high, sst.class = "high")
+	)
 
-	# Filter data frames
-	basin.df <- basin.df %>%
-		dplyr::filter(max.wind > min.speed)
-	df.low <- basin.df %>%
-		dplyr::filter(sst.class == "low")
-	df.high <- basin.df %>%
-		dplyr::filter(sst.class == "high")
+	ggplot(all.data) +
+		aes_string(x = stat) +
+		geom_histogram(aes(fill = sst.class, group = sst.class),
+									 position = "identity", colour = "black", bins = 50, alpha = 0.5) +
+		scale_fill_manual(values = c("high" = "brown1",
+																 "low"  = "dodgerblue1")) +
+		theme_bw()
+}
 
-	# Extract data vectors
-	col.x.low <- df.low[[var1]]
-	col.y.low <- df.low[[var2]]
-	col.x.high <- df.high[[var1]]
-	col.y.high <- df.high[[var2]]
 
-	lm.high.y <- lm(log10(col.y.high) ~ log10(col.x.high))
-	lm.low.y <- lm(log10(col.y.low) ~ log10(col.x.low))
-	lm.high.x <- lm(log10(col.x.high) ~ log10(col.y.high))
-	lm.low.x <- lm(log10(col.x.low) ~ log10(col.y.low))
+# Arbitraty Q-Q plots --------------------------------------
 
-	# Automatic plot title
-	if (min.speed == 0) {
-		storms.str <- "all storms"
-	} else {
-		storms.str <- paste("wind speed >", min.speed)
-	}
-	years.str <- paste0( min(basin.df$storm.year), "-", max(basin.df$storm.year))
-	title.str <- paste0(basin, " (", storms.str, "; ", years.str, ")" )
+plot_arbitrary_qqplot <- function(col.x, col.y, name) {
+	data <- tibble(var1 = sort(col.x),
+								 var2 = sort(col.y))
+	gg <- ggplot(data, aes(sample = var1 )) +
+		stat_qq_line() +
+		# stat_qq_point(shape = 1, size = 1.5) +
+		geom_point(aes(x = var1, y = var2)) +
+		labs(x = "Theoretical Quantiles", y = name) +
+		theme_bw()
 
-	gg <- ggplot() +
-		# Scatterplot
-		geom_point(data = df.low, aes(x = col.x.low, y = col.y.low, colour = "low"), shape = 5, size = 1) +
-		geom_point(data = df.high, aes(x = col.x.high, y = col.y.high, colour = "high"), shape = 1, size = 1) +
-		# Regression lines
-		geom_abline(aes(slope = coef(lm.low.y)[[2]],
-										intercept = coef(lm.low.y)[[1]],
-										colour = "low", linetype = "y(x)")) +
-		geom_abline(aes(slope = 1/coef(lm.low.x)[[2]],
-										intercept = -coef(lm.low.x)[[1]]/coef(lm.low.x)[[2]],
-										colour = "low", linetype = "x(y)")) +
-		geom_abline(aes(slope = coef(lm.high.y)[[2]],
-										intercept = coef(lm.high.y)[[1]],
-										colour = "high", linetype = "y(x)")) +
-		geom_abline(aes(slope = 1/coef(lm.high.x)[[2]],
-										intercept = -coef(lm.high.x)[[1]]/coef(lm.high.x)[[2]],
-										colour = "high", linetype = "x(y)")) +
-		# Scales and legend
-		scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
-		scale_y_log10() +
-		guides(colour = guide_legend(order = 1, override.aes = list(linetype = c(0,0), shape = c(1,5))),
-					 linetype = guide_legend(order = 2, override.aes = list(colour = c("black", "black")))) +
-		scale_colour_manual(labels = c(bquote(.(paste0("high; ")) ~ r^2 ~
-																						.(paste0("= ", format(summary(lm.high.y)$r.squared, digits = 2)))),
-																	 bquote(.(paste0("low;  ")) ~ r^2 ~
-																	 			 	.(paste0("= ", format(summary(lm.low.y)$r.squared, digits = 2))))),
-												values = c("high" = "brown1", "low" = "dodgerblue1")) +
-		scale_linetype_manual(values = c("x(y)" = "longdash", "y(x)" = "solid")) +
-		labs(title = title.str,
-				 x = paste(eval(var1)), y = paste(eval(var2)),
-				 colour = "SST class", linetype = "Regression")
-
-	return(gg + theme_bw())
+	return(gg)
 }
