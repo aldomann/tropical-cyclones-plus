@@ -74,11 +74,11 @@ gg.models <- ggplot(resid.data) +
 gg.models #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "models-example.pdf", width = 5.5, height = 3, dpi = 96, device = cairo_pdf)
 
 
-plot_qqplot(resid.data[["resid"]], "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-norm-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_normal_qqplot(resid.data[["resid"]], "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-norm-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
-plot_qqplot(resid.data[["resid.b"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-skewed-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_normal_qqplot(resid.data[["resid.b"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-skewed-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
-plot_qqplot(resid.data[["resid.c"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-hetero-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_normal_qqplot(resid.data[["resid.c"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-hetero-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
 plot_resid_vs_fitted_from_data(resid.data, "y ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-norm-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 plot_resid_vs_fitted_from_data(resid.data, "y.b ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-skewed-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
