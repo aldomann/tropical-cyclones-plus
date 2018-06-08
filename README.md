@@ -9,7 +9,8 @@ New data base scripts:
 New base scripts: 
  - `[*] hurdat2_base.R`: add `record.id` column (contains information about landfalls).
  - `[+] oisst_base.R`: functions to extract SST data from OISST.
- - `[+] regression_base.R`: functions to perform bootstrap and permutation tests on slopes.
+ - `[+] regression_base.R`: functions to perform regression analysis.
+ - `[+] resampling_base.R`: functions to perform bootstrap and permutation tests on regression coefficients.
  - `[+] residuals_base.R`: functions to analyse residuals in the linear model.
  - `[+] geographic_base.R`: functions to analise the geographical track of hurricanes.
  - `[+] marginals_base.R`: functions to analise the marginal distributions of certain variables.
