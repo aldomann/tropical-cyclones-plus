@@ -26,21 +26,20 @@ if (!compute.flag) {
 	factors.ci.list <- readRDS("regression_ci_fact_list.rds")
 }
 
-
 # Confidence interval for all storms -----------------------
 
 if (compute.flag) {
 	# NATL
-	ci.natl.pdi <- summarise_conf_intervals("NATL", "storm.duration", "storm.pdi")
-	ci.natl.max.wind <- summarise_conf_intervals("NATL", "storm.duration", "max.wind")
-	ci.natl.mean.wind <- summarise_conf_intervals("NATL", "storm.duration", "mean.wind")
-	ci.natl.mean.sq.wind <- summarise_conf_intervals("NATL", "storm.duration", "mean.sq.wind")
+	ci.natl.pdi <- summarise_lm_coefs("NATL", "storm.duration", "storm.pdi")
+	ci.natl.max.wind <- summarise_lm_coefs("NATL", "storm.duration", "max.wind")
+	ci.natl.mean.wind <- summarise_lm_coefs("NATL", "storm.duration", "mean.wind")
+	ci.natl.mean.sq.wind <- summarise_lm_coefs("NATL", "storm.duration", "mean.sq.wind")
 
 	# EPAC
-	ci.epac.pdi <- summarise_conf_intervals("EPAC", "storm.duration", "storm.pdi")
-	ci.epac.max.wind <- summarise_conf_intervals("EPAC", "storm.duration", "max.wind")
-	ci.epac.mean.wind <- summarise_conf_intervals("EPAC", "storm.duration", "mean.wind")
-	ci.epac.mean.sq.wind <- summarise_conf_intervals("EPAC", "storm.duration", "mean.sq.wind")
+	ci.epac.pdi <- summarise_lm_coefs("EPAC", "storm.duration", "storm.pdi")
+	ci.epac.max.wind <- summarise_lm_coefs("EPAC", "storm.duration", "max.wind")
+	ci.epac.mean.wind <- summarise_lm_coefs("EPAC", "storm.duration", "mean.wind")
+	ci.epac.mean.sq.wind <- summarise_lm_coefs("EPAC", "storm.duration", "mean.sq.wind")
 }
 
 
@@ -48,16 +47,16 @@ if (compute.flag) {
 
 if (compute.flag) {
 	# NATL
-	ci.natl.pdi.ds <- summarise_conf_intervals("NATL", "storm.duration", "storm.pdi", 33)
-	ci.natl.max.wind.ds <- summarise_conf_intervals("NATL", "storm.duration", "max.wind", 33)
-	ci.natl.mean.wind.ds <- summarise_conf_intervals("NATL", "storm.duration", "mean.wind", 33)
-	ci.natl.mean.sq.wind.ds <- summarise_conf_intervals("NATL", "storm.duration", "mean.sq.wind", 33)
+	ci.natl.pdi.ds <- summarise_lm_coefs("NATL", "storm.duration", "storm.pdi", 33)
+	ci.natl.max.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "max.wind", 33)
+	ci.natl.mean.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "mean.wind", 33)
+	ci.natl.mean.sq.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "mean.sq.wind", 33)
 
 	# EPAC
-	ci.epac.pdi.ds <- summarise_conf_intervals("EPAC", "storm.duration", "storm.pdi", 33)
-	ci.epac.max.wind.ds <- summarise_conf_intervals("EPAC", "storm.duration", "max.wind", 33)
-	ci.epac.mean.wind.ds <- summarise_conf_intervals("EPAC", "storm.duration", "mean.wind", 33)
-	ci.epac.mean.sq.wind.ds <- summarise_conf_intervals("EPAC", "storm.duration", "mean.sq.wind", 33)
+	ci.epac.pdi.ds <- summarise_lm_coefs("EPAC", "storm.duration", "storm.pdi", 33)
+	ci.epac.max.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "max.wind", 33)
+	ci.epac.mean.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "mean.wind", 33)
+	ci.epac.mean.sq.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "mean.sq.wind", 33)
 }
 
 
@@ -67,16 +66,16 @@ if (compute.flag) {
 
 alfR::lok_regar(if (compute.flag) {
 	# NATL
-	fact.natl.pdi <- summarise_conf_intervals_factors("NATL", "storm.duration", "storm.pdi")
-	fact.natl.max.wind <- summarise_conf_intervals_factors("NATL", "storm.duration", "max.wind")
-	fact.natl.mean.wind <- summarise_conf_intervals_factors("NATL", "storm.duration", "mean.wind")
-	fact.natl.mean.sq.wind <- summarise_conf_intervals_factors("NATL", "storm.duration", "mean.sq.wind")
+	fact.natl.pdi <- summarise_lm_coefs("NATL", "storm.duration", "storm.pdi", metrics = "factor")
+	fact.natl.max.wind <- summarise_lm_coefs("NATL", "storm.duration", "max.wind", metrics = "factor")
+	fact.natl.mean.wind <- summarise_lm_coefs("NATL", "storm.duration", "mean.wind", metrics = "factor")
+	fact.natl.mean.sq.wind <- summarise_lm_coefs("NATL", "storm.duration", "mean.sq.wind", metrics = "factor")
 
 	# EPAC
-	fact.epac.pdi <- summarise_conf_intervals_factors("EPAC", "storm.duration", "storm.pdi")
-	fact.epac.max.wind <- summarise_conf_intervals_factors("EPAC", "storm.duration", "max.wind")
-	fact.epac.mean.wind <- summarise_conf_intervals_factors("EPAC", "storm.duration", "mean.wind")
-	fact.epac.mean.sq.wind <- summarise_conf_intervals_factors("EPAC", "storm.duration", "mean.sq.wind")
+	fact.epac.pdi <- summarise_lm_coefs("EPAC", "storm.duration", "storm.pdi", metrics = "factor")
+	fact.epac.max.wind <- summarise_lm_coefs("EPAC", "storm.duration", "max.wind", metrics = "factor")
+	fact.epac.mean.wind <- summarise_lm_coefs("EPAC", "storm.duration", "mean.wind", metrics = "factor")
+	fact.epac.mean.sq.wind <- summarise_lm_coefs("EPAC", "storm.duration", "mean.sq.wind", metrics = "factor")
 })
 
 
@@ -84,19 +83,17 @@ alfR::lok_regar(if (compute.flag) {
 
 alfR::lok_regar(if (compute.flag) {
 	# NATL
-	fact.natl.pdi.ds <- summarise_conf_intervals_factors("NATL", "storm.duration", "storm.pdi", 33)
-	fact.natl.max.wind.ds <- summarise_conf_intervals_factors("NATL", "storm.duration", "max.wind", 33)
-	fact.natl.mean.wind.ds <- summarise_conf_intervals_factors("NATL", "storm.duration", "mean.wind", 33)
-	fact.natl.mean.sq.wind.ds <- summarise_conf_intervals_factors("NATL", "storm.duration", "mean.sq.wind", 33)
+	fact.natl.pdi.ds <- summarise_lm_coefs("NATL", "storm.duration", "storm.pdi", 33, metrics = "factor")
+	fact.natl.max.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "max.wind", 33, metrics = "factor")
+	fact.natl.mean.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "mean.wind", 33, metrics = "factor")
+	fact.natl.mean.sq.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "mean.sq.wind", 33, metrics = "factor")
 
 	# EPAC
-	fact.epac.pdi.ds <- summarise_conf_intervals_factors("EPAC", "storm.duration", "storm.pdi", 33)
-	fact.epac.max.wind.ds <- summarise_conf_intervals_factors("EPAC", "storm.duration", "max.wind", 33)
-	fact.epac.mean.wind.ds <- summarise_conf_intervals_factors("EPAC", "storm.duration", "mean.wind", 33)
-	fact.epac.mean.sq.wind.ds <- summarise_conf_intervals_factors("EPAC", "storm.duration", "mean.sq.wind", 33)
+	fact.epac.pdi.ds <- summarise_lm_coefs("EPAC", "storm.duration", "storm.pdi", 33, metrics = "factor")
+	fact.epac.max.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "max.wind", 33, metrics = "factor")
+	fact.epac.mean.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "mean.wind", 33, metrics = "factor")
+	fact.epac.mean.sq.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "mean.sq.wind", 33, metrics = "factor")
 })
-
-
 
 
 # Scatterplots (all storms) --------------------------------

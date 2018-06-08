@@ -1,4 +1,4 @@
-# Base code to perform different statistical tests to analise the slopes of PDI vs duration
+# Base code to perform different statistical tests to analise the regression coefficients of PDI vs duration
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 # Libraries ------------------------------------------------
@@ -43,28 +43,28 @@ perform_bootstrap <- function(col.x, col.y, n.sim = 500) {
 	}
 
 	# Summarise results
-	full.results.df <- data.frame(
+	full.results.df <- tibble(
 		slope = slope.sim,
 		inter = inter.sim,
 		r2 = r.squared.sim
-		# row.names = 1
 	)
 
-	results.df <- data.frame(
-		slope = mean(slope.sim),
+	results.df <- tibble(
+		slope =    mean(slope.sim),
 		slope.sd = sd(slope.sim),
-		inter = mean(inter.sim),
+		inter =    mean(inter.sim),
 		inter.sd = sd(inter.sim),
-		r2 = mean(r.squared.sim)
+		r2 =       mean(r.squared.sim),
+		r2.sd =    sd(r.squared.sim)
 	)
 
 	return(list(results.df, full.results.df))
 }
 
-# Confidence intervals -------------------------------------
 
+# Linear regression coefficients ---------------------------
 
-get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000) {
+get_lm_coefs <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000) {
 	get_r_error <- function(r2, n){
 		r.std <- sqrt((1 - r2) / (n - 2))
 		r2.std <- 2 * r2 * r.std
@@ -92,223 +92,106 @@ get_conf_interval <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000
 	r.squared <- sum.fit$r.squared
 	r.squared.sd <- get_r_error(r.squared, n) # NEW
 
-	# Prepare variables for the simulation
-	# n.sim <- 1000 # Number of simulations
-	data.seq <- seq(1, n)
-	slope.sim <- numeric(n.sim)
-	slope.sd.sim <- numeric(n.sim)
-	inter.sim <- numeric(n.sim)
-	inter.sd.sim <- numeric(n.sim)
-	r.squared.sim <- numeric(n.sim)
-	t.value.slope.sim <- numeric(n.sim)
-	t.value.inter.sim <- numeric(n.sim)
+	boot.results <- perform_bootstrap(col.x, col.y)[[1]]
 
-	# Perform the simulation
-	for (i in 1:n.sim) {
-		sim.sample <- sample(data.seq, n, replace = T)
+	boot.slope <- boot.results$slope
+	boot.slope.sd <- boot.results$slope.sd
+	boot.inter <- boot.results$inter
+	boot.inter.sd <- boot.results$inter.sd
+	boot.r2 <- boot.results$r2
+	boot.r2.sd <- boot.results$r2.sd
 
-		# Fit linear model
-		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
-		sum.fit.value.sim <- summary(fit.value.sim)
-		# Slope
-		slope.sim[i] <- sum.fit.value.sim$coefficients[2]
-		slope.sd.sim[i] <- sum.fit.value.sim$coefficients[4]
-		# Intercept
-		inter.sim[i] <- sum.fit.value.sim$coefficients[1]
-		inter.sd.sim[i] <- sum.fit.value.sim$coefficients[3]
-		# R-Squared
-		r.squared.sim[i] <- sum.fit.value.sim$r.squared
-
-		# t-values
-		t.value.slope.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
-		t.value.inter.sim[i] <- (inter.sim[i] - inter) / inter.sd.sim[i]
-	}
-
-	# Bootstrap-t 95% method (slopes)
-	boot.slope.low <- slope + slope.sd * quantile(t.value.slope.sim, 0.025)
-	boot.slope.upp <- slope + slope.sd * quantile(t.value.slope.sim, 0.975)
-	boot.slope.sd <- (boot.slope.upp - boot.slope.low) / 2
-	boot.slope <- boot.slope.upp - boot.slope.sd
-
-	# Bootstrap-t 95% method (intercepts)
-	boot.inter.low <- inter + inter.sd * quantile(t.value.inter.sim, 0.025)
-	boot.inter.upp <- inter + inter.sd * quantile(t.value.inter.sim, 0.975)
-	boot.inter.sd <- (boot.inter.upp - boot.inter.low) / 2
-	boot.inter <- boot.inter.upp - boot.inter.sd
-
-	# Estimation of the correlation coefficient
-	r.squared.sim <- r.squared.sim[order(r.squared.sim)]
-	boot.r.sq.low <- quantile(r.squared.sim, 0.025)
-	boot.r.sq.upp <- quantile(r.squared.sim, 0.975)
-	boot.r.sq.sd <- (boot.r.sq.upp - boot.r.sq.low) / 2
-	boot.r.sq <- boot.r.sq.upp - boot.r.sq.sd
+	# # Prepare variables for the simulation
+	# # n.sim <- 1000 # Number of simulations
+	# data.seq <- seq(1, n)
+	# slope.sim <- numeric(n.sim)
+	# slope.sd.sim <- numeric(n.sim)
+	# inter.sim <- numeric(n.sim)
+	# inter.sd.sim <- numeric(n.sim)
+	# r.squared.sim <- numeric(n.sim)
+	# t.value.slope.sim <- numeric(n.sim)
+	# t.value.inter.sim <- numeric(n.sim)
+	#
+	# # Perform the simulation
+	# for (i in 1:n.sim) {
+	# 	sim.sample <- sample(data.seq, n, replace = T)
+	#
+	# 	# Fit linear model
+	# 	fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
+	# 	sum.fit.value.sim <- summary(fit.value.sim)
+	# 	# Slope
+	# 	slope.sim[i] <- sum.fit.value.sim$coefficients[2]
+	# 	slope.sd.sim[i] <- sum.fit.value.sim$coefficients[4]
+	# 	# Intercept
+	# 	inter.sim[i] <- sum.fit.value.sim$coefficients[1]
+	# 	inter.sd.sim[i] <- sum.fit.value.sim$coefficients[3]
+	# 	# R-Squared
+	# 	r.squared.sim[i] <- sum.fit.value.sim$r.squared
+	#
+	# 	# t-values
+	# 	t.value.slope.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
+	# 	t.value.inter.sim[i] <- (inter.sim[i] - inter) / inter.sd.sim[i]
+	# }
+	#
+	# # Bootstrap-t 95% method (slopes)
+	# boot.slope.low <- slope + slope.sd * quantile(t.value.slope.sim, 0.025)
+	# boot.slope.upp <- slope + slope.sd * quantile(t.value.slope.sim, 0.975)
+	# boot.slope.sd <- (boot.slope.upp - boot.slope.low) / 2
+	# boot.slope <- boot.slope.upp - boot.slope.sd
+	#
+	# # Bootstrap-t 95% method (intercepts)
+	# boot.inter.low <- inter + inter.sd * quantile(t.value.inter.sim, 0.025)
+	# boot.inter.upp <- inter + inter.sd * quantile(t.value.inter.sim, 0.975)
+	# boot.inter.sd <- (boot.inter.upp - boot.inter.low) / 2
+	# boot.inter <- boot.inter.upp - boot.inter.sd
+	#
+	# # Estimation of the correlation coefficient
+	# r.squared.sim <- r.squared.sim[order(r.squared.sim)]
+	# boot.r.sq.low <- quantile(r.squared.sim, 0.025)
+	# boot.r.sq.upp <- quantile(r.squared.sim, 0.975)
+	# boot.r.sq.sd <- (boot.r.sq.upp - boot.r.sq.low) / 2
+	# boot.r.sq <- boot.r.sq.upp - boot.r.sq.sd
 
 	# Summarise results
-	results.df <- data.frame(
-		metric      = c("lm",         "bootstrap",   "factor"),
+	results.df <- tibble(
+		metric      = c("ols",        "bootstrap",   "factor"),
 		sst.class   = rep(class, 3),
 		slope       = c(slope,        boot.slope,    boot.slope / slope),
 		slope.sd    = c(slope.sd,     boot.slope.sd, boot.slope.sd / slope.sd),
 		inter       = c(inter,        boot.inter,    boot.inter / inter),
 		inter.sd    = c(inter.sd,     boot.inter.sd, boot.inter.sd / inter.sd),
-		r2          = c(r.squared,    boot.r.sq,     boot.r.sq / r.squared),
-		r2.sd       = c(r.squared.sd, boot.r.sq.sd,  boot.r.sq.sd / r.squared.sd), # NEW
+		r2          = c(r.squared,    boot.r2,       boot.r2 / r.squared),
+		r2.sd       = c(r.squared.sd, boot.r2.sd,    boot.r2.sd / r.squared.sd), # NEW
 		dep.var     = rep(var2, 3),
-		indep.var   = rep(var1, 3),
-		row.names   = 1
+		indep.var   = rep(var1, 3)
 	)
-
-	i <- sapply(results.df, is.factor)
-	results.df[i] <- lapply(results.df[i], as.character)
 
 	return(results.df)
 }
 
-summarise_conf_intervals <- function(basin, var1, var2, min.speed = 0, n.sim = 1000) {
+summarise_lm_coefs <- function(basin, var1, var2, min.speed = 0,
+															 n.sim = 1000, metrics = c("ols", "bootstrap")) {
 	# Parse the basin PDI data frame
 	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
 
 	# var2 ~ var1 regression (y ~ x)
-	ci.yx.low <-  get_conf_interval(basin.df, "low",  var1, var2, min.speed, n.sim)
-	ci.yx.high <- get_conf_interval(basin.df, "high", var1, var2, min.speed, n.sim)
+	ci.yx.low <-  get_lm_coefs(basin.df, "low",  var1, var2, min.speed, n.sim)
+	ci.yx.high <- get_lm_coefs(basin.df, "high", var1, var2, min.speed, n.sim)
 
 	# var1 ~ var2 regression (x ~ y)
-	ci.xy.low <-  get_conf_interval(basin.df, "low",  var2, var1, min.speed)
-	ci.xy.high <- get_conf_interval(basin.df, "high", var2, var1, min.speed)
+	ci.xy.low <-  get_lm_coefs(basin.df, "low",  var2, var1, min.speed)
+	ci.xy.high <- get_lm_coefs(basin.df, "high", var2, var1, min.speed)
 
 	# Construct summarised data frame
-	results <- data.frame(
-		rbind(
-			cbind(ci.yx.low["bootstrap",], basin = toupper(basin), min.speed = min.speed),
-			cbind(ci.yx.high["bootstrap",], basin = toupper(basin), min.speed = min.speed),
-			cbind(ci.xy.low["bootstrap",], basin = toupper(basin), min.speed = min.speed),
-			cbind(ci.xy.high["bootstrap",], basin = toupper(basin), min.speed = min.speed)
-		)
+	results <- cbind(
+		rbind(ci.yx.low %>% filter(metric %in% metrics),
+					ci.yx.high %>% filter(metric %in% metrics),
+					ci.xy.low %>% filter(metric %in% metrics),
+					ci.xy.high %>% filter(metric %in% metrics)),
+		basin = toupper(basin), min.speed = min.speed
 	)
-	# results <- data.frame(
-	# 	rbind(
-	# 		cbind(ci.yx.low, basin = toupper(basin), min.speed = min.speed),
-	# 		cbind(ci.yx.high, basin = toupper(basin), min.speed = min.speed),
-	# 		cbind(ci.xy.low, basin = toupper(basin), min.speed = min.speed),
-	# 		cbind(ci.xy.high, basin = toupper(basin), min.speed = min.speed)
-	# 	)
-	# )
-	rownames(results) <- c()
 
 	return(results)
-}
-
-summarise_conf_intervals_factors <- function(basin, var1, var2, min.speed = 0, n.sim = 1000) {
-	# Parse the basin PDI data frame
-	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
-
-	# var2 ~ var1 regression (y ~ x)
-	ci.yx.low <-  get_conf_interval(basin.df, "low",  var1, var2, min.speed, n.sim)
-	ci.yx.high <- get_conf_interval(basin.df, "high", var1, var2, min.speed, n.sim)
-
-	# var1 ~ var2 regression (x ~ y)
-	ci.xy.low <-  get_conf_interval(basin.df, "low",  var2, var1, min.speed)
-	ci.xy.high <- get_conf_interval(basin.df, "high", var2, var1, min.speed)
-
-	# Construct summarised data frame
-	results <- data.frame(
-		rbind(
-			cbind(ci.yx.low["factor",], basin = toupper(basin), min.speed = min.speed),
-			cbind(ci.yx.high["factor",], basin = toupper(basin), min.speed = min.speed),
-			cbind(ci.xy.low["factor",], basin = toupper(basin), min.speed = min.speed),
-			cbind(ci.xy.high["factor",], basin = toupper(basin), min.speed = min.speed)
-		)
-	)
-	rownames(results) <- c()
-
-	return(results)
-}
-
-
-# Bootstrap for permutation test ---------------------------
-
-do_bootstrap <- function(col.x, col.y, n.sim = 500) {
-	# Construct data
-	data <- cbind(log10(col.x), log10(col.y))
-	n <- nrow(data)
-
-	# Linear regression
-	fit <- lm(data[,2] ~ data[,1])
-	sum.fit <- summary(fit)
-	slope <- sum.fit$coefficients[2]
-	slope.sd <- sum.fit$coefficients[4]
-	inter <- sum.fit$coefficients[1]
-	inter.sd <- sum.fit$coefficients[3]
-	r.squared <- sum.fit$r.squared
-
-	# Prepare variables for the simulation
-	# n.sim <- 500 # Number of simulations
-	data.seq <- seq(1, n)
-	slope.sim <- numeric(n.sim)
-	slope.sd.sim <- numeric(n.sim)
-	inter.sim <- numeric(n.sim)
-	inter.sd.sim <- numeric(n.sim)
-	r.squared.sim <- numeric(n.sim)
-	t.value.slope.sim <- numeric(n.sim)
-	t.value.inter.sim <- numeric(n.sim)
-
-	# Perform the simulation
-	for (i in 1:n.sim) {
-		sim.sample <- sample(data.seq, n, replace = T)
-
-		# Fit linear model
-		fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
-		sum.fit.value.sim <- summary(fit.value.sim)
-		# Slope
-		slope.sim[i] <- sum.fit.value.sim$coefficients[2]
-		slope.sd.sim[i] <- sum.fit.value.sim$coefficients[4]
-		# Intercept
-		inter.sim[i] <- sum.fit.value.sim$coefficients[1]
-		inter.sd.sim[i] <- sum.fit.value.sim$coefficients[3]
-		# R-Squared
-		r.squared.sim[i] <- sum.fit.value.sim$r.squared
-
-		# t-values
-		t.value.slope.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
-		t.value.inter.sim[i] <- (inter.sim[i] - inter) / inter.sd.sim[i]
-	}
-
-	# Bootstrap-t 95% method (slopes)
-	boot.slope.low <- slope + slope.sd * quantile(t.value.slope.sim, 0.025)
-	boot.slope.upp <- slope + slope.sd * quantile(t.value.slope.sim, 0.975)
-	boot.slope.sd <- (boot.slope.upp - boot.slope.low) / 2
-	boot.slope <- boot.slope.upp - boot.slope.sd
-
-	# Bootstrap-t 95% method (intercepts)
-	boot.inter.low <- inter + inter.sd * quantile(t.value.inter.sim, 0.025)
-	boot.inter.upp <- inter + inter.sd * quantile(t.value.inter.sim, 0.975)
-	boot.inter.sd <- (boot.inter.upp - boot.inter.low) / 2
-	boot.inter <- boot.inter.upp - boot.inter.sd
-
-	# Estimation of the correlation coefficient
-	r.squared.sim <- r.squared.sim[order(r.squared.sim)]
-	r.sq.low <- quantile(r.squared.sim, 0.025)
-	r.sq.upp <- quantile(r.squared.sim, 0.975)
-	r.sq.sd <- (r.sq.upp - r.sq.low) / 2
-	boot.r.sq <- r.sq.upp - r.sq.sd
-
-	# Summarise results
-	results.df <- data.frame(
-		# method = c("lm", "bootstrap-t"),
-		slope = c(boot.slope),
-		slope.sd = c(boot.slope.sd),
-		inter = c(boot.inter),
-		inter.sd = c(boot.inter.sd),
-		r2 = c(boot.r.sq),
-		# dep.var = rep(var2, 2),
-		# indep.var = rep(var1, 2),
-		row.names = 1
-	)
-
-	i <- sapply(results.df, is.factor)
-	results.df[i] <- lapply(results.df[i], as.character)
-
-	return(results.df)
 }
 
 
@@ -355,9 +238,6 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 		r.sqr.high <- sum.fit.high$r.squared
 	} else if (bootstrap) {
 		# True bootstrap statistics
-		# true.boot.lm.high <- do_bootstrap(col.x.high, col.y.high, n.boot)
-		# true.boot.lm.low <- do_bootstrap(col.x.low, col.y.low, n.boot)
-
 		true.boot.lm.high <- perform_bootstrap(col.x.high, col.y.high, n.boot)
 		true.boot.lm.low <- perform_bootstrap(col.x.low, col.y.low, n.boot)
 
@@ -520,7 +400,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 	r.sqr.p.value.err <- get_pval_error(r.sqr.p.value)
 
 	# Format results
-	results.df <- data.frame(
+	results.df <- tibble(
 		cbind(
 			# Slopes (Alt)
 			slope.alt.p.val = slope.alt.p.value,
@@ -549,7 +429,8 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 
 # Summarise p-values ---------------------------------------
 
-summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, n.sim = 1000) {
+summarise_p_values <- function(basin, var1, var2, min.speed = 0,
+															 bootstrap = F, n.sim = 1000) {
 	basin.df <- eval(parse(text=paste("pdi.", tolower(basin), sep = "")))
 
 	n.boot <- n.sim / 2
@@ -562,7 +443,7 @@ summarise_p_values <- function(basin, var1, var2, min.speed = 0, bootstrap = F, 
 
 
 	# Construct summarised data frame
-	results <- data.frame(
+	results <- tibble(
 		rbind(
 			cbind(p.val.yx, dep.var = var2, indep.var = var1,
 						basin = toupper(basin), min.speed = min.speed),
