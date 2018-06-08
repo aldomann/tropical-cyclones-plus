@@ -1,4 +1,4 @@
-# Code to analyse the residuals in the linear model
+# Base code to analyse the residuals in the linear model
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 
