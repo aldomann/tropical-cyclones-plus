@@ -208,14 +208,14 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 	}
 
 	# True statistics
-	T.true <- get_t_statistics(slope.low, slope.sd.low, inter.low, inter.sd.low, r.sqr.low,
-														 slope.high, slope.sd.high, inter.high, inter.sd.high, r.sqr.high)
-	slope.alt.stat.true <- T.true[1]
-	inter.alt.stat.true <- T.true[2]
-	slope.stat.true <- T.true[4]
-	inter.stat.true <- T.true[5]
-	total.stat.true <- T.true[6]
+	T.true <- get_t_statistics(c(slope.low, slope.sd.low, inter.low, inter.sd.low, r.sqr.low),
+														 c(slope.high, slope.sd.high, inter.high, inter.sd.high, r.sqr.high))
+	inter.alt.stat.true <- T.true[1]
+	slope.alt.stat.true <- T.true[2]
 	r.sqr.stat.true <- T.true[3]
+	inter.stat.true <- T.true[4]
+	slope.stat.true <- T.true[5]
+	total.stat.true <- T.true[6]
 
 	# Construct data
 	data.high <-cbind(col.x.high, col.y.high)
@@ -295,16 +295,16 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 			r.sqr.high.perm <- sim.boot.lm.high$r2
 		}
 		# Simulated statistics
-		T.sim <- get_t_statistics(slope.low.perm, slope.sd.low.perm,
-															inter.low.perm, inter.sd.low.perm, r.sqr.low.perm,
-															slope.high.perm, slope.sd.high.perm,
-															inter.high.perm, inter.sd.high.perm, r.sqr.high.perm)
-		slope.alt.stat.sim[i] <- T.sim[1]
-		inter.alt.stat.sim[i] <- T.sim[2]
-		slope.stat.sim[i] <- T.sim[4]
-		inter.stat.sim[i] <- T.sim[5]
-		total.stat.sim[i] <- T.sim[6]
+		T.sim <- get_t_statistics(c(slope.low.perm, slope.sd.low.perm,
+																inter.low.perm, inter.sd.low.perm, r.sqr.low.perm),
+															c(slope.high.perm, slope.sd.high.perm, inter.high.perm,
+																inter.sd.high.perm, r.sqr.high.perm))
+		inter.alt.stat.sim[i] <- T.sim[1]
+		slope.alt.stat.sim[i] <- T.sim[2]
 		r.sqr.stat.sim[i] <- T.sim[3]
+		inter.stat.sim[i] <- T.sim[4]
+		slope.stat.sim[i] <- T.sim[5]
+		total.stat.sim[i] <- T.sim[6]
 
 		# Counters for p-values
 		if (slope.alt.stat.sim[i] > slope.alt.stat.true) {

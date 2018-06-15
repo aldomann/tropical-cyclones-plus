@@ -108,13 +108,25 @@ explore_p_values <- function(p.values.list, alpha = 0.05) {
 # 	return(round(result, digits = 3))
 # }
 
-get_t_statistics <- function(slope.low, slope.sd.low, inter.low, inter.sd.low, r2.low,
-														 slope.high, slope.sd.high, inter.high, inter.sd.high, r2.high) {
-	T1 <- abs( slope.high - slope.low )
-	T2 <- abs( inter.high - inter.low )
+get_t_statistics <- function(coefs.low, coefs.high) {
+	# Low SST coefficients
+	slope.low <- coefs.low[1]
+	slope.sd.low <- coefs.low[2]
+	inter.low <- coefs.low[3]
+	inter.sd.low <- coefs.low[4]
+	r2.low <- coefs.low[5]
+	# High SST coefficients
+	slope.high <- coefs.high[1]
+	slope.sd.high <- coefs.high[2]
+	inter.high <- coefs.high[3]
+	inter.sd.high <- coefs.high[4]
+	r2.high <- coefs.high[5]
+
+	T1 <- abs( inter.high - inter.low )
+	T2 <- abs( slope.high - slope.low )
 	T3 <- abs( r2.high - r2.low )
-	T4 <- T1 / sqrt( slope.sd.high^2 + slope.sd.low^2 )
-	T5 <- T2 / sqrt( inter.sd.high^2 + inter.sd.low^2 )
+	T4 <- T1 / sqrt( inter.sd.high^2 + inter.sd.low^2 )
+	T5 <- T2 / sqrt( slope.sd.high^2 + slope.sd.low^2 )
 	T6 <- T5 + T4
 
 	result <- c(T1, T2, T3, T4, T5, T6)
