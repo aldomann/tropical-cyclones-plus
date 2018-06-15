@@ -163,22 +163,29 @@ pdi.epac <- pdi.all %>%
 plot_scatterplot("NATL", "storm.duration", "storm.pdi", 33) + labs(title = "N. Atl. regression analysis (1966-2016)", x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2))) + theme_bw() + theme(text = element_text(family = "Palatino")) + ggsave(filename = "scatter_natl.png", width = 6.5, height = 3., dpi = 300, device = "png")
 
 
+# PDI ~ duration OLS
+get_t_statistics(
+	coefs.low =  as.numeric(lm.coefs.list.natl.ds[[4]][5,3:7]),
+	coefs.high = as.numeric(lm.coefs.list.natl.ds[[4]][7,3:7])
+)
 
-get_T_statistics <- function(a, b, ci) {
-	T1 <- abs( ci[[a, 4]] - ci[[b, 4]])
-	T2 <- abs( ci[[a, 2]] - ci[[b, 2]])
-	T3 <- abs( ci[[a, 6]] - ci[[b, 6]])
-	T4 <- abs( ci[[a, 4]] - ci[[b, 4]]) / sqrt(ci[[a, 5]]^2 + ci[[b, 5]]^2 )
-	T5 <- abs( ci[[a, 2]] - ci[[b, 2]]) / sqrt(ci[[a, 3]]^2 + ci[[b, 3]]^2 )
-	T6 <- T5 + T4
+# PDI ~ duration Bootstrap
+get_t_statistics(
+	coefs.low =  as.numeric(lm.coefs.list.natl.ds[[4]][6,3:7]),
+	coefs.high = as.numeric(lm.coefs.list.natl.ds[[4]][8,3:7])
+)
 
-	result <- c(T1,T2,T3,T4,T5,T6)
+# Duration ~ PDI OLS
+get_t_statistics(
+	coefs.low =  as.numeric(lm.coefs.list.natl.ds[[4]][1,3:7]),
+	coefs.high = as.numeric(lm.coefs.list.natl.ds[[4]][3,3:7])
+)
 
-	return(round(result, digits = 3))
-}
+# Duration ~ PDI Bootstrap
+get_t_statistics(
+	coefs.low =  as.numeric(lm.coefs.list.natl.ds[[4]][2,3:7]),
+	coefs.high = as.numeric(lm.coefs.list.natl.ds[[4]][4,3:7])
+)
 
-get_T_statistics(1, 4,ci.natl.pdi.ds) # normal
-get_T_statistics(7, 10,ci.natl.pdi.ds)
 
-get_T_statistics(2, 5,ci.natl.pdi.ds) # boot
-get_T_statistics(8, 11,ci.natl.pdi.ds)
+
