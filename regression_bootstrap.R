@@ -23,24 +23,24 @@ compute.flag <- F
 # Load objects from disk -----------------------------------
 
 if (!compute.flag) {
-	ci.list <- readRDS("regression_ci_list.rds")
-	factors.ci.list <- readRDS("regression_ci_fact_list.rds")
+	lm.coefs.list <- readRDS("regression_lm_coefs_list.rds")
+	factors.lm.coefs.list <- readRDS("regression_lm_coefs_fact_list.rds")
 }
 
 # Confidence interval for all storms -----------------------
 
 if (compute.flag) {
 	# NATL
-	ci.natl.pdi <- summarise_lm_coefs("NATL", "storm.duration", "storm.pdi")
-	ci.natl.max.wind <- summarise_lm_coefs("NATL", "storm.duration", "max.wind")
-	ci.natl.mean.wind <- summarise_lm_coefs("NATL", "storm.duration", "mean.wind")
-	ci.natl.mean.sq.wind <- summarise_lm_coefs("NATL", "storm.duration", "mean.sq.wind")
+	lm.coefs.natl.pdi <- summarise_lm_coefs("NATL", "storm.duration", "storm.pdi")
+	lm.coefs.natl.max.wind <- summarise_lm_coefs("NATL", "storm.duration", "max.wind")
+	lm.coefs.natl.mean.wind <- summarise_lm_coefs("NATL", "storm.duration", "mean.wind")
+	lm.coefs.natl.mean.sq.wind <- summarise_lm_coefs("NATL", "storm.duration", "mean.sq.wind")
 
 	# EPAC
-	ci.epac.pdi <- summarise_lm_coefs("EPAC", "storm.duration", "storm.pdi")
-	ci.epac.max.wind <- summarise_lm_coefs("EPAC", "storm.duration", "max.wind")
-	ci.epac.mean.wind <- summarise_lm_coefs("EPAC", "storm.duration", "mean.wind")
-	ci.epac.mean.sq.wind <- summarise_lm_coefs("EPAC", "storm.duration", "mean.sq.wind")
+	lm.coefs.epac.pdi <- summarise_lm_coefs("EPAC", "storm.duration", "storm.pdi")
+	lm.coefs.epac.max.wind <- summarise_lm_coefs("EPAC", "storm.duration", "max.wind")
+	lm.coefs.epac.mean.wind <- summarise_lm_coefs("EPAC", "storm.duration", "mean.wind")
+	lm.coefs.epac.mean.sq.wind <- summarise_lm_coefs("EPAC", "storm.duration", "mean.sq.wind")
 }
 
 
@@ -48,16 +48,16 @@ if (compute.flag) {
 
 if (compute.flag) {
 	# NATL
-	ci.natl.pdi.ds <- summarise_lm_coefs("NATL", "storm.duration", "storm.pdi", 33)
-	ci.natl.max.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "max.wind", 33)
-	ci.natl.mean.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "mean.wind", 33)
-	ci.natl.mean.sq.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "mean.sq.wind", 33)
+	lm.coefs.natl.pdi.ds <- summarise_lm_coefs("NATL", "storm.duration", "storm.pdi", 33)
+	lm.coefs.natl.max.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "max.wind", 33)
+	lm.coefs.natl.mean.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "mean.wind", 33)
+	lm.coefs.natl.mean.sq.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "mean.sq.wind", 33)
 
 	# EPAC
-	ci.epac.pdi.ds <- summarise_lm_coefs("EPAC", "storm.duration", "storm.pdi", 33)
-	ci.epac.max.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "max.wind", 33)
-	ci.epac.mean.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "mean.wind", 33)
-	ci.epac.mean.sq.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "mean.sq.wind", 33)
+	lm.coefs.epac.pdi.ds <- summarise_lm_coefs("EPAC", "storm.duration", "storm.pdi", 33)
+	lm.coefs.epac.max.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "max.wind", 33)
+	lm.coefs.epac.mean.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "mean.wind", 33)
+	lm.coefs.epac.mean.sq.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "mean.sq.wind", 33)
 }
 
 
@@ -65,7 +65,7 @@ if (compute.flag) {
 
 # Confidence interval for all storms -----------------------
 
-alfR::lok_regar(if (compute.flag) {
+if (compute.flag) {
 	# NATL
 	fact.natl.pdi <- summarise_lm_coefs("NATL", "storm.duration", "storm.pdi", metrics = "factor")
 	fact.natl.max.wind <- summarise_lm_coefs("NATL", "storm.duration", "max.wind", metrics = "factor")
@@ -77,12 +77,12 @@ alfR::lok_regar(if (compute.flag) {
 	fact.epac.max.wind <- summarise_lm_coefs("EPAC", "storm.duration", "max.wind", metrics = "factor")
 	fact.epac.mean.wind <- summarise_lm_coefs("EPAC", "storm.duration", "mean.wind", metrics = "factor")
 	fact.epac.mean.sq.wind <- summarise_lm_coefs("EPAC", "storm.duration", "mean.sq.wind", metrics = "factor")
-})
+}
 
 
 # Confidence interval for developing systems ---------------
 
-alfR::lok_regar(if (compute.flag) {
+if (compute.flag) {
 	# NATL
 	fact.natl.pdi.ds <- summarise_lm_coefs("NATL", "storm.duration", "storm.pdi", 33, metrics = "factor")
 	fact.natl.max.wind.ds <- summarise_lm_coefs("NATL", "storm.duration", "max.wind", 33, metrics = "factor")
@@ -94,65 +94,66 @@ alfR::lok_regar(if (compute.flag) {
 	fact.epac.max.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "max.wind", 33, metrics = "factor")
 	fact.epac.mean.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "mean.wind", 33, metrics = "factor")
 	fact.epac.mean.sq.wind.ds <- summarise_lm_coefs("EPAC", "storm.duration", "mean.sq.wind", 33, metrics = "factor")
-})
+}
 
 
 # Scatterplots (all storms) --------------------------------
 
-# NATL
-plot_scatterplot("NATL", "storm.duration", "storm.pdi")
-plot_scatterplot("NATL", "storm.duration", "max.wind")
-plot_scatterplot("NATL", "storm.duration", "mean.wind")
-plot_scatterplot("NATL", "storm.duration", "mean.sq.wind")
-
-# EPAC
-plot_scatterplot("EPAC", "storm.duration", "storm.pdi")
-plot_scatterplot("EPAC", "storm.duration", "max.wind")
-plot_scatterplot("EPAC", "storm.duration", "mean.wind")
-plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind")
+# # NATL
+# plot_scatterplot("NATL", "storm.duration", "storm.pdi")
+# plot_scatterplot("NATL", "storm.duration", "max.wind")
+# plot_scatterplot("NATL", "storm.duration", "mean.wind")
+# plot_scatterplot("NATL", "storm.duration", "mean.sq.wind")
+#
+# # EPAC
+# plot_scatterplot("EPAC", "storm.duration", "storm.pdi")
+# plot_scatterplot("EPAC", "storm.duration", "max.wind")
+# plot_scatterplot("EPAC", "storm.duration", "mean.wind")
+# plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind")
 
 
 # Scatterplots (developing systems) ------------------------
 
-# NATL
-plot_scatterplot("NATL", "storm.duration", "storm.pdi", 33)
-plot_scatterplot("NATL", "storm.duration", "max.wind", 33)
-plot_scatterplot("NATL", "storm.duration", "mean.wind", 33)
-plot_scatterplot("NATL", "storm.duration", "mean.sq.wind", 33)
-
-# EPAC
-plot_scatterplot("EPAC", "storm.duration", "storm.pdi", 33)
-plot_scatterplot("EPAC", "storm.duration", "max.wind", 33)
-plot_scatterplot("EPAC", "storm.duration", "mean.wind", 33)
-plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind", 33)
+# # NATL
+# plot_scatterplot("NATL", "storm.duration", "storm.pdi", 33)
+# plot_scatterplot("NATL", "storm.duration", "max.wind", 33)
+# plot_scatterplot("NATL", "storm.duration", "mean.wind", 33)
+# plot_scatterplot("NATL", "storm.duration", "mean.sq.wind", 33)
+#
+# # EPAC
+# plot_scatterplot("EPAC", "storm.duration", "storm.pdi", 33)
+# plot_scatterplot("EPAC", "storm.duration", "max.wind", 33)
+# plot_scatterplot("EPAC", "storm.duration", "mean.wind", 33)
+# plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind", 33)
 
 
 # Summarise CI data frames ---------------------------------
 
 # Group data frames into a list
 if (compute.flag) {
-	rm(ci.list)
-	ci.list <- lapply(ls(patt='^ci.'), get)
-	factors.ci.list <- lapply(ls(patt='^fact.'), get)
-	saveRDS(ci.list, "regression_ci_list.rds")
-	saveRDS(factors.ci.list, "regression_ci_fact_list.rds")
-	# rm(list=ls(pattern="^ci.epac"))
-	# rm(list=ls(pattern="^ci.natl"))
+	# rm(lm.coefs.list)
+	lm.coefs.list <- lapply(ls(patt='^lm.coefs.'), get)
+	# rm(factors.lm.coefs.list)
+	factors.lm.coefs.list <- lapply(ls(patt='^fact.'), get)
+	saveRDS(lm.coefs.list, "regression_lm_coefs_list.rds")
+	saveRDS(factors.lm.coefs.list, "regression_lm_coefs_fact_list.rds")
+	# rm(list=ls(pattern="^lm.coefs.epac"))
+	# rm(list=ls(pattern="^lm.coefs.natl"))
 }
 
 # NATL (all storms)
-ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0]
+lm.coefs.list.natl <- lm.coefs.list[lapply(purrr::map(lm.coefs.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 0)), nrow) > 0]
 
 # NATL (all storms)
-ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0]
+lm.coefs.list.epac <- lm.coefs.list[lapply(purrr::map(lm.coefs.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 0)), nrow) > 0]
 
 # NATL (developing systems)
-ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0]
+lm.coefs.list.natl.ds <- lm.coefs.list[lapply(purrr::map(lm.coefs.list, ~dplyr::filter(.x, basin == "NATL", min.speed == 33)), nrow) > 0]
 
 # EPAC (developing systems)
-ci.list[lapply(purrr::map(ci.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0]
+lm.coefs.list.epac.ds <- lm.coefs.list[lapply(purrr::map(lm.coefs.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0]
 
 
 # Compare CI methods ---------------------------------------
 
-compare_ci_methods(factors.ci.list)
+# compare_ci_methods(factors.lm.coefs.list)
