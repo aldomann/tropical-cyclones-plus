@@ -101,57 +101,6 @@ get_lm_coefs <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000) {
 	boot.r2 <- boot.results$r2
 	boot.r2.sd <- boot.results$r2.sd
 
-	# # Prepare variables for the simulation
-	# # n.sim <- 1000 # Number of simulations
-	# data.seq <- seq(1, n)
-	# slope.sim <- numeric(n.sim)
-	# slope.sd.sim <- numeric(n.sim)
-	# inter.sim <- numeric(n.sim)
-	# inter.sd.sim <- numeric(n.sim)
-	# r.squared.sim <- numeric(n.sim)
-	# t.value.slope.sim <- numeric(n.sim)
-	# t.value.inter.sim <- numeric(n.sim)
-	#
-	# # Perform the simulation
-	# for (i in 1:n.sim) {
-	# 	sim.sample <- sample(data.seq, n, replace = T)
-	#
-	# 	# Fit linear model
-	# 	fit.value.sim <- lm(data[sim.sample, 2] ~ data[sim.sample, 1])
-	# 	sum.fit.value.sim <- summary(fit.value.sim)
-	# 	# Slope
-	# 	slope.sim[i] <- sum.fit.value.sim$coefficients[2]
-	# 	slope.sd.sim[i] <- sum.fit.value.sim$coefficients[4]
-	# 	# Intercept
-	# 	inter.sim[i] <- sum.fit.value.sim$coefficients[1]
-	# 	inter.sd.sim[i] <- sum.fit.value.sim$coefficients[3]
-	# 	# R-Squared
-	# 	r.squared.sim[i] <- sum.fit.value.sim$r.squared
-	#
-	# 	# t-values
-	# 	t.value.slope.sim[i] <- (slope.sim[i] - slope) / slope.sd.sim[i]
-	# 	t.value.inter.sim[i] <- (inter.sim[i] - inter) / inter.sd.sim[i]
-	# }
-	#
-	# # Bootstrap-t 95% method (slopes)
-	# boot.slope.low <- slope + slope.sd * quantile(t.value.slope.sim, 0.025)
-	# boot.slope.upp <- slope + slope.sd * quantile(t.value.slope.sim, 0.975)
-	# boot.slope.sd <- (boot.slope.upp - boot.slope.low) / 2
-	# boot.slope <- boot.slope.upp - boot.slope.sd
-	#
-	# # Bootstrap-t 95% method (intercepts)
-	# boot.inter.low <- inter + inter.sd * quantile(t.value.inter.sim, 0.025)
-	# boot.inter.upp <- inter + inter.sd * quantile(t.value.inter.sim, 0.975)
-	# boot.inter.sd <- (boot.inter.upp - boot.inter.low) / 2
-	# boot.inter <- boot.inter.upp - boot.inter.sd
-	#
-	# # Estimation of the correlation coefficient
-	# r.squared.sim <- r.squared.sim[order(r.squared.sim)]
-	# boot.r.sq.low <- quantile(r.squared.sim, 0.025)
-	# boot.r.sq.upp <- quantile(r.squared.sim, 0.975)
-	# boot.r.sq.sd <- (boot.r.sq.upp - boot.r.sq.low) / 2
-	# boot.r.sq <- boot.r.sq.upp - boot.r.sq.sd
-
 	# Summarise results
 	results.df <- tibble(
 		metric      = c("ols",        "bootstrap",   "factor"),
@@ -238,8 +187,8 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 		r.sqr.high <- sum.fit.high$r.squared
 	} else if (bootstrap) {
 		# True bootstrap statistics
-		true.boot.lm.high <- perform_bootstrap(col.x.high, col.y.high, n.boot)
-		true.boot.lm.low <- perform_bootstrap(col.x.low, col.y.low, n.boot)
+		true.boot.lm.high <- perform_bootstrap(col.x.high, col.y.high, n.boot)[[1]]
+		true.boot.lm.low <- perform_bootstrap(col.x.low, col.y.low, n.boot)[[1]]
 
 		# True slopes
 		slope.low <- true.boot.lm.low$slope
@@ -259,12 +208,14 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 	}
 
 	# True statistics
-	slope.alt.stat.true <- abs(slope.high - slope.low)
-	inter.alt.stat.true <- abs(inter.high - inter.low)
-	slope.stat.true <- slope.alt.stat.true/sqrt(slope.sd.high^2 + slope.sd.low^2)
-	inter.stat.true <- inter.alt.stat.true/sqrt(inter.sd.high^2 + inter.sd.low^2)
-	total.stat.true <- slope.stat.true + inter.stat.true
-	r.sqr.stat.true <- abs(r.sqr.high - r.sqr.low)
+	T.true <- get_t_statistics(slope.low, slope.sd.low, inter.low, inter.sd.low, r.sqr.low,
+														 slope.high, slope.sd.high, inter.high, inter.sd.high, r.sqr.high)
+	slope.alt.stat.true <- T.true[1]
+	inter.alt.stat.true <- T.true[2]
+	slope.stat.true <- T.true[4]
+	inter.stat.true <- T.true[5]
+	total.stat.true <- T.true[6]
+	r.sqr.stat.true <- T.true[3]
 
 	# Construct data
 	data.high <-cbind(col.x.high, col.y.high)
@@ -324,11 +275,8 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 			r.sqr.high.perm <- sum.fit.high.perm$r.squared
 		} else if (bootstrap) {
 			# Simulated bootstrap statistics
-			# sim.boot.lm.high <- do_bootstrap(high[,1], high[,2], n.boot)
-			# sim.boot.lm.low <- do_bootstrap(low[,1], low[,2], n.boot)
-
-			sim.boot.lm.high <- perform_bootstrap(high[,1], high[,2], n.boot)
-			sim.boot.lm.low <- perform_bootstrap(low[,1], low[,2], n.boot)
+			sim.boot.lm.high <- perform_bootstrap(high[,1], high[,2], n.boot)[[1]]
+			sim.boot.lm.low <- perform_bootstrap(low[,1], low[,2], n.boot)[[1]]
 
 			# Simulated slopes
 			slope.low.perm <- sim.boot.lm.low$slope
@@ -346,14 +294,17 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 			r.sqr.low.perm <- sim.boot.lm.low$r2
 			r.sqr.high.perm <- sim.boot.lm.high$r2
 		}
-
 		# Simulated statistics
-		slope.alt.stat.sim[i] <- abs(slope.high.perm - slope.low.perm)
-		inter.alt.stat.sim[i] <- abs(inter.high.perm - inter.low.perm)
-		slope.stat.sim[i] <- slope.alt.stat.sim[i]/sqrt(slope.sd.high.perm^2 + slope.sd.low.perm^2)
-		inter.stat.sim[i] <- inter.alt.stat.sim[i]/sqrt(inter.sd.high.perm^2 + inter.sd.low.perm^2)
-		total.stat.sim[i] <- slope.stat.sim[i] + inter.stat.sim[i]
-		r.sqr.stat.sim[i] <- abs(r.sqr.high.perm - r.sqr.low.perm)
+		T.sim <- get_t_statistics(slope.low.perm, slope.sd.low.perm,
+															inter.low.perm, inter.sd.low.perm, r.sqr.low.perm,
+															slope.high.perm, slope.sd.high.perm,
+															inter.high.perm, inter.sd.high.perm, r.sqr.high.perm)
+		slope.alt.stat.sim[i] <- T.sim[1]
+		inter.alt.stat.sim[i] <- T.sim[2]
+		slope.stat.sim[i] <- T.sim[4]
+		inter.stat.sim[i] <- T.sim[5]
+		total.stat.sim[i] <- T.sim[6]
+		r.sqr.stat.sim[i] <- T.sim[3]
 
 		# Counters for p-values
 		if (slope.alt.stat.sim[i] > slope.alt.stat.true) {
@@ -401,7 +352,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 
 	# Format results
 	results.df <- tibble(
-		cbind(
+		# cbind(
 			# Slopes (Alt)
 			slope.alt.p.val = slope.alt.p.value,
 			slope.alt.p.val.error = slope.alt.p.value.err,
@@ -420,7 +371,7 @@ do_permutation_test <- function(df, var1, var2, min.speed = 0, bootstrap = F, n.
 			# R Squared
 			r.sqr.p.val = r.sqr.p.value,
 			r.sqr.p.val.error = r.sqr.p.value.err
-		)
+		# )
 	)
 
 	return(results.df)
@@ -443,14 +394,12 @@ summarise_p_values <- function(basin, var1, var2, min.speed = 0,
 
 
 	# Construct summarised data frame
-	results <- tibble(
-		rbind(
+	results <- rbind(
 			cbind(p.val.yx, dep.var = var2, indep.var = var1,
 						basin = toupper(basin), min.speed = min.speed),
 			cbind(p.val.xy, dep.var = var1, indep.var = var2,
 						basin = toupper(basin), min.speed = min.speed)
 		)
-	)
 
 	i <- sapply(results, is.factor)
 	results[i] <- lapply(results[i], as.character)

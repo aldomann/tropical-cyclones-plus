@@ -1,4 +1,4 @@
-# Base code to perform different statistical tests to analise the slopes of PDI vs duration
+# Base code to perform regression analysis of PDI vs duration
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 # Libraries ------------------------------------------------
@@ -90,6 +90,36 @@ explore_p_values <- function(p.values.list, alpha = 0.05) {
 			}
 		}
 	}
+}
+
+
+# Calculate T statistics -----------------------------------
+
+# get_T_statistics <- function(a, b, ci) {
+# 	T1 <- abs( ci[[a, 4]] - ci[[b, 4]])
+# 	T2 <- abs( ci[[a, 2]] - ci[[b, 2]])
+# 	T3 <- abs( ci[[a, 6]] - ci[[b, 6]])
+# 	T4 <- abs( ci[[a, 4]] - ci[[b, 4]]) / sqrt(ci[[a, 5]]^2 + ci[[b, 5]]^2 )
+# 	T5 <- abs( ci[[a, 2]] - ci[[b, 2]]) / sqrt(ci[[a, 3]]^2 + ci[[b, 3]]^2 )
+# 	T6 <- T5 + T4
+#
+# 	result <- c(T1,T2,T3,T4,T5,T6)
+#
+# 	return(round(result, digits = 3))
+# }
+
+get_t_statistics <- function(slope.low, slope.sd.low, inter.low, inter.sd.low, r2.low,
+														 slope.high, slope.sd.high, inter.high, inter.sd.high, r2.high) {
+	T1 <- abs( slope.high - slope.low )
+	T2 <- abs( inter.high - inter.low )
+	T3 <- abs( r2.high - r2.low )
+	T4 <- T1 / sqrt( slope.sd.high^2 + slope.sd.low^2 )
+	T5 <- T2 / sqrt( inter.sd.high^2 + inter.sd.low^2 )
+	T6 <- T5 + T4
+
+	result <- c(T1, T2, T3, T4, T5, T6)
+
+	return(round(result, digits = 4))
 }
 
 # Compare statistics and CI methods ------------------------
@@ -235,15 +265,18 @@ plot_boot_coefs_hist <- function(data.low, data.high, stat) {
 
 # Arbitraty Q-Q plots --------------------------------------
 
-plot_arbitrary_qqplot <- function(col.x, col.y, name) {
+plot_dists_qqplot <- function(col.x, col.y) {
 	data <- tibble(var1 = sort(col.x),
 								 var2 = sort(col.y))
-	gg <- ggplot(data, aes(sample = var1 )) +
-		stat_qq_line() +
+	gg <- ggplot(data, aes(sample = var2 )) +
+		# stat_qq_line() +
 		# stat_qq_point(shape = 1, size = 1.5) +
 		geom_point(aes(x = var1, y = var2)) +
-		labs(x = "Theoretical Quantiles", y = name) +
+		labs(x = "Var 1", y = "Var 2") +
 		theme_bw()
 
 	return(gg)
 }
+
+# plot_dists_qqplot(boot.low.data$slope, boot.high.data$slope)
+# plot_dists_qqplot(boot.low.data$inter, boot.high.data$inter)
