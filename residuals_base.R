@@ -93,3 +93,22 @@ plot_normal_qqplot <- function(col, name) {
 
 	return(gg)
 }
+
+
+
+# Statistical tests ----------------------------------------
+
+perform_residual_tests <- function(col.x, col.y) {
+	data <- data.frame(col.x, col.y)
+
+	fit <- lm(data[[2]] ~ data[[1]])
+	norm.p.val <- lillie.test(residuals(fit))$p.value
+	inde.p.val <- cor.test(residuals(fit), fitted(fit))$p.value
+	homo.p.val <- bptest(fit)$p.value
+
+	return(c(
+		"norm.p.val" = norm.p.val,
+		"inde.p.val" = inde.p.val,
+		"homo.p.val" = homo.p.val
+	))
+}
