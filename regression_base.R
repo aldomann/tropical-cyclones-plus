@@ -131,7 +131,7 @@ get_t_statistics <- function(coefs.low, coefs.high) {
 
 	result <- c(T1, T2, T3, T4, T5, T6)
 
-	return(round(result, digits = 4))
+	return(round(result, digits = 3))
 }
 
 # Compare statistics and CI methods ------------------------

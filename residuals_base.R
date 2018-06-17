@@ -84,6 +84,7 @@ get_boot_residuals <- function(col.x, col.y, boot.stats) {
 
 plot_normal_qqplot <- function(col, name) {
 	var.data <-  tibble(variable = col)
+
 	gg <- ggplot(var.data, aes( sample = variable )) +
 		stat_qq_line() +
 		stat_qq_point(shape = 1, size = 1.5) +
