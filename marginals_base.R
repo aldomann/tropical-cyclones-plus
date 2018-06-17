@@ -36,7 +36,7 @@ summarise_marginals_stats <- function(basin.name, min.speed = 0) {
 
 analyse_marginals_compat <- function(basin.name, min.speed = 0) {
 
-	data <- get_marginals_stats(basin.name, min.speed)
+	data <- summarise_marginals_stats(basin.name, min.speed)
 
 	is_overlapping <- function(x, err) {
 		lower <- min(x) + err[[which.min(x)]]
