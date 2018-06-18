@@ -44,21 +44,21 @@ resid.data <- tibble(
 
 set.seed(10)
 resid.data$resid <- rnorm(75, 0, 0.5)
-set.seed(94)
-resid.data$resid.b <- rnorm(75, 0, 0.5)^2 + runif(75, 0 ,1) ^2
 set.seed(12)
-resid.data$resid.c <- rnorm(75, 0, 0.5)
+resid.data$resid.b <- rnorm(75, 0, 0.5)
+set.seed(94)
+resid.data$resid.c <- rnorm(75, 0, 0.5)^2 + runif(75, 0 ,1) ^2
 
 resid.data <- resid.data %>%
 	dplyr::mutate(
 		y = 3 * x + resid,
-		y.b = 3 * x + resid.b,
-		y.c = 3 * x + (1 + x) * resid.c
+		y.b = 3 * x + (1 + x) * resid.b,
+		y.c = 3 * x + resid.c
 	)
 
 gg.models <- ggplot(resid.data) +
-	geom_jitter(aes(x = x, y = y.b, colour = "Skewed", shape = "skewed"), height = 20) +
-	geom_point(aes(x = x, y = y.c, colour = "Heteroscedastic", shape = "hetero")) +
+	geom_point(aes(x = x, y = y.b, colour = "Heteroscedastic", shape = "hetero")) +
+	geom_jitter(aes(x = x, y = y.c, colour = "Skewed", shape = "skewed"), height = 20) +
 	geom_jitter(aes(x = x, y = y, colour = "Homoscedastic", shape = "homo"), height = 20) +
 	scale_shape_manual(values = c("homo"   = 0,
 																"hetero" = 1,
@@ -76,14 +76,18 @@ gg.models #+ theme(text = element_text(family = "Palatino")) + ggsave(filename =
 
 plot_normal_qqplot(resid.data[["resid"]], "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-norm-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
-plot_normal_qqplot(resid.data[["resid.b"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-skewed-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_normal_qqplot(resid.data[["resid.b"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-hetero-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
-plot_normal_qqplot(resid.data[["resid.c"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-hetero-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_normal_qqplot(resid.data[["resid.c"]] , "Sample Quantiles") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "qq-skewed-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
 plot_resid_vs_fitted_from_data(resid.data, "y ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-norm-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
-plot_resid_vs_fitted_from_data(resid.data, "y.b ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-skewed-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
-plot_resid_vs_fitted_from_data(resid.data, "y.c ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-hetero-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_resid_vs_fitted_from_data(resid.data, "y.b ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-hetero-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_resid_vs_fitted_from_data(resid.data, "y.c ~ x") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "resid-skewed-example.pdf", width = 2.5, height = 2.5, dpi = 96, device = cairo_pdf)
 
+# p-values for normality, independence, and homoscedasticity tests
+perform_residual_tests(resid.data$x, resid.data$y)
+perform_residual_tests(resid.data$x, resid.data$y.b)
+perform_residual_tests(resid.data$x, resid.data$y.c)
 
 # Poster ---------------------------------------------------
 source("geographic_base.R")
