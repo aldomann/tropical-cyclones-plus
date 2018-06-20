@@ -108,10 +108,11 @@ perform_residual_tests <- function(col.x, col.y) {
 	inde.p.val <- cor.test(residuals(fit), fitted(fit))$p.value
 	homo.p.val <- bptest(fit)$p.value
 
+	round.digits <- 4
 	return(c(
-		"norm.p.val" = norm.p.val,
-		"inde.p.val" = inde.p.val,
-		"homo.p.val" = homo.p.val
+		"norm.p.val" = round(norm.p.val, digits = round.digits),
+		"inde.p.val" = round(inde.p.val, digits = round.digits),
+		"homo.p.val" = round(homo.p.val, digits = round.digits)
 	))
 }
 
@@ -120,9 +121,10 @@ perform_fit_residual_tests <- function(fit) {
 	inde.p.val <- cor.test(residuals(fit), fitted(fit))$p.value
 	homo.p.val <- bptest(fit)$p.value
 
+	round.digits <- 4
 	return(c(
-		"norm.p.val" = norm.p.val,
-		"inde.p.val" = inde.p.val,
-		"homo.p.val" = homo.p.val
+		"norm.p.val" = round(norm.p.val, digits = round.digits),
+		"inde.p.val" = round(inde.p.val, digits = round.digits),
+		"homo.p.val" = round(homo.p.val, digits = round.digits)
 	))
 }
