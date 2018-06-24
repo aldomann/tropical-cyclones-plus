@@ -5,8 +5,8 @@ library(tidyverse)
 
 # Get RAW data ---------------------------------------------
 
-pdi.all <- as_tibble(data.table::fread('data/hurdat2-hadisst-1966-2016_pdis.csv')) %>%
 # pdi.all <- as_tibble(data.table::fread('data/hurdat2-hadisst-1966-2016_pdis_with_month.csv')) %>%
+pdi.all <- as_tibble(data.table::fread('data/hurdat2-hadisst-1966-2016_pdis.csv')) %>%
 	mutate(storm.duration = measurements::conv_unit(storm.duration, "sec", "hr"))
 
 pdi.natl <- pdi.all %>%
@@ -27,146 +27,45 @@ construct_data <- function(pdi.df) {
 	return(df)
 }
 
-plot_dev_systems_ratio <- function(pdi.df, type = "ratio") {
-	df <- construct_data(pdi.df)
-
-	gg <- ggplot(df) +
-		aes(x = storm.year)
-
-	if (type == "ratio") {
-		gg <- gg +
-			geom_line(aes(y = ratio)) +
-			geom_point(aes(y = ratio, colour = interaction(basin, sst.class))) +
-			geom_hline( aes(yintercept = mean(ratio)), linetype = "dashed") +
-			scale_y_continuous(limits = c(0, 1)) +
-			labs(title = "Ratio of tropical depressions (v ≤ 33) per year",
-					 colour = "SST Class")
-	} else if (type == "total") {
-		gg <- gg +
-			geom_line(aes(y = nds)) +
-			geom_point(aes(y = nds, colour = interaction(basin, sst.class))) +
-			geom_hline( aes(yintercept = mean(nds)), linetype = "dashed") +
-			scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0,10)) +
-			labs(title = "Number of tropical depressions (v ≤ 33) per year",
-					 colour = "SST Class")
-	} else if (type == "total-ds") {
-		gg <- gg +
-			geom_line(aes(y = ds) ) +
-			geom_point(aes(y = ds, colour = interaction(basin, sst.class))) +
-			geom_hline( aes(yintercept = mean(ds)), linetype = "dashed") +
-			# scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0,10)) +
-			labs(title = "Number of tropical-cyclones (v > 33) per year",
-					 colour = "SST Class")
-	}
-
-
-	gg <- gg +
-		scale_colour_manual(values = c("NATL.high" = "brown1", "NATL.low" = "dodgerblue1",
-																	 "EPAC.high" = "brown1", "EPAC.low" = "dodgerblue1")) +
-		# scale_color_manual(values = c("EPAC" = "mediumseagreen", "NATL" = "mediumslateblue")) +
-		theme_bw()
-
-	return(gg)
-}
-
-# plot_dev_systems_ratio(pdi.natl, "total") +
-# 	facet_wrap(~ sst.class, nrow = 2) +
-# 	guides(colour = FALSE) +
-# 	ggsave(filename = "ds-natl-total.pdf", width = 4, height = 4, dpi = 96, device = cairo_pdf)
-#
-# plot_dev_systems_ratio(pdi.natl) + facet_wrap(~ sst.class, nrow = 2) +
-# 	facet_wrap(~ sst.class, nrow = 2) +
-# 	guides(colour = FALSE) +
-# 	ggsave(filename = "ds-natl-ratio.pdf", width = 4, height = 4, dpi = 96, device = cairo_pdf)
-#
-#
-# plot_dev_systems_ratio(pdi.epac, "total") + facet_wrap(~ sst.class, nrow = 2) +
-# 	facet_wrap(~ sst.class, nrow = 2) +
-# 	guides(colour = FALSE) +
-# 	ggsave(filename = "ds-epac-total.pdf", width = 4, height = 4, dpi = 96, device = cairo_pdf)
-# plot_dev_systems_ratio(pdi.epac) + facet_wrap(~ sst.class, nrow = 2) +
-# 	facet_wrap(~ sst.class, nrow = 2) +
-# 	guides(colour = FALSE) +
-# 	ggsave(filename = "ds-epac-ratio.pdf", width = 4, height = 4, dpi = 96, device = cairo_pdf)
-#
-# plot_dev_systems_ratio(pdi.all, "total") +
-# 	facet_grid(~ basin) +
-# 	ggsave(filename = "ds-all-total.pdf", width = 6, height = 3, dpi = 96, device = cairo_pdf)
-#
-# plot_dev_systems_ratio(pdi.all) +
-# 	facet_grid(~ basin) +
-# 	ggsave(filename = "ds-all-ratio.pdf", width = 6, height = 3, dpi = 96, device = cairo_pdf)
-#
-# plot_dev_systems_ratio(pdi.all, "total-ds") +
-# 	facet_grid(~ basin) +
-# 	ggsave(filename = "ds-all-total-ds.pdf", width = 6, height = 3, dpi = 96, device = cairo_pdf)
-
-
-
 # Test -----------------------------------------------------
 
-# library(TTR)
-a <- construct_data(pdi.natl)%>%
-	# select(storm.year,  sst.class) %>%
-	# mutate(Dates = lubridate::as_date(paste(storm.year, 1, 1, sep = "-"), "%y-%m-%d"))
-	# mutate(Dates = lubridate::as_date(paste(storm.year, storm.month, 1, sep = "-"), "%y-%m-%d"))
+natl.storms <- construct_data(pdi.natl)%>%
 	mutate(Dates = as.Date(as.character(paste(storm.year, 01, 01, sep = "-"), "%Y-%m-%d")))
 
-a.low <- a %>%
-	filter(sst.class == "low")
+summarise_stationarity_tests <- function(df) {
+	test_stationarity <- function(df) {
+		nds <- aTSA::kpss.test(df$nds, output = F)[[1,3]]
+		ds <- aTSA::kpss.test(df$ds, output = F)[[1,3]]
+		total <- aTSA::kpss.test(df$total, output = F)[[1,3]]
 
-a.high <- a %>%
-	filter(sst.class == "high")
+		return(c(nds, ds, total))
+	}
 
-# a.dates <- tibble(Dates = seq(as.Date("1966/1/1"), as.Date("2016/12/1"), by = "year"))
-#
-# a.low <- full_join(a.low, a.dates)
-# a.low <- arrange(a.low, Dates) #%>%
-	#mutate(ds = ifelse(is.na(ds), 0, ds))
-
-# library(fractal)
-# library(locits)
-library(aTSA)
-
-# If your data is sufficient, studies are efficient , methods are sensitive and you are unbaised. These four provides completeness.
-
-test_stationarity <- function(df) {
-	nds <- kpss.test(df$nds, output = F)[[1,3]] # NS
-	ds <- kpss.test(df$ds, output = F)[[1,3]] # S
-	total <- kpss.test(df$total, output = F)[[1,3]] # S
-
-	return(
-		tibble(
-			p.val.nds = nds,
-			p.val.ds = ds,
-			p.val.total = total
+	results <- as_tibble(
+		rbind(
+			test_stationarity(df),
+			test_stationarity(df %>% filter(sst.class == "low")),
+			test_stationarity(df %>% filter(sst.class == "high"))
 		)
 	)
+
+	results <- as_tibble(cbind(type = c("all", "low", "ligh"), results)) %>%
+		dplyr::rename("nds" = V1, "ds" = V2, "total" = V3)
+
+	return(results)
 }
 
-test_stationarity(a)
-test_stationarity(a.high)
-test_stationarity(a.low)
+summarise_stationarity_tests(natl.storms)
 
 
-ggplot(a.low) +
-	aes(x = Dates) +
-	geom_line(aes(y = ds, colour = "big")) +
-	geom_line(aes(y = nds, colour = "small")) +
-	geom_line(aes(y = ds + nds, colour = "total"))
+gg.ts.natl <- ggplot(natl.storms) +
+	aes(x = Dates, group = sst.class) +
+	geom_line(aes(y = ds, colour = "Developing")) +
+	geom_line(aes(y = nds, colour = "Non-developing")) +
+	geom_line(aes(y = total, colour = "All storms")) +
+	facet_wrap(~sst.class) +
+	labs(x = "Time (year)", y = "Storm count", colour = "System") +
+	theme_bw() +
+	theme(legend.position="bottom")
 
-ggplot(a) +
-	aes(x = Dates) +
-	geom_line(aes(y = ds, colour = "big")) +
-	geom_line(aes(y = nds, colour = "small")) +
-	geom_line(aes(y = ds + nds, colour = "total")) +
-	facet_wrap(~sst.class)
-
-ggplot(a.low) +
-	aes(x = Dates) +
-	geom_line(aes(y = ds, colour = "big", linetype = "low")) +
-	geom_line(aes(y = nds, colour = "small", linetype = "low")) +
-	geom_line(aes(y = ds + nds, colour = "total", linetype = "low")) +
-	geom_line(data = a.high, aes(y = ds, colour = "big", linetype = "high")) +
-	geom_line(data = a.high, aes(y = nds, colour = "small", linetype = "high")) +
-	geom_line(data = a.high, aes(y = ds + nds, colour = "total", linetype = "high"))
+gg.ts.natl + ggsave(filename = "natl-storms-ts.pdf", width = 7, height = 2.5, dpi = 96, device = cairo_pdf)
