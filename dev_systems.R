@@ -130,17 +130,23 @@ library(aTSA)
 
 # If your data is sufficient, studies are efficient , methods are sensitive and you are unbaised. These four provides completeness.
 
-kpss.test(a.low$ds) # S
-kpss.test(a.low$nds) # NS
-kpss.test(a.low$total) # S
+test_stationarity <- function(df) {
+	nds <- kpss.test(df$nds, output = F)[[1,3]] # NS
+	ds <- kpss.test(df$ds, output = F)[[1,3]] # S
+	total <- kpss.test(df$total, output = F)[[1,3]] # S
 
-kpss.test(a.high$ds) # S
-kpss.test(a.high$nds) # NS
-kpss.test(a.high$total) # S
+	return(
+		tibble(
+			p.val.nds = nds,
+			p.val.ds = ds,
+			p.val.total = total
+		)
+	)
+}
 
-kpss.test(a$ds) # S
-kpss.test(a$nds) # NS
-kpss.test(a$total) # S
+test_stationarity(a)
+test_stationarity(a.high)
+test_stationarity(a.low)
 
 
 ggplot(a.low) +
