@@ -2,6 +2,7 @@
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 library(tidyverse)
+library(GGally)
 
 # Get RAW data ---------------------------------------------
 
@@ -49,7 +50,7 @@ summarise_stationarity_tests <- function(df) {
 		)
 	)
 
-	results <- as_tibble(cbind(type = c("all", "low", "ligh"), results)) %>%
+	results <- as_tibble(cbind(type = c("all", "low", "high"), results)) %>%
 		dplyr::rename("nds" = V1, "ds" = V2, "total" = V3)
 
 	return(results)
@@ -57,8 +58,13 @@ summarise_stationarity_tests <- function(df) {
 
 summarise_stationarity_tests(natl.storms)
 
+natl.storms.bis <- natl.storms
 
-gg.ts.natl <- ggplot(natl.storms) +
+natl.storms.bis$sst.class <- natl.storms.bis$sst.class %>%
+	plyr::revalue(c("low" = "Low SST",
+									"high" = "High SST"))
+
+gg.ts.natl <- ggplot(natl.storms.bis) +
 	aes(x = Dates, group = sst.class) +
 	geom_line(aes(y = ds, colour = "Developing")) +
 	geom_line(aes(y = nds, colour = "Non-developing")) +
@@ -68,4 +74,4 @@ gg.ts.natl <- ggplot(natl.storms) +
 	theme_bw() +
 	theme(legend.position="bottom")
 
-gg.ts.natl + ggsave(filename = "natl-storms-ts.pdf", width = 7, height = 2.5, dpi = 96, device = cairo_pdf)
+gg.ts.natl #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-storms-ts.pdf", width = 7, height = 2.5, dpi = 96, device = cairo_pdf)
