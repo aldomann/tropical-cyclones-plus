@@ -33,25 +33,26 @@ pdi.epac <- pdi.all %>%
 
 # Plot real BVLN distributions ------------------------------
 
-plot_bvln_dist(pdi.natl) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-bvln.pdf", width = 5, height = 2.25, dpi = 96, device = cairo_pdf)
-plot_bvln_dist(pdi.epac) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-bvln.pdf", width = 5, height = 2.25, dpi = 96, device = cairo_pdf)
+plot_bvln_dist(pdi.natl) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-bvln.pdf", width = 5, height = 3.5, dpi = 96, device = cairo_pdf)
+plot_bvln_dist(pdi.epac) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-bvln.pdf", width = 5, height = 3.5, dpi = 96, device = cairo_pdf)
 
 
 # Marginals analsysis --------------------------------------
 
 natl.data <- pdi.natl %>%
-	# dplyr::filter(sst.class == "high") %>%
 	dplyr::filter(max.wind > 33) %>%
 	select(storm.pdi, storm.duration, max.wind, sst.class)
 
+epac.data <- pdi.epac %>%
+	dplyr::filter(max.wind > 33) %>%
+	select(storm.pdi, storm.duration, max.wind, sst.class)
 
-ggplot(natl.data) +
-	aes(x = log10(storm.pdi), colour = sst.class) +
-	geom_density()
+# Plot the marginals and the mean
+plot_marginal(natl.data, "storm.duration", "lifetime") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-marginals-lifetime.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_marginal(natl.data, "storm.pdi", "PDI") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-marginals-pdi.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
 
-ggplot(natl.data) +
-	aes(x = log10(storm.duration), colour = sst.class) +
-	geom_density()
+plot_marginal(epac.data, "storm.duration", "lifetime") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-marginals-lifetime.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_marginal(epac.data, "storm.pdi", "PDI") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-marginals-pdi.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
 
 
 summarise_marginals_stats("NATL")

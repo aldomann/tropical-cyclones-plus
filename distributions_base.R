@@ -153,3 +153,38 @@ analyse_marginals_compat <- function(basin.name, min.speed = 0) {
 
 	return(data)
 }
+
+
+plot_marginal <- function(data, variable, x.name) {
+	data <- data %>%
+		mutate(
+			storm.pdi = log10(storm.pdi),
+			storm.duration = log10(storm.duration)
+			)
+
+	mean.low <- data %>%
+		dplyr::filter(sst.class == "low") %>%
+		select(variable) %>%
+		unlist() %>%
+		# log10() %>%
+		mean()
+	mean.high <- data %>%
+		dplyr::filter(sst.class == "high") %>%
+		select(variable) %>%
+		unlist() %>%
+		# log10() %>%
+		mean()
+
+	gg <- ggplot(data) +
+		aes_string(x = variable, colour = "sst.class") +
+		stat_density(geom="line", position = "identity")+
+		geom_vline(xintercept = mean.low,
+							 colour = "dodgerblue1", linetype = "dashed") +
+		geom_vline(xintercept = mean.high,
+							 colour = "brown1", linetype = "dashed") +
+		scale_colour_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		labs(x = paste0("log(", x.name, ")"), y = "Density", colour = "SST Class") +
+		theme_bw()
+
+	return(gg)
+}
