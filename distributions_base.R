@@ -110,6 +110,10 @@ summarise_marginals_stats <- function(basin.name, min.speed = 0) {
 	median.error <- function(x) { 1.253 * sd(x)/sqrt(length(x)) }
 
 	data <- pdi.all %>%
+		mutate(
+			storm.pdi = log10(storm.pdi),
+			storm.duration = log10(storm.duration)
+		) %>%
 		dplyr::filter(basin == basin.name) %>%
 		dplyr::filter(max.wind > min.speed) %>%
 		select(storm.pdi, storm.duration, max.wind, sst.class)
@@ -117,10 +121,10 @@ summarise_marginals_stats <- function(basin.name, min.speed = 0) {
 	data <- data %>%
 		group_by(sst.class) %>%
 		dplyr::summarise(
-			pdi.mean = mean(storm.pdi)/1E-9,
-			pdi.mean.err = std.error(storm.pdi)/1E-9,
-			pdi.median = median(storm.pdi)/1E-9,
-			pdi.median.err = median.error(storm.pdi)/1E-9,
+			pdi.mean = mean(storm.pdi),
+			pdi.mean.err = std.error(storm.pdi),
+			pdi.median = median(storm.pdi),
+			pdi.median.err = median.error(storm.pdi),
 			dur.mean = mean(storm.duration),
 			dur.mean.err = std.error(storm.duration),
 			dur.median = median(storm.duration),

@@ -55,7 +55,5 @@ plot_marginal(epac.data, "storm.duration", "lifetime") #+ theme(text = element_t
 plot_marginal(epac.data, "storm.pdi", "PDI") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-marginals-pdi.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
 
 
-summarise_marginals_stats("NATL")
-summarise_marginals_stats("EPAC")
 summarise_marginals_stats("NATL", 33)
 summarise_marginals_stats("EPAC", 33)
