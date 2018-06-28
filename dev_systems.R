@@ -33,6 +33,9 @@ construct_data <- function(pdi.df) {
 natl.storms <- construct_data(pdi.natl)%>%
 	mutate(Dates = as.Date(as.character(paste(storm.year, 01, 01, sep = "-"), "%Y-%m-%d")))
 
+epac.storms <- construct_data(pdi.epac)%>%
+	mutate(Dates = as.Date(as.character(paste(storm.year, 01, 01, sep = "-"), "%Y-%m-%d")))
+
 summarise_stationarity_tests <- function(df) {
 	test_stationarity <- function(df) {
 		nds <- aTSA::kpss.test(df$nds, output = F)[[1,3]]
@@ -57,10 +60,18 @@ summarise_stationarity_tests <- function(df) {
 }
 
 summarise_stationarity_tests(natl.storms)
+summarise_stationarity_tests(epac.storms)
+
+
+# Plots ----------------------------------------------------
 
 natl.storms.bis <- natl.storms
-
 natl.storms.bis$sst.class <- natl.storms.bis$sst.class %>%
+	plyr::revalue(c("low" = "Low SST",
+									"high" = "High SST"))
+
+epac.storms.bis <- epac.storms
+epac.storms.bis$sst.class <- epac.storms.bis$sst.class %>%
 	plyr::revalue(c("low" = "Low SST",
 									"high" = "High SST"))
 
@@ -74,4 +85,16 @@ gg.ts.natl <- ggplot(natl.storms.bis) +
 	theme_bw() +
 	theme(legend.position="bottom")
 
+gg.ts.epac <- ggplot(epac.storms.bis) +
+	aes(x = Dates, group = sst.class) +
+	geom_line(aes(y = ds, colour = "Developing")) +
+	geom_line(aes(y = nds, colour = "Non-developing")) +
+	geom_line(aes(y = total, colour = "All storms")) +
+	facet_wrap(~sst.class) +
+	labs(x = "Time (year)", y = "Storm count", colour = "System") +
+	theme_bw() +
+	theme(legend.position="bottom")
+
 gg.ts.natl #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-storms-ts.pdf", width = 7, height = 2.5, dpi = 96, device = cairo_pdf)
+
+gg.ts.epac #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-storms-ts.pdf", width = 7, height = 2.5, dpi = 96, device = cairo_pdf)
