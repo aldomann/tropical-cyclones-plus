@@ -3,8 +3,8 @@
 
 
 # Source base code -----------------------------------------
-source("slopes_base.R")
-source("slopes_sim_base.R")
+source("regression_base.R")
+source("regression_sim_base.R")
 
 # Get RAW data ---------------------------------------------
 
@@ -44,15 +44,9 @@ gg.sim <- ggplot(pdi.natl.sim) +
 	labs(title = "Simulated data (NATL, developing systems)") +
 	theme_bw()
 
-gg.real <- ggplot(pdi.natl %>% dplyr::filter(max.wind > 33)) +
-	geom_point(aes(y = storm.pdi, x = storm.duration, colour = sst.class)) +
-	scale_y_log10(limits = c(1e8, 1e12)) +
-	scale_x_log10(limits = c(25, 1000)) +
-	labs(title = "Real data (NATL, developing systems)") +
-	theme_bw()
-
-gg.sim + ggsave(filename = "sim-data.pdf", width = 5.75, height = 3.75, dpi = 96, device = cairo_pdf)
-gg.real + ggsave(filename = "real-data.pdf", width = 5.75, height = 3.75, dpi = 96, device = cairo_pdf)
+#gg.sim #+ ggsave(filename = "sim-data.pdf", width = 5.75, height = 3.75, dpi = 96, device = cairo_pdf)
+plot_bvln_dist(pdi.natl) + theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-bvln.pdf", width = 5, height = 2.25, dpi = 96, device = cairo_pdf)
+plot_bvln_dist(pdi.epac) + theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-bvln.pdf", width = 5, height = 2.25, dpi = 96, device = cairo_pdf)
 
 # Estimate confidence intervals
 (ci.natl.pdi.ds <- summarise_conf_intervals("NATL", "storm.duration", "storm.pdi", 33))

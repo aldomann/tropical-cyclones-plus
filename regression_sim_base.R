@@ -82,3 +82,22 @@ simulate_hurricane_obs <- function(basin.name, var1, var2, min.speed) {
 
 	return(rbind(sim.df.low, sim.df.high))
 }
+
+
+# Bivariate log normal distributions -----------------------
+
+plot_bvln_dist <- function(pdi.df) {
+	gg <- ggplot(pdi.df %>% dplyr::filter(max.wind > 33)) +
+		geom_point(aes(y = storm.pdi, x = storm.duration, colour = sst.class, shape = sst.class), size = 1) +
+		scale_y_log10() +
+		scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
+		scale_shape_manual(values = c("high" = 1, "low" = 5)) +
+		scale_colour_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		guides(colour = guide_legend(order = 1, override.aes = list(shape = c(1,5))),
+					 shape = FALSE) +
+		labs(x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2)),
+				 colour = "SST Class") +
+		theme_bw()
+
+	return(gg)
+}
