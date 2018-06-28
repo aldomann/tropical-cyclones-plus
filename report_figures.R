@@ -167,6 +167,8 @@ pdi.epac <- pdi.all %>%
 plot_scatterplot("NATL", "storm.duration", "storm.pdi", 33) + labs(title = "N. Atl. regression analysis (1966-2016)", x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2))) + theme_bw() + theme(text = element_text(family = "Palatino")) + ggsave(filename = "scatter_natl.png", width = 6.5, height = 3., dpi = 300, device = "png")
 
 
+# Simple T statistics (NATL) -------------------------------
+
 # PDI ~ duration OLS
 get_t_statistics(
 	coefs.low =  as.numeric(lm.coefs.list.natl.ds[[4]][5,3:7]),
@@ -192,4 +194,28 @@ get_t_statistics(
 )
 
 
+# Simple T statistics (EPAC) -------------------------------
 
+# PDI ~ duration OLS
+get_t_statistics(
+	coefs.low =  as.numeric(lm.coefs.list.epac.ds[[4]][5,3:7]),
+	coefs.high = as.numeric(lm.coefs.list.epac.ds[[4]][7,3:7])
+)
+
+# PDI ~ duration Bootstrap
+get_t_statistics(
+	coefs.low =  as.numeric(lm.coefs.list.epac.ds[[4]][6,3:7]),
+	coefs.high = as.numeric(lm.coefs.list.epac.ds[[4]][8,3:7])
+)
+
+# Duration ~ PDI OLS
+get_t_statistics(
+	coefs.low =  as.numeric(lm.coefs.list.epac.ds[[4]][1,3:7]),
+	coefs.high = as.numeric(lm.coefs.list.epac.ds[[4]][3,3:7])
+)
+
+# Duration ~ PDI Bootstrap
+get_t_statistics(
+	coefs.low =  as.numeric(lm.coefs.list.epac.ds[[4]][2,3:7]),
+	coefs.high = as.numeric(lm.coefs.list.epac.ds[[4]][4,3:7])
+)
