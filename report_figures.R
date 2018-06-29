@@ -164,9 +164,12 @@ pdi.natl <- pdi.all %>%
 pdi.epac <- pdi.all %>%
 	dplyr::filter(basin == "EPAC")
 
-plot_scatterplot("NATL", "storm.duration", "storm.pdi", 33) + labs(title = NULL, x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2))) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "scatterplot-natl.pdf", width = 6.5, height = 3., dpi = 96, device = cairo_pdf)
 
-plot_scatterplot("EPAC", "storm.duration", "storm.pdi", 33) + labs(title = NULL, x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2))) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "scatterplot-epac.pdf", width = 6.5, height = 3., dpi = 96, device = cairo_pdf)
+# Plot scatterplots of the BVLN distributions --------------
+
+plot_scatterplot("NATL", "storm.duration", "storm.pdi", 33) + labs(title = NULL, x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2))) #+ theme_bw() + theme(text = element_text(family = "Palatino")) + ggsave(filename = "scatterplot-natl.pdf", width = 6.5, height = 3., dpi = 96, device = cairo_pdf)
+
+plot_scatterplot("EPAC", "storm.duration", "storm.pdi", 33) + labs(title = NULL, x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2))) #+ theme_bw() + theme(text = element_text(family = "Palatino")) + ggsave(filename = "scatterplot-epac.pdf", width = 6.5, height = 3., dpi = 96, device = cairo_pdf)
 
 
 # Simple T statistics (NATL) -------------------------------
