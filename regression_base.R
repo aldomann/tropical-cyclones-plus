@@ -46,16 +46,16 @@ plot_scatterplot <- function(basin, var1, var2, min.speed = 0) {
 		# Regression lines
 		geom_abline(aes(slope = coef(lm.low.y)[[2]],
 										intercept = coef(lm.low.y)[[1]],
-										colour = "low", linetype = "y(x)")) +
+										colour = "low", linetype = "Y(X)")) +
 		geom_abline(aes(slope = 1/coef(lm.low.x)[[2]],
 										intercept = -coef(lm.low.x)[[1]]/coef(lm.low.x)[[2]],
-										colour = "low", linetype = "x(y)")) +
+										colour = "low", linetype = "X(Y)")) +
 		geom_abline(aes(slope = coef(lm.high.y)[[2]],
 										intercept = coef(lm.high.y)[[1]],
-										colour = "high", linetype = "y(x)")) +
+										colour = "high", linetype = "Y(X)")) +
 		geom_abline(aes(slope = 1/coef(lm.high.x)[[2]],
 										intercept = -coef(lm.high.x)[[1]]/coef(lm.high.x)[[2]],
-										colour = "high", linetype = "x(y)")) +
+										colour = "high", linetype = "X(Y)")) +
 		# Scales and legend
 		scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
 		scale_y_log10() +
@@ -66,7 +66,7 @@ plot_scatterplot <- function(basin, var1, var2, min.speed = 0) {
 																	 bquote(.(paste0("low;  ")) ~ r^2 ~
 																	 			 	.(paste0("= ", format(summary(lm.low.y)$r.squared, digits = 2))))),
 												values = c("high" = "brown1", "low" = "dodgerblue1")) +
-		scale_linetype_manual(values = c("x(y)" = "longdash", "y(x)" = "solid")) +
+		scale_linetype_manual(values = c("X(Y)" = "longdash", "Y(X)" = "solid")) +
 		labs(title = title.str,
 				 x = paste(eval(var1)), y = paste(eval(var2)),
 				 colour = "SST class", linetype = "Regression")
