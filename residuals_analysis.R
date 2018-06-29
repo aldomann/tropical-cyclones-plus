@@ -82,36 +82,56 @@ plot_resid_qqplot(epac.fit.high) #+ theme(text = element_text(family = "Palatino
 
 
 # Histograms of sample -------------------------------------
-plot_boot_coefs_hist <- function(data.low, data.high, stat) {
+plot_boot_coefs_hist <- function(boot.data.low, boot.data.high, fit.low, fit.high, stat) {
 	all.data <- rbind(
-		cbind(data.low, sst.class = "low"),
-		cbind(data.high, sst.class = "high")
+		cbind(boot.data.low, sst.class = "low"),
+		cbind(boot.data.high, sst.class = "high")
 	)
 
-	ggplot(all.data) +
+	gg <- ggplot(all.data) +
 		aes_string(x = stat) +
 		geom_histogram(aes(fill = sst.class, group = sst.class),
 									 position = "identity", colour = "black", bins = 50, alpha = 0.5) +
+		geom_vline(xintercept = mean(boot.data.low[[stat]]),
+							 colour = "dodgerblue1", linetype = "dashed") +
+		geom_vline(xintercept = mean(boot.data.high[[stat]]),
+							 colour = "brown1", linetype = "dashed") +
 		scale_fill_manual(values = c("high" = "brown1",
 																 "low"  = "dodgerblue1")) +
+		guides(linetype = guide_legend(order = 2, override.aes = list(linetype = c(1,5)))) +
 		labs(y = "Count", x = paste("Bootstraped", eval(stat)), fill = "SST Class" ) +
 		theme_bw()
+
+	if (stat == "slope") {
+		gg <- gg +
+			geom_vline(xintercept = fit.low$coefficients[2],
+								 colour = "dodgerblue1", linetype = "solid") +
+			geom_vline(xintercept = fit.high$coefficients[2],
+								 colour = "brown1", linetype = "solid")
+	} else if (stat == "inter") {
+		gg <- gg +
+			geom_vline(xintercept = fit.low$coefficients[1],
+								 colour = "dodgerblue1", linetype = "solid") +
+			geom_vline(xintercept = fit.high$coefficients[1],
+								 colour = "brown1", linetype = "solid")
+	}
+	return(gg)
 }
 
 # ggplot(natl.boot.low.data) +
 # 	geom_histogram(aes(x = r2), binwidth = 0.005)
 
-plot_boot_coefs_hist(natl.boot.low.data, natl.boot.high.data, "slope")# + theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl_boot_slope.pdf", width = 4, height = 3, dpi = 300, device = cairo_pdf)
-plot_dists_qqplot(natl.boot.low.data$slope, natl.boot.high.data$slope)
+plot_boot_coefs_hist(natl.boot.low.data, natl.boot.high.data, natl.fit.low, natl.fit.high, "slope") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl_boot_slope.pdf", width = 4, height = 2.75, dpi = 300, device = cairo_pdf)
+plot_dists_qqplot(natl.boot.low.data$slope, natl.boot.high.data$slope) + labs(x = "Boostrapped slope (low SST)", y = "Boostrapped slope (high SST)") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl_boot_slope_qq.pdf", width = 4, height = 2.75, dpi = 300, device = cairo_pdf)
 
-plot_boot_coefs_hist(natl.boot.low.data, natl.boot.high.data, "inter")# + theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl_boot_inter.pdf", width = 4, height = 3, dpi = 300, device = cairo_pdf)
-plot_dists_qqplot(natl.boot.low.data$inter, natl.boot.high.data$inter)
+plot_boot_coefs_hist(natl.boot.low.data, natl.boot.high.data, natl.fit.low, natl.fit.high, "inter") + labs(x = "Bootstrapped intercept") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl_boot_inter.pdf", width = 4, height = 2.75, dpi = 300, device = cairo_pdf)
+plot_dists_qqplot(natl.boot.low.data$inter, natl.boot.high.data$inter) + labs(x = "Boostrapped intercept (low SST)", y = "Boostrapped intercept (high SST)") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl_boot_inter_qq.pdf", width = 4, height = 2.75, dpi = 300, device = cairo_pdf)
 
-plot_boot_coefs_hist(epac.boot.low.data, epac.boot.high.data, "slope")# + theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac_boot_slope.pdf", width = 4, height = 3, dpi = 300, device = cairo_pdf)
-plot_dists_qqplot(epac.boot.low.data$slope, epac.boot.high.data$slope)
+plot_boot_coefs_hist(epac.boot.low.data, epac.boot.high.data, epac.fit.low, epac.fit.high, "slope") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac_boot_slope.pdf", width = 4, height = 2.75, dpi = 300, device = cairo_pdf)
+plot_dists_qqplot(epac.boot.low.data$slope, epac.boot.high.data$slope) + labs(x = "Boostrapped slope (low SST)", y = "Boostrapped slope (high SST)") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac_boot_slope_qq.pdf", width = 4, height = 2.75, dpi = 300, device = cairo_pdf)
 
-plot_boot_coefs_hist(epac.boot.low.data, epac.boot.high.data, "inter")# + theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac_boot_inter.pdf", width = 4, height = 3, dpi = 300, device = cairo_pdf)
-plot_dists_qqplot(epac.boot.low.data$inter, epac.boot.high.data$inter)
+plot_boot_coefs_hist(epac.boot.low.data, epac.boot.high.data, epac.fit.low, epac.fit.high, "inter") #+ labs(x = "Bootstrapped intercept") + theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac_boot_inter.pdf", width = 4, height = 2.75, dpi = 300, device = cairo_pdf)
+plot_dists_qqplot(epac.boot.low.data$inter, epac.boot.high.data$inter) + labs(x = "Boostrapped intercept (low SST)", y = "Boostrapped intercept (high SST)") #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac_boot_inter_qq.pdf", width = 4, height = 2.75, dpi = 300, device = cairo_pdf)
 
 
 

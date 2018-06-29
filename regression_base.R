@@ -281,14 +281,9 @@ plot_dists_qqplot <- function(col.x, col.y) {
 	data <- tibble(var1 = sort(col.x),
 								 var2 = sort(col.y))
 	gg <- ggplot(data, aes(sample = var2 )) +
-		# stat_qq_line() +
-		# stat_qq_point(shape = 1, size = 1.5) +
-		geom_point(aes(x = var1, y = var2)) +
+		geom_point(aes(x = var1, y = var2), shape = 1, size = 1.5) +
 		labs(x = "Var 1", y = "Var 2") +
 		theme_bw()
 
 	return(gg)
 }
-
-# plot_dists_qqplot(boot.low.data$slope, boot.high.data$slope)
-# plot_dists_qqplot(boot.low.data$inter, boot.high.data$inter)
