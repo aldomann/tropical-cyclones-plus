@@ -142,10 +142,10 @@ coords.epac.map <- c("160W", "90W", "5N", "35N")
 
 coords.all.map <- c("160W", "0E", "0N", "60N")
 
-map_region_hurrs(storms.natl, coords.natl.map, coords.natl, steps = c(20, 10), xtra.lims = c(3,2)) + theme_bw() + theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl_map.png", width = 6, height = 3, dpi = 300, device = "png")
+map_region_hurrs(storms.natl, coords.natl.map, coords.natl, steps = c(20, 10), xtra.lims = c(3,2)) + theme_bw() + theme(text = element_text(family = "Palatino")) #+ ggsave(filename = "natl_map.png", width = 6, height = 3, dpi = 300, device = "png")
 
 
-map_region_hurrs_full(storms.all, coords.all.map, coords.natl, coords.epac, steps = c(20, 10), xtra.lims = c(3,2)) + theme_bw() + theme(text = element_text(family = "Palatino")) + ggsave(filename = "full_map.png", width = 6, height = 2.75, dpi = 300, device = "png")
+map_region_hurrs_full(storms.all, coords.all.map, coords.natl, coords.epac, steps = c(20, 10), xtra.lims = c(3,2)) + theme_bw() + theme(text = element_text(family = "Palatino")) #+ ggsave(filename = "full_map.png", width = 6, height = 2.75, dpi = 300, device = "png")
 
 
 
@@ -164,7 +164,9 @@ pdi.natl <- pdi.all %>%
 pdi.epac <- pdi.all %>%
 	dplyr::filter(basin == "EPAC")
 
-plot_scatterplot("NATL", "storm.duration", "storm.pdi", 33) + labs(title = "N. Atl. regression analysis (1966-2016)", x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2))) + theme_bw() + theme(text = element_text(family = "Palatino")) + ggsave(filename = "scatter_natl.png", width = 6.5, height = 3., dpi = 300, device = "png")
+plot_scatterplot("NATL", "storm.duration", "storm.pdi", 33) + labs(title = NULL, x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2))) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "scatterplot-natl.pdf", width = 6.5, height = 3., dpi = 96, device = cairo_pdf)
+
+plot_scatterplot("EPAC", "storm.duration", "storm.pdi", 33) + labs(title = NULL, x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2))) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "scatterplot-epac.pdf", width = 6.5, height = 3., dpi = 96, device = cairo_pdf)
 
 
 # Simple T statistics (NATL) -------------------------------
@@ -219,3 +221,9 @@ get_t_statistics(
 	coefs.low =  as.numeric(lm.coefs.list.epac.ds[[4]][2,3:7]),
 	coefs.high = as.numeric(lm.coefs.list.epac.ds[[4]][4,3:7])
 )
+
+p.vals.natl.pdi.ds.ols[,c(3,1,11,7,5,9)]
+p.vals.natl.pdi.ds.boot[,c(3,1,11,7,5,9)]
+
+p.vals.epac.pdi.ds.ols[,c(3,1,11,7,5,9)]
+p.vals.epac.pdi.ds.boot[,c(3,1,11,7,5,9)]
