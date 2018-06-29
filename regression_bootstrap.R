@@ -154,6 +154,7 @@ lm.coefs.list.natl.ds <- lm.coefs.list[lapply(purrr::map(lm.coefs.list, ~dplyr::
 lm.coefs.list.epac.ds <- lm.coefs.list[lapply(purrr::map(lm.coefs.list, ~dplyr::filter(.x, basin == "EPAC", min.speed == 33)), nrow) > 0]
 
 
-# Compare CI methods ---------------------------------------
+# Summarise regression coefficients ------------------------
 
-# compare_ci_methods(factors.lm.coefs.list)
+cbind(lm.coefs.natl.pdi.ds[9:10], lm.coefs.natl.pdi.ds[1:2], round(lm.coefs.natl.pdi.ds[c(5,6,3,4,7,8)], 2))
+cbind(lm.coefs.epac.pdi.ds[9:10], lm.coefs.epac.pdi.ds[1:2], round(lm.coefs.epac.pdi.ds[c(5,6,3,4,7,8)], 2))
