@@ -92,7 +92,7 @@ get_lm_coefs <- function(df, class, var1, var2, min.speed = 0, n.sim = 1000) {
 	r.squared <- sum.fit$r.squared
 	r.squared.sd <- get_r_error(r.squared, n) # NEW
 
-	boot.results <- perform_bootstrap(col.x, col.y)[[1]]
+	boot.results <- perform_bootstrap(col.x, col.y, n.sim)[[1]]
 
 	boot.slope <- boot.results$slope
 	boot.slope.sd <- boot.results$slope.sd
