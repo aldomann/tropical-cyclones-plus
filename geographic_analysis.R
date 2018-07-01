@@ -35,7 +35,7 @@ storms.all <- rbind(storms.natl, storms.epac)
 
 storms.tracks <- storms.all %>%
 	group_by(storm.id) %>%
-	mutate(distance = haversine_distance(lat, lag(lat), long, lag(long))) %>%
+	mutate(distance = distance_slc(lat, lag(lat), long, lag(long))) %>%
 	mutate(distance = ifelse(is.na(distance), 0, distance)) %>%
 	summarise(first.lat = first(lat), last.lat = last(lat),
 						first.long = first(long), last.long = last(long),
@@ -44,8 +44,7 @@ storms.tracks <- storms.all %>%
 
 # Read PDI data frame
 
-pdi.all <- as_tibble(fread('data/hurdat2-hadisst-1966-2016_pdis.csv')) %>%
-	mutate(storm.duration = conv_unit(storm.duration, "sec", "hr"))
+pdi.all <- as_tibble(fread('data/hurdat2-hadisst-1966-2016_pdis.csv'))
 
 # Join data frames by storm.id
 storms.joint <- full_join(pdi.all, storms.tracks)
@@ -53,6 +52,14 @@ storms.joint <- full_join(pdi.all, storms.tracks)
 storms.joint <- storms.joint %>%
 	dplyr::filter(!is.na(storm.name))
 
+# Write CSV
+# write_csv(storms.joint, 'data/hurdat2-hadisst-1966-2016_pdis_geo.csv')
+
+storms.joint <- storms.joint %>%
+	mutate(storm.duration = conv_unit(storm.duration, "sec", "hr"))
+
+
+# Maps -----------------------------------------------------
 
 # Windows of activity
 # years.natl <- 1966:2016
