@@ -221,7 +221,7 @@ plot_distance_histogram <- function(basin.name, min.speed = 0, facet = F) {
 		dplyr::filter(basin == basin.name)
 
 	gg <- ggplot(df) +
-		geom_histogram(aes(fill = sst.class), colour = "black", alpha = 0.5, bins = 50) +
+		geom_histogram(aes(fill = sst.class), colour = "black", alpha = 0.5, bins = 50, position) +
 		aes(x = storm.duration/distance) +
 		scale_color_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
 		labs(fill = "SST class")
@@ -233,6 +233,41 @@ plot_distance_histogram <- function(basin.name, min.speed = 0, facet = F) {
 
 	return(gg)
 }
+
+plot_distance_histogram_alt <- function(basin.name, min.speed) {
+	data <- storms.joint %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		dplyr::filter(basin == basin.name) %>%
+		dplyr::mutate(durperdist = distance/(storm.duration * 1000) )
+
+	mean.low <- data %>%
+		dplyr::filter(sst.class == "low") %>%
+		select(durperdist) %>%
+		unlist() %>%
+		# log10() %>%
+		mean()
+	mean.high <- data %>%
+		dplyr::filter(sst.class == "high") %>%
+		select(durperdist) %>%
+		unlist() %>%
+		# log10() %>%
+		mean()
+
+	gg <- ggplot(data) +
+		aes(x = durperdist, fill = sst.class) +
+		# stat_density(geom="line", position = "identity")+
+		geom_histogram(position = "identity", colour = "black", alpha = 0.5, bins = 50)+
+		geom_vline(xintercept = mean.low,
+							 colour = "dodgerblue1", linetype = "dashed") +
+		geom_vline(xintercept = mean.high,
+							 colour = "brown1", linetype = "dashed") +
+		scale_fill_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		labs(x = "Mean forward speed (km/h)", y = "Count", fill = "SST Class") +
+		theme_bw()
+
+	return(gg)
+}
+
 
 # Scatterplot of initial and final positions
 plot_positions <- function(basin.name, type = "all", min.speed = 0) {
@@ -301,6 +336,45 @@ plot_positions_histogram <- function(basin.name, var, min.speed = 0) {
 	return(pm)
 }
 
+plot_position_densities <- function(basin.name, variable, x.name, min.speed = 33) {
+	data.epac <- storms.joint %>%
+		dplyr::filter(basin == "EPAC") %>%
+		dplyr::filter(
+			first.long < 0,
+			last.long < 0
+		)
+
+	data.natl <- storms.joint %>%
+		dplyr::filter(basin == "NATL")
+
+	data <- rbind(data.epac, data.natl) %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		dplyr::filter(basin == basin.name)
+
+	mean.low <- data %>%
+		dplyr::filter(sst.class == "low") %>%
+		select(variable) %>%
+		unlist() %>%
+		mean()
+	mean.high <- data %>%
+		dplyr::filter(sst.class == "high") %>%
+		select(variable) %>%
+		unlist() %>%
+		mean()
+
+	gg <- ggplot(data) +
+		aes_string(x = variable, colour = "sst.class") +
+		stat_density(geom="line", position = "identity")+
+		geom_vline(xintercept = mean.low,
+							 colour = "dodgerblue1", linetype = "dashed") +
+		geom_vline(xintercept = mean.high,
+							 colour = "brown1", linetype = "dashed") +
+		scale_colour_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
+		labs(x = paste(x.name, "(rad)"), y = "Density", colour = "SST Class") +
+		theme_bw()
+
+	return(gg)
+}
 
 
 # Statistical summary of positions

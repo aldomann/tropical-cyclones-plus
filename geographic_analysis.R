@@ -56,6 +56,13 @@ storms.joint <- storms.joint %>%
 	mutate(storm.duration = measurements::conv_unit(storm.duration, "sec", "hr"))
 
 
+# Forward speed --------------------------------------------
+
+# Histograms
+plot_distance_histogram_alt("NATL", 33) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-forward-speed.pdf", width = 6, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_distance_histogram_alt("EPAC", 33) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-forward-speed.pdf", width = 6, height = 2.5, dpi = 96, device = cairo_pdf)
+
+
 # Maps -----------------------------------------------------
 
 # Windows of activity
@@ -68,8 +75,8 @@ coords.epac <- c("120W", "90W", "5N", "20N")
 coords.epac.map <- c("160W", "90W", "5N", "35N")
 
 # Maps of the basins (full)
-map_region_hurrs(storms.natl, coords.natl.map, coords.natl, steps = c(20, 10), xtra.lims = c(3,2)) #+ theme_bw() + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "map-natl.pdf", width = 5.75, height = 3.75, dpi = 96, device = cairo_pdf)
-map_region_hurrs(storms.epac, coords.epac.map, coords.epac, steps = c(10, 10), xtra.lims = c(3,2)) #+ theme_bw() + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "map-epac.pdf", width = 6, height = 3.15, dpi = 96, device = cairo_pdf)
+# map_region_hurrs(storms.natl, coords.natl.map, coords.natl, steps = c(20, 10), xtra.lims = c(3,2)) #+ theme_bw() + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "map-natl.pdf", width = 5.75, height = 3.75, dpi = 96, device = cairo_pdf)
+# map_region_hurrs(storms.epac, coords.epac.map, coords.epac, steps = c(10, 10), xtra.lims = c(3,2)) #+ theme_bw() + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "map-epac.pdf", width = 6, height = 3.15, dpi = 96, device = cairo_pdf)
 
 
 # Analysis of travelled distance ---------------------------
@@ -102,3 +109,24 @@ plot_positions("EPAC", "first", 33)
 
 plot_positions("NATL", "last", 33)
 plot_positions("EPAC", "last", 33)
+
+
+# Position marginals ---------------------------------------
+
+# North Atlantic
+plot_position_densities("NATL", "first.long", "Genesis longitude", 33) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-init-long.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
+
+plot_position_densities("NATL", "last.long", "Death longitude", 33) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-final-long.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
+
+plot_position_densities("NATL", "first.lat", "Genesis latitude", 33) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-init-lat.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
+
+plot_position_densities("NATL", "last.lat", "Death longitude", 33) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-final-lat.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
+
+# Northeast Pacific
+plot_position_densities("EPAC", "first.long", "Genesis longitude", 33) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-init-long.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
+
+plot_position_densities("EPAC", "last.long", "Death longitude", 33) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-final-long.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
+
+plot_position_densities("EPAC", "first.lat", "Genesis latitude", 33) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-init-lat.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
+
+plot_position_densities("EPAC", "last.lat", "Death latitude", 33) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-final-lat.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
