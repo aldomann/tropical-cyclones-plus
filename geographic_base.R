@@ -370,7 +370,7 @@ plot_position_densities <- function(basin.name, variable, x.name, min.speed = 33
 		geom_vline(xintercept = mean.high,
 							 colour = "brown1", linetype = "dashed") +
 		scale_colour_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
-		labs(x = paste(x.name, "(rad)"), y = "Density", colour = "SST Class") +
+		labs(x = paste(x.name, "(°)"), y = "Density", colour = "SST Class") +
 		theme_bw()
 
 	return(gg)
