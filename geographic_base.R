@@ -193,22 +193,25 @@ plot_distance_scatterplot <- function(basin.name, min.speed = 0) {
 	gg <- ggplot(df) +
 		# Low SST Years
 		geom_point(data = df %>% dplyr::filter(sst.class == "low"),
-							 aes(x = storm.duration, y = distance, colour = "low"),
+							 aes(x = storm.duration, y = distance/1000, colour = "low"),
 							 shape = 5, size = 1) +
-		geom_smooth(data = df %>% dplyr::filter(sst.class == "low"),
-							 aes(x = storm.duration, y = distance, colour = "low"),
-							 method = "lm") +
+		# geom_smooth(data = df %>% dplyr::filter(sst.class == "low"),
+		# 					 aes(x = storm.duration, y = distance, colour = "low"),
+		# 					 method = "lm") +
 		# High SST Years
 		geom_point(data = df %>% dplyr::filter(sst.class == "high"),
-							 aes(x = storm.duration, y = distance, colour = "high"),
+							 aes(x = storm.duration, y = distance/1000, colour = "high"),
 							 shape = 1, size = 1) +
-		geom_smooth(data = df %>% dplyr::filter(sst.class == "high"),
-								aes(x = storm.duration, y = distance, colour = "high"),
-								method = "lm") +
-		# scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
-		# scale_y_log10() +
+		# geom_smooth(data = df %>% dplyr::filter(sst.class == "high"),
+		# 						aes(x = storm.duration, y = distance, colour = "high"),
+		# 						method = "lm") +
+		scale_x_log10(breaks = c(25, 50, 100, 200, 400, 800)) +
+		# scale_y_log10(breaks = c(125, 250, 500, 1000, 2000, 4000, 8000, 16000)) +
+		scale_y_log10(breaks = c(125, 500, 2000, 8000)) +
 		scale_color_manual(values = c("high" = "brown1", "low" = "dodgerblue1")) +
-		labs(colour = "SST class")
+		labs(colour = "SST class",
+				 x = "Storm lifetime (h)", y = "Path length (km)")
+	return(gg)
 }
 
 # Plot histogram of distance/duration

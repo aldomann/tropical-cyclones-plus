@@ -2,9 +2,6 @@
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 
-# Libraries ------------------------------------------------
-library(measurements) # Convert units
-
 # Source base code -----------------------------------------
 source("geographic_base.R")
 
@@ -56,7 +53,7 @@ storms.joint <- storms.joint %>%
 # write_csv(storms.joint, 'data/hurdat2-hadisst-1966-2016_pdis_geo.csv')
 
 storms.joint <- storms.joint %>%
-	mutate(storm.duration = conv_unit(storm.duration, "sec", "hr"))
+	mutate(storm.duration = measurements::conv_unit(storm.duration, "sec", "hr"))
 
 
 # Maps -----------------------------------------------------
@@ -92,23 +89,16 @@ get_longest_paths("NATL")
 get_longest_paths("EPAC")
 
 # Scatterplot of distance vs duration
-plot_distance_scatterplot("NATL") + theme_bw()
-plot_distance_scatterplot("EPAC") + theme_bw()
-
-plot_distance_scatterplot("NATL", 33) + theme_bw()
-plot_distance_scatterplot("EPAC", 33) + theme_bw()
+plot_distance_scatterplot("NATL", 33) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-distance-bvln.pdf", width = 5, height = 2.5, dpi = 96, device = cairo_pdf)
+plot_distance_scatterplot("EPAC", 33) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-distance-bvln.pdf", width = 5, height = 2.5, dpi = 96, device = cairo_pdf)
 
 
 # Scatterplot of initial and final positions
-plot_positions("NATL", "first")
-plot_positions("EPAC", "first")
 
 plot_positions("NATL", "first", 33)
 plot_positions("EPAC", "first", 33)
 
 # Scatterplot of initial and final positions
-plot_positions("NATL", "last")
-plot_positions("EPAC", "last")
 
 plot_positions("NATL", "last", 33)
 plot_positions("EPAC", "last", 33)
