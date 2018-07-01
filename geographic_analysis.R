@@ -52,6 +52,19 @@ storms.joint <- storms.joint %>%
 # Write CSV
 # write_csv(storms.joint, 'data/hurdat2-hadisst-1966-2016_pdis_geo.csv')
 
+data.epac <- storms.joint %>%
+	dplyr::filter(basin == "EPAC") %>%
+	dplyr::filter(
+		first.long < 0,
+		last.long < 0,
+		first.lat < 25
+	)
+
+data.natl <- storms.joint %>%
+	dplyr::filter(basin == "NATL")
+
+storms.joint <- rbind(data.epac, data.natl)
+
 storms.joint <- storms.joint %>%
 	mutate(storm.duration = measurements::conv_unit(storm.duration, "sec", "hr"))
 
@@ -61,23 +74,6 @@ storms.joint <- storms.joint %>%
 # Histograms
 plot_distance_histogram_alt("NATL", 33) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "natl-forward-speed.pdf", width = 6, height = 2.5, dpi = 96, device = cairo_pdf)
 plot_distance_histogram_alt("EPAC", 33) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-forward-speed.pdf", width = 6, height = 2.5, dpi = 96, device = cairo_pdf)
-
-
-# Maps -----------------------------------------------------
-
-# Windows of activity
-# years.natl <- 1966:2016
-coords.natl <- c("90W", "20W", "5N", "25N")
-coords.natl.map <- c("100W", "0E", "0N", "60N")
-
-# years.epac <- 1966:2016
-coords.epac <- c("120W", "90W", "5N", "20N")
-coords.epac.map <- c("160W", "90W", "5N", "35N")
-
-# Maps of the basins (full)
-# map_region_hurrs(storms.natl, coords.natl.map, coords.natl, steps = c(20, 10), xtra.lims = c(3,2)) #+ theme_bw() + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "map-natl.pdf", width = 5.75, height = 3.75, dpi = 96, device = cairo_pdf)
-# map_region_hurrs(storms.epac, coords.epac.map, coords.epac, steps = c(10, 10), xtra.lims = c(3,2)) #+ theme_bw() + theme(text = element_text(family = "LM Roman 10")) + ggsave(filename = "map-epac.pdf", width = 6, height = 3.15, dpi = 96, device = cairo_pdf)
-
 
 # Analysis of travelled distance ---------------------------
 
@@ -100,17 +96,6 @@ plot_distance_scatterplot("NATL", 33) + theme_bw() #+ theme(text = element_text(
 plot_distance_scatterplot("EPAC", 33) + theme_bw() #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-distance-bvln.pdf", width = 5, height = 2.5, dpi = 96, device = cairo_pdf)
 
 
-# Scatterplot of initial and final positions
-
-plot_positions("NATL", "first", 33)
-plot_positions("EPAC", "first", 33)
-
-# Scatterplot of initial and final positions
-
-plot_positions("NATL", "last", 33)
-plot_positions("EPAC", "last", 33)
-
-
 # Position marginals ---------------------------------------
 
 # North Atlantic
@@ -130,3 +115,36 @@ plot_position_densities("EPAC", "last.long", "Death longitude", 33) #+ theme(tex
 plot_position_densities("EPAC", "first.lat", "Genesis latitude", 33) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-init-lat.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
 
 plot_position_densities("EPAC", "last.lat", "Death latitude", 33) #+ theme(text = element_text(family = "Palatino")) + ggsave(filename = "epac-final-lat.pdf", width = 4, height = 2.5, dpi = 96, device = cairo_pdf)
+
+
+storms.joint %>%
+	group_by(sst.class, basin) %>%
+	summarise(
+		mean.first.long = round(mean(first.long), 2),
+		sd.first.long = round(sd(first.long), 2),
+		mean.first.lat = round(mean(first.lat), 2),
+		sd.first.lat = round(sd(first.lat), 2),
+		mean.last.long = round(mean(last.long), 2),
+		sd.last.long = round(sd(last.long), 2),
+		mean.last.lat = round(mean(last.lat), 2),
+		sd.last.lat = round(sd(last.lat), 2)
+	) %>%
+	data.frame()
+
+# Position clustering --------------------------------------
+
+# Scatterplot of initial and final positions
+
+plot_positions("NATL", "first", 33)
+plot_positions("EPAC", "first", 33)
+
+# Scatterplot of initial and final positions
+
+plot_positions("NATL", "last", 33)
+plot_positions("EPAC", "last", 33)
+
+plot_clusters("NATL", "first", 33, n.clust = 2)
+plot_clusters("NATL", "last", 33, n.clust = 2)
+
+plot_clusters("EPAC", "first", 33, n.clust = 2)
+plot_clusters("EPAC", "last", 33, n.clust = 2)
