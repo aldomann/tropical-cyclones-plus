@@ -5,7 +5,6 @@ library(tidyverse)
 library(lubridate)
 library(raster)
 library(ncdf4)
-library(data.table)
 
 # Source OISST Function ------------------------------------
 

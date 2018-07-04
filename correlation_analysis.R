@@ -9,7 +9,7 @@ source("oisst_base.R")
 
 # Correlation analysis -------------------------------------
 
-hurr.all.obs.full <- fread("data/hurdat2-oisst-1981-2016.csv") %>%
+hurr.all.obs.full <- data.table::fread("data/hurdat2-oisst-1981-2016.csv") %>%
 	mutate(date.time = ymd_hms(date.time)) %>%
 	filter(is.na(wind) != TRUE)
 

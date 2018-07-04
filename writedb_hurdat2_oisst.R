@@ -20,7 +20,7 @@ if (file.exists("data/hurdat2-1981-2016.csv") & !file.exists("oisst-data/downloa
 
 # Mine SSTs and write CSV
 if (file.exists("data/hurdat2-1981-2016.csv") & !file.exists("data/hurdat2-oisst-1981-2016.csv")) {
-	hurr.all.obs <- fread("data/hurdat2-1981-2016.csv")
+	hurr.all.obs <- data.table::fread("data/hurdat2-1981-2016.csv")
 
 	hurr.all.obs.new <- hurr.all.obs %>%
 		mutate(date.time = ymd_hms(date.time))
