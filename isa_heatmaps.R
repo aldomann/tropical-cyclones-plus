@@ -1,10 +1,9 @@
 library(tidyverse)
-library(data.table)
 library(gplots)
 
 # Load data ------------------------------------------------
 
-x <- fread('data/hurdat2-oisst-1981-2016.csv')
+x <- data.table::fread('data/hurdat2-oisst-1981-2016.csv')
 
 # Heatmaps -------------------------------------------------
 

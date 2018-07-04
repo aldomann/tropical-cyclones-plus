@@ -3,8 +3,6 @@
 
 # Libraries ------------------------------------------------
 library(tidyverse)
-# library(lubridate)
-library(data.table)
 library(maps)
 library(ggalt)
 
