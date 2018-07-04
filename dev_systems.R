@@ -1,4 +1,4 @@
-# Code to analyse of time stability of non-developing systems
+# Code to analyse of time stationarity of non-developing systems
 # Author: Alfredo Hernández <aldomann.designs@gmail.com>
 
 library(tidyverse)
