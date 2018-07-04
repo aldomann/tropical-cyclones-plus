@@ -23,11 +23,11 @@ pdi.epac <- pdi.all %>%
 
 # Permutation tests (OLS)
 # n.sim.test <- 1000
-# true.p.vals.natl.pdi.ds.std <- readRDS("slopes_p_values_pdi.rds")[[4]]
+# true.p.vals.natl.pdi.ds.std <- readRDS("objects/slopes_p_values_pdi.rds")[[4]]
 # p.vals.natl.pdi.ds.std <- summarise_p_values("NATL.sim", "storm.duration", "storm.pdi", 33, F, n.sim.test)
 
 # Permutation tests (bootstrap)
-# true.p.vals.natl.pdi.ds.boot <- readRDS("slopes_p_values_boot_pdi.rds")[[4]]
+# true.p.vals.natl.pdi.ds.boot <- readRDS("objects/slopes_p_values_boot_pdi.rds")[[4]]
 # p.vals.natl.pdi.ds.boot <- summarise_p_values("NATL.sim", "storm.duration", "storm.pdi", 33, T, n.sim.test)
 
 

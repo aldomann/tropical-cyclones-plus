@@ -23,8 +23,8 @@ compute.flag <- F
 # Load objects from disk -----------------------------------
 
 if (!compute.flag) {
-	lm.coefs.list <- readRDS("regression_lm_coefs_list.rds")
-	factors.lm.coefs.list <- readRDS("regression_lm_coefs_fact_list.rds")
+	lm.coefs.list <- readRDS("objects/regression_lm_coefs_list.rds")
+	factors.lm.coefs.list <- readRDS("objects/regression_lm_coefs_fact_list.rds")
 }
 
 # Confidence interval for all storms -----------------------
@@ -135,8 +135,8 @@ if (compute.flag) {
 	lm.coefs.list <- lapply(ls(patt='^lm.coefs.'), get)
 	# rm(factors.lm.coefs.list)
 	factors.lm.coefs.list <- lapply(ls(patt='^fact.'), get)
-	saveRDS(lm.coefs.list, "regression_lm_coefs_list.rds")
-	saveRDS(factors.lm.coefs.list, "regression_lm_coefs_fact_list.rds")
+	saveRDS(lm.coefs.list, "objects/regression_lm_coefs_list.rds")
+	saveRDS(factors.lm.coefs.list, "objects/regression_lm_coefs_fact_list.rds")
 	# rm(list=ls(pattern="^lm.coefs.epac"))
 	# rm(list=ls(pattern="^lm.coefs.natl"))
 }

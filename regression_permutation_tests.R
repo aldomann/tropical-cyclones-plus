@@ -26,18 +26,18 @@ bs.flag <- T
 
 if (read.flag) {
 	# Standard
-	p.values.list <- readRDS("regression_p_values_all.rds")
-	p.values.list.pdi <- readRDS("regression_p_values_pdi.rds")
-	p.values.list.max.wind <- readRDS("regression_p_values_maxwind.rds")
-	p.values.list.mean.wind <- readRDS("regression_p_values_meanwind.rds")
-	p.values.list.mean.sq.wind <- readRDS("regression_p_values_meansqwind.rds")
+	p.values.list <- readRDS("objects/regression_p_values_all.rds")
+	p.values.list.pdi <- readRDS("objects/regression_p_values_pdi.rds")
+	p.values.list.max.wind <- readRDS("objects/regression_p_values_maxwind.rds")
+	p.values.list.mean.wind <- readRDS("objects/regression_p_values_meanwind.rds")
+	p.values.list.mean.sq.wind <- readRDS("objects/regression_p_values_meansqwind.rds")
 
 	# With bootstrap
-	boot.p.values.list <- readRDS("regression_p_values_boot_all.rds")
-	boot.p.values.list.pdi <- readRDS("regression_p_values_boot_pdi.rds")
-	boot.p.values.list.max.wind <- readRDS("regression_p_values_boot_maxwind.rds")
-	boot.p.values.list.mean.wind <- readRDS("regression_p_values_boot_meanwind.rds")
-	boot.p.values.list.mean.sq.wind <- readRDS("regression_p_values_boot_meansqwind.rds")
+	boot.p.values.list <- readRDS("objects/regression_p_values_boot_all.rds")
+	boot.p.values.list.pdi <- readRDS("objects/regression_p_values_boot_pdi.rds")
+	boot.p.values.list.max.wind <- readRDS("objects/regression_p_values_boot_maxwind.rds")
+	boot.p.values.list.mean.wind <- readRDS("objects/regression_p_values_boot_meanwind.rds")
+	boot.p.values.list.mean.sq.wind <- readRDS("objects/regression_p_values_boot_meansqwind.rds")
 }
 
 # Permutation tests ----------------------------------------
@@ -90,19 +90,19 @@ if (compute.flag) {
 
 # Save into RDS files
 if (save.flag && !bs.flag) {
-	saveRDS(p.values.list, "regression_p_values_all.rds")
-	saveRDS(p.values.list.pdi, "regression_p_values_pdi.rds")
-	saveRDS(p.values.list.max.wind, "regression_p_values_maxwind.rds")
-	saveRDS(p.values.list.mean.wind, "regression_p_values_meanwind.rds")
-	saveRDS(p.values.list.mean.sq.wind, "regression_p_values_meansqwind.rds")
+	saveRDS(p.values.list, "objects/regression_p_values_all.rds")
+	saveRDS(p.values.list.pdi, "objects/regression_p_values_pdi.rds")
+	saveRDS(p.values.list.max.wind, "objects/regression_p_values_maxwind.rds")
+	saveRDS(p.values.list.mean.wind, "objects/regression_p_values_meanwind.rds")
+	saveRDS(p.values.list.mean.sq.wind, "objects/regression_p_values_meansqwind.rds")
 }
 
 if (save.flag && bs.flag) {
-	saveRDS(p.values.list, "regression_p_values_boot_all.rds")
-	saveRDS(p.values.list.pdi, "regression_p_values_boot_pdi.rds")
-	saveRDS(p.values.list.max.wind, "regression_p_values_boot_maxwind.rds")
-	saveRDS(p.values.list.mean.wind, "regression_p_values_boot_meanwind.rds")
-	saveRDS(p.values.list.mean.sq.wind, "regression_p_values_boot_meansqwind.rds")
+	saveRDS(p.values.list, "objects/regression_p_values_boot_all.rds")
+	saveRDS(p.values.list.pdi, "objects/regression_p_values_boot_pdi.rds")
+	saveRDS(p.values.list.max.wind, "objects/regression_p_values_boot_maxwind.rds")
+	saveRDS(p.values.list.mean.wind, "objects/regression_p_values_boot_meanwind.rds")
+	saveRDS(p.values.list.mean.sq.wind, "objects/regression_p_values_boot_meansqwind.rds")
 }
 
 # Analyse p-values -----------------------------------------
