@@ -95,7 +95,7 @@ library(measurements)
 
 # Get RAW data ---------------------------------------------
 
-storms.all <- as_tibble(fread('data/hurdat2-all.csv'))
+storms.all <- as_tibble(data.table::fread('data/hurdat2-all.csv'))
 
 storms.natl <- storms.all %>%
 	dplyr::filter(basin == "NATL") %>%
@@ -120,7 +120,7 @@ storms.tracks <- storms.all %>%
 						first.long = first(long), last.long = last(long),
 						distance = sum(distance))
 
-pdi.all <- as_tibble(fread('data/hurdat2-hadisst-1966-2016_pdis.csv')) %>%
+pdi.all <- as_tibble(data.table::fread('data/hurdat2-hadisst-1966-2016_pdis.csv')) %>%
 	mutate(storm.duration = conv_unit(storm.duration, "sec", "hr"))
 
 # Join data frames by storm.id
@@ -135,17 +135,21 @@ storms.joint <- storms.joint %>%
 # years.natl <- 1966:2016
 coords.natl <- c("90W", "20W", "5N", "25N")
 coords.natl.map <- c("100W", "0E", "0N", "60N")
+coords.natl.map.poster <- c("100W", "0E", "0N", "50N")
 
 # years.epac <- 1966:2016
 coords.epac <- c("120W", "90W", "5N", "20N")
 coords.epac.map <- c("160W", "90W", "5N", "35N")
 
 coords.all.map <- c("160W", "0E", "0N", "60N")
+coords.all.map.poster <- c("160W", "0E", "0N", "50N")
 
-map_region_hurrs(storms.natl, coords.natl.map, coords.natl, steps = c(20, 10), xtra.lims = c(3,2)) + theme_bw() + theme(text = element_text(family = "Palatino")) #+ ggsave(filename = "natl_map.png", width = 6, height = 3, dpi = 300, device = "png")
+map_region_hurrs(storms.natl, coords.natl.map.poster, coords.natl, steps = c(20, 10), xtra.lims = c(3,2)) + theme_bw() + theme(text = element_text(family = "Palatino")) #+ ggsave(filename = "natl_map.png", width = 6, height = 3, dpi = 300, device = "png")
 
 
 map_region_hurrs_full(storms.all, coords.all.map, coords.natl, coords.epac, steps = c(20, 10), xtra.lims = c(3,2)) + theme_bw() + theme(text = element_text(family = "Palatino")) #+ ggsave(filename = "full_map.png", width = 6, height = 2.75, dpi = 300, device = "png")
+
+plot_scatterplot("NATL", "storm.duration", "storm.pdi", 33) + labs(title = NULL, x = "Storm lifetime (h)", y = bquote(PDI~ (m^3 ~s^-2))) + theme(text = element_text(family = "Palatino")) #+ ggsave(filename = "scatter_natl.png", width = 6, height = 3, dpi = 300, device = "png")
 
 
 
