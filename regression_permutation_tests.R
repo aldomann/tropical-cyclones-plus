@@ -38,6 +38,9 @@ if (read.flag) {
 	boot.p.values.list.max.wind <- readRDS("objects/regression_p_values_boot_maxwind.rds")
 	boot.p.values.list.mean.wind <- readRDS("objects/regression_p_values_boot_meanwind.rds")
 	boot.p.values.list.mean.sq.wind <- readRDS("objects/regression_p_values_boot_meansqwind.rds")
+
+	# Latest run for PDI
+	final.p.values.list.pdi <- readRDS("objects/regression_p_values_pdi_final.rds")
 }
 
 # Permutation tests ----------------------------------------
@@ -111,6 +114,20 @@ if (save.flag && bs.flag) {
 explore_p_values(p.values.list, 0.05)
 explore_p_values(boot.p.values.list, 0.05)
 
+# NATL
+p.vals.natl.pdi.ds.ols <- final.p.values.list.pdi[[3]]
+p.vals.natl.pdi.ds.boot <- final.p.values.list.pdi[[4]]
+
+p.vals.natl.pdi.ds.ols[,c(3,1,11,7,5,9)]
+p.vals.natl.pdi.ds.boot[,c(3,1,11,7,5,9)]
+
+# EPAC
+p.vals.epac.pdi.ds.ols <- final.p.values.list.pdi[[1]]
+p.vals.epac.pdi.ds.boot <- final.p.values.list.pdi[[2]]
+
+p.vals.epac.pdi.ds.ols[,c(3,1,11,7,5,9)]
+p.vals.epac.pdi.ds.boot[,c(3,1,11,7,5,9)]
+
 # Compare statistics and methods ---------------------------
 
 # Compare slope/intercept with alt calculation
@@ -122,5 +139,5 @@ stats.std[[2]]
 stats.boot[[1]]
 stats.boot[[2]]
 
-# Compare CI methods
+# Compare calculation methods
 compare_perm_methods(p.values.list, boot.p.values.list, 1.75, 0.6)
