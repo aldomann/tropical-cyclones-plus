@@ -127,7 +127,8 @@ if (compute.flag) {
 # plot_scatterplot("EPAC", "storm.duration", "mean.sq.wind", 33)
 
 
-# Summarise CI data frames ---------------------------------
+
+# Aggregate results ----------------------------------------
 
 # Group data frames into a list
 if (compute.flag) {
@@ -156,5 +157,71 @@ lm.coefs.list.epac.ds <- lm.coefs.list[lapply(purrr::map(lm.coefs.list, ~dplyr::
 
 # Summarise regression coefficients ------------------------
 
-cbind(lm.coefs.natl.pdi.ds[9:10], lm.coefs.natl.pdi.ds[1:2], round(lm.coefs.natl.pdi.ds[c(5,6,3,4,7,8)], 2))
-cbind(lm.coefs.epac.pdi.ds[9:10], lm.coefs.epac.pdi.ds[1:2], round(lm.coefs.epac.pdi.ds[c(5,6,3,4,7,8)], 2))
+# NATL basin
+lm.coefs.natl.pdi.ds <- lm.coefs.list.natl.ds[[4]]
+
+
+cbind(lm.coefs.natl.pdi.ds[10:9], lm.coefs.natl.pdi.ds[1:2], round(lm.coefs.natl.pdi.ds[c(5,6,3,4,7,8)], 2)) %>% dplyr::arrange(metric)
+
+# T statistics
+
+rbind(
+	# PDI ~ duration OLS
+	get_t_statistics(
+		coefs.low =  as.numeric(lm.coefs.list.natl.ds[[4]][1,3:7]),
+		coefs.high = as.numeric(lm.coefs.list.natl.ds[[4]][3,3:7])
+	),
+	# Duration ~ PDI OLS
+	get_t_statistics(
+		coefs.low =  as.numeric(lm.coefs.list.natl.ds[[4]][5,3:7]),
+		coefs.high = as.numeric(lm.coefs.list.natl.ds[[4]][7,3:7])
+	)
+)
+
+rbind(
+	# PDI ~ duration Bootstrap
+	get_t_statistics(
+		coefs.low =  as.numeric(lm.coefs.list.natl.ds[[4]][2,3:7]),
+		coefs.high = as.numeric(lm.coefs.list.natl.ds[[4]][4,3:7])
+	),
+	# Duration ~ PDI Bootstrap
+	get_t_statistics(
+		coefs.low =  as.numeric(lm.coefs.list.natl.ds[[4]][6,3:7]),
+		coefs.high = as.numeric(lm.coefs.list.natl.ds[[4]][8,3:7])
+	)
+)
+
+
+# EPAC basin
+lm.coefs.epac.pdi.ds <- lm.coefs.list.epac.ds[[4]]
+
+cbind(lm.coefs.epac.pdi.ds[10:9], lm.coefs.epac.pdi.ds[1:2], round(lm.coefs.epac.pdi.ds[c(5,6,3,4,7,8)], 2)) %>% dplyr::arrange(metric)
+
+
+# T statistics (EPAC)
+
+rbind(
+	# PDI ~ duration OLS
+	get_t_statistics(
+		coefs.low =  as.numeric(lm.coefs.list.epac.ds[[4]][1,3:7]),
+		coefs.high = as.numeric(lm.coefs.list.epac.ds[[4]][3,3:7])
+	),
+	# Duration ~ PDI OLS
+	get_t_statistics(
+		coefs.low =  as.numeric(lm.coefs.list.epac.ds[[4]][5,3:7]),
+		coefs.high = as.numeric(lm.coefs.list.epac.ds[[4]][7,3:7])
+	)
+)
+
+rbind(
+	# PDI ~ duration Bootstrap
+	get_t_statistics(
+		coefs.low =  as.numeric(lm.coefs.list.epac.ds[[4]][2,3:7]),
+		coefs.high = as.numeric(lm.coefs.list.epac.ds[[4]][4,3:7])
+	),
+	# Duration ~ PDI Bootstrap
+	get_t_statistics(
+		coefs.low =  as.numeric(lm.coefs.list.epac.ds[[4]][6,3:7]),
+		coefs.high = as.numeric(lm.coefs.list.epac.ds[[4]][8,3:7])
+	)
+)
