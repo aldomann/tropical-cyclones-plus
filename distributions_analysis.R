@@ -57,3 +57,6 @@ plot_marginal(epac.data, "storm.pdi", "PDI") #+ theme(text = element_text(family
 
 summarise_marginals_stats("NATL", 33)
 summarise_marginals_stats("EPAC", 33)
+
+summarise_marginals_stats_nolog("NATL", 33) %>% data.frame()
+summarise_marginals_stats_nolog("EPAC", 33)

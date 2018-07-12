@@ -134,6 +134,31 @@ summarise_marginals_stats <- function(basin.name, min.speed = 0) {
 	return(data)
 }
 
+summarise_marginals_stats_nolog <- function(basin.name, min.speed = 0) {
+	std.error <- function(x) { sd(x)/sqrt(length(x)) }
+	median.error <- function(x) { 1.253 * sd(x)/sqrt(length(x)) }
+
+	data <- pdi.all %>%
+		dplyr::filter(basin == basin.name) %>%
+		dplyr::filter(max.wind > min.speed) %>%
+		select(storm.pdi, storm.duration, max.wind, sst.class)
+
+	data <- data %>%
+		group_by(sst.class) %>%
+		dplyr::summarise(
+			pdi.mean = mean(storm.pdi),
+			pdi.mean.err = std.error(storm.pdi),
+			pdi.median = median(storm.pdi),
+			pdi.median.err = median.error(storm.pdi),
+			dur.mean = mean(storm.duration),
+			dur.mean.err = std.error(storm.duration),
+			dur.median = median(storm.duration),
+			dur.median.err = median.error(storm.duration)
+		)
+
+	return(data)
+}
+
 # Marginals: analyse statistical compatibility -------------
 
 analyse_marginals_compat <- function(basin.name, min.speed = 0) {
