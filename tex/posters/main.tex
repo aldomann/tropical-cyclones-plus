@@ -1,0 +1,204 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MUW Poster
+% LaTeX Template
+% Version 1.0 (31/08/2016)
+% (Based on Version 1.0 (31/08/2015) of the Jacobs Portrait Poster
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+% Created by:
+% Nicolas Ballarini, CeMSIIS, Medical University of Vienna
+% nicoballarini@gmail.com
+% http://statistics.msi.meduniwien.ac.at/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\def\footer#1{\def\insertfooter{#1}}
+%--------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%--------------------------------------------------------------------------------------
+
+\documentclass[final]{beamer}
+
+
+
+% \usepackage[scale=1.150]{beamerposter} % Use the beamerposter package
+\usepackage[scale=0.9]{beamerposter} % Use the beamerposter package
+\usetheme{MUWposter} % Use the MUWposter theme supplied with this template
+
+
+\usepackage{newpxtext}
+\usepackage{newpxmath}
+% \let\openbox\relax
+
+% Include a logo of your project if desired
+% \logo{\pgfputat{\pgfxy(-11,107)}{\pgfbox[center,base]{\includegraphics[width=7cm]{ProjectLogo.png}}}}
+
+\usepackage{multicol}
+\usepackage{array}
+%The following two are column definitions for the aknowledgements section
+\newcolumntype{L}{>{\arraybackslash}m{22cm}}
+\newcolumntype{S}{>{\arraybackslash}m{5cm}}
+\usepackage{pgf}
+\usepackage{mathtools}
+% \usepackage{amsmath, amsthm, amssymb, amsfonts}
+
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{xfrac}
+\usepackage[a]{esvect}
+\usepackage{graphicx}
+
+\usepackage[arrowdel]{physics}
+	\renewcommand{\vnabla}{\vec{\nabla}}
+	% \renewcommand{\vectorbold}[1]{\boldsymbol{#1}}
+	% \renewcommand{\vectorarrow}[1]{\vec{\boldsymbol{#1}}}
+	% \renewcommand{\vectorunit}[1]{\hat{\boldsymbol{#1}}}
+	\renewcommand{\vectorarrow}[1]{\vec{#1}}
+	\renewcommand{\vectorunit}[1]{\hat{#1}}
+	\renewcommand*{\grad}[1]{\vnabla #1}
+	\renewcommand*{\div}[1]{\vnabla \vdot \va{#1}}
+	\renewcommand*{\curl}[1]{\vnabla \cp \va{#1}}
+	\let\rot\curl
+
+\newcommand*{\se}[1]{\widehat{\text{se}}(#1)}
+
+% \usepackage{exscale}
+\usepackage{xcolor}
+\usepackage{ushort}
+\usepackage{setspace}
+\usepackage{url}
+\renewcommand{\vec}[1]{\ushort{#1}}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+
+% \usepackage{$HOME/LaTeX/style-files/alf-misc}
+% Richer enumerate, figure, and table support
+\usepackage{enumerate}
+% \usepackage[shortlabels]{enumitem}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{subfig}
+
+
+
+\usepackage[square,numbers]{natbib}
+\bibliographystyle{abbrvnat}
+
+% \usepackage[backend=bibtex, style=trad-abbrv, sorting=none, maxbibnames=3, maxcitenames=2]{biblatex}
+% \addbibresource{../TFM.bib}
+% \addbibresource{../bibliography.bib}
+% \makeatletter
+% 	\def\blx@maxline{77}
+% \makeatother
+
+%-----------------------------------------------
+%  START Set the colors
+%  Uncomment to apply colors you want to use.
+%-----------------------------------------------
+
+\definecolor{greenMUW}{RGB}{60,191,174}
+\definecolor{blueMUW}{RGB}{17,29,79}
+\definecolor{skinMUW}{RGB}{254,228,217}
+\definecolor{hellblauMUW}{RGB}{95,180,229}
+
+\definecolor{redCRM}{RGB}{155,44,60}
+
+\colorlet{themecolor}{redCRM}
+\usebackgroundtemplate{\includegraphics{assets/CRM_skin_IBC912.pdf}}
+
+% \colorlet{themecolor}{greenMUW}
+% \usebackgroundtemplate{\includegraphics{MUW_green.pdf}}
+
+%\colorlet{themecolor}{skinMUW}
+%\colorlet{themecolor}{blueMUW}
+%\usebackgroundtemplate{\includegraphics{MUW_skin.pdf}}
+
+%%\colorlet{themecolor}{blueMUW}
+%\colorlet{themecolor}{hellblauMUW}
+%\usebackgroundtemplate{\includegraphics{MUW_hellblau.pdf}}
+%-----------------------------------------------
+%  END Set the colors
+%-----------------------------------------------
+
+
+%-----------------------------------------------
+%  START Set the width of the columns
+%-----------------------------------------------
+\setlength{\paperwidth}{90cm} % A0 width: 46.8in
+\setlength{\paperheight}{120cm} % A0 height: 33.1in
+\newlength{\sepmargin}
+\newlength{\sepwid}
+\newlength{\onecolwid}
+\newlength{\twocolwid}
+\newlength{\threecolwid}
+
+% The following measures are used for 2 columns
+\setlength{\sepmargin}{0.055\paperwidth} % Separation width (white space) between columns
+\setlength{\sepwid}{0.03\paperwidth} % Separation width (white space) between columns
+\setlength{\onecolwid}{0.43\paperwidth} % Width of one column
+\setlength{\twocolwid}{0.9\paperwidth} % Width of two columns
+
+%-----------------------------------------------------------
+% The following measures are used for 3 columns
+%\setlength{\sepmargin}{0.06\paperwidth} % Separation width (white space) between columns
+%\setlength{\sepwid}{0.02\paperwidth} % Separation width (white space) between columns
+%\setlength{\onecolwid}{0.28\paperwidth} % Width of one column
+%\setlength{\twocolwid}{0.58\paperwidth} % Width of two columns
+%\setlength{\threecolwid}{0.88\paperwidth} % Width of three columns
+%\setlength{\columnsep}{30pt}
+
+%-----------------------------------------------
+%  END Set the width of the columns
+%-----------------------------------------------
+
+
+%-----------------------------------------------------------------
+% PDF INFO AND HYPERREF
+%-----------------------------------------------------------------
+\usepackage{hyperref}
+% \hypersetup{colorlinks, citecolor=black, filecolor=black, linkcolor=black, urlcolor=black}
+\usepackage{cleveref}
+
+\newcommand*{\mytitle}{The influence of sea surface temperature on tropical-cyclone intensity}
+\newcommand*{\myauthor}{Alfredo Hernández}
+\newcommand*{\mysupervisora}{Álvaro Corral}
+\newcommand*{\mysupervisorb}{Isabel Serra}
+\newcommand*{\myaffa}{Centre de Recerca Matemàtica}
+\newcommand*{\myaffc}{Barcelona Supercomputing Center}
+\newcommand*{\myaffb}{Complexity Science Hub Vienna}
+\newcommand*{\mydate}{July 2018}
+
+\pdfstringdefDisableCommands{\def\and{and }}
+
+%--------------------------------------------------------------------------------------
+% TITLE SECTION
+%--------------------------------------------------------------------------------------
+\setbeamertemplate{title}[left]
+\setbeamertemplate{frametitle}[default][left]
+%\setmainfont{Georgia}
+
+\title{\mytitle} % Poster title
+
+\author[shortname]{\myauthor\inst{1},
+           \mysupervisorb\inst{1, 2} and
+           \mysupervisora\inst{1, 3}} % Author(s)
+
+\institute[shortinst]{\inst{1} \myaffa , \,
+                      \inst{2} \myaffc , \, and
+                      \inst{3} \myaffb} % Institution(s)
+
+\usepackage{hyperxmp}
+\hypersetup{pdfauthor={\myauthor}, pdftitle={\mytitle}}
+
+%--------------------------------------------------------------------------------------
+\begin{document}
+
+  \addtobeamertemplate{block end}{}{\vspace*{1ex}} % White space under blocks
+  \addtobeamertemplate{block alerted end}{}{\vspace*{0ex}} % White space under highlighted (alert) blocks
+  \setlength{\belowcaptionskip}{2ex} % White space under figures
+  \setlength\belowdisplayshortskip{1ex} % White space under equations
+
+  \include{contents/body}
+
+\end{document}
