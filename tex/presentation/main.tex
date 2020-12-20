@@ -1,0 +1,110 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% I, the copyright holder of this work, release this work into the
+%% public domain. This applies worldwide. In some countries this may
+%% not be legally possible; if so: I grant anyone the right to use
+%% this work for any purpose, without any conditions, unless such
+%% conditions are required by law.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass{beamer}
+\usetheme[faculty=fss]{fibeamer}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+% \usepackage{lmodern}
+
+% \renewcommand\familydefault{\sfdefault}
+\usefonttheme[onlymath]{serif}
+% \usepackage{newpxtext}
+% \usepackage{newpxmath}
+% \let\openbox\relax
+
+\usepackage{slantsc}
+\usepackage{microtype}
+\usepackage[british]{babel}
+
+\usepackage[backend=bibtex, style=trad-abbrv, sorting=none, maxbibnames=3, maxcitenames=2]{biblatex}
+\addbibresource{../TFG.bib}
+\addbibresource{../TFM.bib}
+\addbibresource{../bibliography.bib}
+\makeatletter
+	\def\blx@maxline{77}
+\makeatother
+
+\let\counterwithout\relax
+\let\counterwithin\relax
+
+%-----------------------------------------------------------------
+%	PDF INFO AND HYPERREF
+%-----------------------------------------------------------------
+\usepackage{hyperref}
+\hypersetup{colorlinks, citecolor=black, filecolor=black, linkcolor=black, urlcolor=black}
+\usepackage{cleveref}
+	\crefname{section}{\S}{\SS}
+	\Crefname{section}{\S}{\SS}
+	\crefname{listing}{snippet}{}
+
+\newcommand*{\mytitle}{The influence of sea surface temperature on tropical-cyclone intensity}
+\newcommand*{\mysubtitle}{(Provisional Title)}
+\newcommand*{\myauthor}{Alfredo Hernández Cavieres}
+\newcommand*{\mysupervisora}{Álvaro Corral }
+\newcommand*{\mysupervisorb}{Isabel Serra}
+\newcommand*{\myuni}{Universitat Autònoma de Barcelona}
+\newcommand*{\mydate}{11th July 2018}
+
+\pdfstringdefDisableCommands{\def\and{and }}
+
+\usepackage{hyperxmp}
+\usepackage{pdfpages}
+\hypersetup{pdfauthor={\myauthor}, pdftitle={\mytitle}}
+
+
+%-----------------------------------------------------------------
+% CUSTOM STYLE FILES
+%-----------------------------------------------------------------
+
+% \usepackage{$HOME/LaTeX/style-files/alf-layout-new}
+\usepackage{$HOME/LaTeX/style-files/alf-maths}
+% \usepackage{$HOME/LaTeX/style-files/alf-misc}
+% \usepackage{$HOME/LaTeX/style-files/alf-code}
+\usepackage{../alf-code}
+% \usepackage{$HOME/LaTeX/style-files/alf-theorems}
+% \usepackage{$HOME/LaTeX/style-files/alf-ela}
+
+% \usepackage{enumerate}
+% \usepackage[shortlabels]{enumitem}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+
+\usepackage[linesnumbered,algoruled,vlined]{algorithm2e}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\newcommand*{\se}[1]{\widehat{\text{se}}(#1)}
+
+
+%-----------------------------------------------------------------
+%% These macros specify information about the presentation
+\title{\mytitle}
+% \subtitle{Presentation Subtitle}
+\author{\myauthor
+\\ \footnotesize Supervised by: \mysupervisora \& \mysupervisorb}
+%% These additional packages are used within the document:
+\usepackage{ragged2e}  % `\justifying` text
+\usepackage{booktabs}  % Tables
+\usepackage{tabularx}
+\usepackage{tikz}      % Diagrams
+\usetikzlibrary{calc, shapes, backgrounds}
+\usepackage{amsmath, amssymb}
+\usepackage{url}       % `\url`s
+\usepackage{listings}  % Code listings
+\frenchspacing
+
+\begin{document}
+	\include{contents/body}
+\end{document}
