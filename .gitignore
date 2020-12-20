@@ -8,4 +8,4 @@
 /oisst-data
 /images
 *.nb.html
-*.pdf
+# *.pdf
