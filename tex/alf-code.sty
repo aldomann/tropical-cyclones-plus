@@ -1,0 +1,67 @@
+%-----------------------------------------------------------------
+%	SYNTAX HIGHLIGHTING
+%-----------------------------------------------------------------
+% \usepackage{algorithm}
+% \usepackage[noend]{algpseudocode}
+\usepackage[linesnumbered,algoruled,vlined]{algorithm2e}
+% \setlength{\algotitleheightrule}{0.8pt}
+% \setlength{\algoheightrule}{0pt}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\usepackage[formats]{listings}
+\usepackage{relsize}
+\usepackage{chngcntr}
+
+\renewcommand{\lstlistingname}{Snippet}
+\renewcommand{\lstlistlistingname}{List of snippets}
+
+\lstloadlanguages{R}
+\lstdefinelanguage{Renhanced}[]{R}{%
+	morekeywords={acf,ar,arima,arima.sim,colMeans,colSums,is.na,is.null,%
+	mapply,ms,na.rm,nlmin,replicate,row.names,rowMeans,rowSums,seasonal,%
+	sys.time,system.time,ts.plot,which.max,which.min,%
+	rename,mutate,unite,select,filter,left_join,group_by,dplyr::select,%
+	ggplot,aes,geom_line,geom_hline,geom_point,geom_path,geom_errorbar,%
+	geom_abline,geom_smooth%
+	geom_cartogram,coord_proj,scale_x_longitude, scale_y_latitude,%
+	labs,guides,annotate,theme,rowwise,%
+	scale_linetype_manual,scale_colour_manual,scale_x_log10,scale_y_log10,%
+	attr,paste,paste0,bind_rows,str_trim,as.numeric,as.dataframe,data.frame},
+	deletekeywords={c,range,step},
+	alsoletter={.,_,::},
+	otherkeywords = {!,!=,~,\$,*,\&,\%/\%,\%*\%,\%\%,\%>\%,<-,<<-,\% in \%}
+	}
+
+\newcommand*{\inline}{\lstinline[basicstyle=\normalsize\ttfamily]}
+
+
+\lstset{language=Renhanced,
+		frame=tb,
+		% captionpos=b,
+		tabsize=2,
+		% showtabs=true,
+		breaklines=true,
+		breakatwhitespace=true,
+		basicstyle=\smaller\ttfamily,
+		numbers=left,
+		numberstyle=\tiny,
+		numbersep=7.5pt,
+		% commentstyle=\textsl,
+		xleftmargin=3ex}
+\lstset{escapeinside={(*}{*)}}   % for (*\ref{ }*) inside lstlistings (Scode)
+
+\lstdefinestyle{output}{
+	language=,
+	% showtabs=true,
+	% showspaces=true,
+	numbers=none,
+	frame=tblr,
+	% columns=fullflexible,
+	backgroundcolor=\color{blue!10},
+	% numbers=left,
+	% numberstyle=\tiny,
+	% numbersep=7.5pt,
+	xleftmargin=3ex}

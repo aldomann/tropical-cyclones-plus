@@ -1,0 +1,59 @@
+%-----------------------------------------------------------------
+%	GEOGRAPHIC ANALYSIS
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+
+% \begin{itemize}
+% 	\item Distance
+% 	\item Linear regression?
+% 	\item Analysis of initial/final position.
+% 	\item Marginals of the finitial positions (4 plots per basin + summary).
+% 	\item Boxplots and Wilcoxon tests.
+% 	\item Clustering.
+% \end{itemize}
+
+\subsection{Geographical variables}
+During the analysis performed in \Cref{sec:data-analysis} and \Cref{sec:regr-analysis-boot} we only used geographical information about the hurricane occurrences for the calculation of the basin-wide averaged SST.
+
+From the raw HURDAT2 data sets, we can extract some relevant geographical data about each tropical-cyclone that could help obtain some insight or physical reason behind the displacement of the joint distribution of $PDI$ and lifetime of the storms between low-SST and high-SST years occurrences.
+
+\bigskip
+We focus on the geographical genesis location of a tropical-cyclone, as well as its death location. This information is easy to get from the individual longitude and latitude tracks for each hurricane.
+
+Apart from this, we calculate the total travelled distance, or path length, of each hurricane by means of the \emph{spherical law of cosines}:
+\begin{align}
+	d(p_{1}, p_{2}) = \cos^{-1}\qty[\sin(\phi_{1}) \cdot \sin(\phi_{2}) + \cos(\phi_{1}) \cdot \cos(\phi_{2}) \cdot \cos(\Delta \lambda)] \cdot R_{\text{E}},
+\end{align}
+where $\phi$ and $\lambda$ respectively represent latitude and longitude in radians, and $R_{\text{E}}$ represents the Earth's radius in meters.
+
+\medskip
+In \Cref{hd:geog-data-head} one can see the structure of the cleaned data illustrate these newly calculated geographical variables.
+\begin{table}[H]
+	\centering
+	\ttfamily
+	\resizebox{\textwidth}{!}{%
+	\begin{tabular}{r r r r c r r r r r}
+		\toprule
+		\toprule
+		storm.id & storm.name & n.obs & storm.duration & \multirow{2}{*}{$\cdots$} & first.lat & last.lat & first.long & last.long &  distance \\
+		<chr>    & <chr>      & <int> &          <dbl> &          &     <dbl> &    <dbl> &      <dbl> &     <dbl> &     <dbl> \\
+		\midrule
+		AL011966 & ALMA       &    42 &         907200 & $\cdots$ &      12.7 &     42.0 &      -84.0 &     -70.5 &   4129705 \\
+		AL021966 & BECKY      &     9 &         194400 & $\cdots$ &      32.4 &     45.5 &      -57.8 &     -58.5 &   1678458 \\
+		AL031966 & CELIA      &    36 &         777600 & $\cdots$ &      19.1 &     52.0 &      -59.5 &     -57.0 &   5635625 \\
+		AL041966 & DOROTHY    &    37 &         799200 & $\cdots$ &      31.0 &     53.5 &      -41.0 &     -38.5 &   2864172 \\
+		AL051966 & ELLA       &    26 &         561600 & $\cdots$ &      10.0 &     24.3 &      -35.0 &     -68.4 &   3917529 \\
+		AL071966 & GRETA      &    26 &         561600 & $\cdots$ &      13.7 &     28.0 &      -48.4 &     -71.7 &   2977350 \\
+		\bottomrule
+	\end{tabular}}
+	\caption{Excerpt of the North Atlantic data set, focusing on the geographical variables}
+	\label{hd:geog-data-head}
+\end{table}
+
+\bigskip
+Similarly to the unified HURDAT2 \& HadISST1 data sets (see \Cref{ssec:unified-data-set}), these geographically enhanced data sets are available in the \texttt{HurdatHadISSTData} package:
+\begin{itemize}
+	\item \texttt{tc.pdi.geog.natl} -- Data set for the North Atlantic basin.
+	\item \texttt{tc.pdi.geog.epac} -- Data set for the Northeast Pacific basin.
+	\item \texttt{tc.pdi.geog.all} -- Data set for both basins.
+\end{itemize}

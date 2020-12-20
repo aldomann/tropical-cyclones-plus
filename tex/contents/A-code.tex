@@ -1,0 +1,28 @@
+%-----------------------------------------------------------------
+%	APPENDIX A
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\section{Developed code}\label{app:code}
+\renewcommand{\lstlistingname}{Script}
+The code developed for this thesis is licensed under the \href{https://www.gnu.org/licenses/gpl-3.0.en.html}{GNU General Public License v3.0} and can be downloaded from \url{https://github.com/aldomann/tropical-cyclones}.
+
+\lstinputlisting[firstline = 4, label = scr:hurdat2_base,%
+	caption = \inline{hurdat2_base.R} - Base code to study the PDI of hurricane data from the National Hurricane Center (HURDAT)]%
+	{code/hurdat2_base.R}
+\lstinputlisting[firstline = 4, label = scr:hurdat2_pdi_base,%
+	caption = \inline{hurdat2_pdi_base.R} - Base code to study the PDI probability density (DPDI)]%
+	{code/hurdat2_pdi_base.R}
+\lstinputlisting[firstline = 4, label = scr:hadisst_base,%
+	caption = \inline{hadisst_base.R} - Base code to study the SST data from the Hadley Centre (HadISST)]%
+	{code/hadisst_base.R}
+\lstinputlisting[firstline = 4, label = scr:analysis_base,%
+	caption = \inline{analysis_base.R} - Base code with several functions needed in \inline{main_analysis.R}]%
+	{code/analysis_base.R}
+\lstinputlisting[firstline = 4, label = scr:main_analysis,%
+	caption = \inline{main_analysis.R} - Code to study the PDI dependence with the SST]%
+	{code/main_analysis.R}
+\lstinputlisting[firstline = 4, label = scr:hadcrut4_analysis,%
+	caption = \inline{hadcrut4_analysis.R} - Code to study the global average temperature (from HadCRUT4)]%
+	{code/hadcrut4_analysis.R}
+
+

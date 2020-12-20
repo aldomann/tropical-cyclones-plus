@@ -1,0 +1,26 @@
+%-----------------------------------------------------------------
+%	INTRODUCTION: HYPOTHESIS AND CONCLUSIONS
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\subsection{Hypothesis and conclusions}\label{sec:intro-hypothesis}
+The hypothesis is that the $\text{SST}$ does not directly affect the maximum wind speed of a tropical-cyclone: storms of equal lifetime should, in theory, have the same wind speed and $PDI$, and have the same joint distribution:
+\begin{align}\label{eq:hypothesis}
+	f(Y \mid X = x)_{\text{low}} = f(Y \mid X = x)_{\text{high}} .
+\end{align}
+The physical reasoning behind this is that once the cyclone is activated, the wind speed should not depend on its underlying $\text{SST}$.
+
+Instead of working with the exact joint
+%bivariate log-normal
+distributions $f$, we study the expected value of the distributions:
+\begin{align}
+	E(Y \mid X = x )_{\text{low}} = E(Y \mid X = x )_{\text{high}},
+\end{align}
+where $E(Y \mid X = x )$ is estimated by performing a \emph{ordinary least squares} (OLS) regression analysis on the data sets.
+
+\bigskip
+The results show a remarkable correlation in the joint distribution of lifetime and $PDI$. By considering this joint distribution a bivariate lognormal distribution we perform a linear regression analysis of the logarithmic variables. Statistical testing, by means of a permutation test, shows that there is no significant difference between the regression coefficient estimates for low-SST years and high-SST years.
+
+This gives a strong evidence in favour to the fact that this relation does not significantly depend on the SST. In other words, the wind speed of a tropical cyclone of a given lifetime will be the same (within statistical fluctuations) in cold and warm years.
+
+% \medskip
+% Our conclusions are compatible with the view of tropical cyclones as an activation process, in which, once the event has started, its intensity is kept in critical balance between attenuation and intensification (and so, higher SST does not trigger more intensification).

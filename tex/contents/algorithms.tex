@@ -1,0 +1,67 @@
+
+%algorithm usage
+\begin{algorithm}
+	\KwIn{entities; actors; player; customRules;}
+	\KwOut{new world state}
+	let \textit{entities} be all entities, excluding actors and the player\;
+	let \textit{actors} be all actors, including the player\;
+	\ForEach{actor in actors}{
+		actor.rules.Invoke()\;
+	}
+	\tcc{It's possible that one of the rules gave the player a constraint, so we'll check}
+	\If{player.constraint == null}{
+		GenerateConstraint(player)\;
+	}
+	\ForEach{rule in customRules}{
+		rule.Invoke()\;
+	}
+	\caption{Step planning}\label{alg:step_planning}
+\end{algorithm}
+
+%procedure usage
+\begin{procedure}
+	\KwIn{player}
+	\KwOut{new constraint for the player}
+		\eIf{rules.count $\geq$ 0}{
+			\ForEach{item in rules}{
+				rules.invoke(player)\;
+			}}{
+				\textbf{select random} \textit{e} \textbf{from} \textit{entities}\;
+				player.constraint = \textit{e}\;
+			}
+	\caption{GenerateConstraint(Player)}\label{proc:generate_constraint}
+\end{procedure}
+
+\begin{algorithm}[H]
+\caption{How to write algorithms}
+% \SetAlgoLined
+\DontPrintSemicolon
+	\KwData{this text}
+	\KwResult{how to write algorithm with \LaTeX2e }
+	initialization\;
+	\While{not at end of this document}{
+		read current\;
+		\eIf{understand}{
+			go to next section\;
+			current section becomes this one\;
+			}{
+			go back to the beginning of current section\;
+		}
+	}
+\end{algorithm}
+
+\begin{algorithm}
+\DontPrintSemicolon % Some LaTeX compilers require you to use \dontprintsemicolon instead
+\KwIn{A set $C = \{c_1, c_2, \ldots, c_r\}$ of denominations of coins, where $c_i > c_2 > \ldots > c_r$ and a positive number $n$}
+\KwOut{A list of coins $d_1,d_2,\ldots,d_k$, such that $\sum_{i=1}^k d_i = n$ and $k$ is minimized}
+$C \gets \emptyset$\;
+\For{$i \gets 1$ \textbf{to} $r$}{
+  \While{$n \geq c_i$} {
+	$C \gets C \cup \{c_i\}$\;
+	$n \gets n - c_i$\;
+  }
+}
+\Return{$C$}\;
+\caption{{\scshape Change} Makes change using the smallest number of coins}
+\label{algo:change}
+\end{algorithm}

@@ -1,0 +1,155 @@
+%-----------------------------------------------------------------
+%	BASIC DOCUMENT LAYOUT
+%-----------------------------------------------------------------
+\documentclass[paper=a4, fontsize=12pt, twoside=semi, abstracton, listof=totoc, toc=left]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+% \usepackage{lmodern}
+\usepackage{newpxtext}
+\usepackage{newpxmath}
+\let\openbox\relax
+\usepackage{slantsc}
+\usepackage{microtype}
+\usepackage[british]{babel}
+% \usepackage[backend=bibtex, style=phys, sorting=none, citestyle=authoryear, maxbibnames=3, maxcitenames=2]{biblatex}
+\usepackage[backend=bibtex, style=trad-abbrv, sorting=none, maxbibnames=3, maxcitenames=2]{biblatex}
+\addbibresource{TFG.bib}
+\addbibresource{TFM.bib}
+\addbibresource{bibliography.bib}
+\makeatletter
+	\def\blx@maxline{77}
+\makeatother
+
+\let\counterwithout\relax
+\let\counterwithin\relax
+
+%-----------------------------------------------------------------
+%	CUSTOM STYLE FILES
+%-----------------------------------------------------------------
+
+\usepackage{$HOME/LaTeX/style-files/alf-layout-new}
+\usepackage{$HOME/LaTeX/style-files/alf-maths}
+\usepackage{$HOME/LaTeX/style-files/alf-misc}
+% \usepackage{$HOME/LaTeX/style-files/alf-code}
+\usepackage{alf-code}
+\usepackage{$HOME/LaTeX/style-files/alf-theorems}
+\usepackage{$HOME/LaTeX/style-files/alf-ela}
+
+% \usepackage{tocloft}
+
+%-----------------------------------------------------------------
+%	CUSTOM DEFINITIONS
+%-----------------------------------------------------------------
+
+\newcommand*{\se}[1]{\widehat{\text{se}}(#1)}
+
+%-----------------------------------------------------------------
+%	DEDICATION ENVIRONMENT
+%-----------------------------------------------------------------
+
+\newenvironment{mydedication}
+	{\clearpage           % we want a new page
+	\thispagestyle{empty}% no header and footer
+	\vspace*{\stretch{1}}% some space at the top
+	% \itshape             % the text is in italics
+	\raggedleft          % flush to the right margin
+	}
+	{\par % end the paragraph
+	\vspace{\stretch{3}} % space at bottom is three times that at the top
+	\clearpage           % finish off the page
+	}
+
+%-----------------------------------------------------------------
+%	PDF INFO AND HYPERREF
+%-----------------------------------------------------------------
+\usepackage{hyperref}
+\hypersetup{colorlinks, citecolor=black, filecolor=black, linkcolor=black, urlcolor=black}
+\usepackage{cleveref}
+	\crefname{section}{\S}{\SS}
+	\Crefname{section}{\S}{\SS}
+	\crefname{listing}{snippet}{}
+
+\newcommand*{\mytitle}{The influence of sea surface temperature on tropical-cyclone intensity}
+\newcommand*{\mysubtitle}{(Provisional Title)}
+\newcommand*{\myauthor}{Alfredo Hernández Cavieres}
+\newcommand*{\mysupervisora}{Álvaro Corral }
+\newcommand*{\mysupervisorb}{Isabel Serra}
+\newcommand*{\myuni}{Universitat Autònoma de Barcelona}
+\newcommand*{\mydate}{11th July 2018}
+
+\pdfstringdefDisableCommands{\def\and{and }}
+
+\usepackage{hyperxmp}
+\usepackage{pdfpages}
+\hypersetup{pdfauthor={\myauthor}, pdftitle={\mytitle}}
+
+%-----------------------------------------------------------------
+%	TITLE SECTION AND DOCUMENT BEGINNING
+%-----------------------------------------------------------------
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}}
+\title{
+	\normalfont
+	\small \scshape{\myuni} \\ [25pt]
+	% \large \scshape{Treball de fi de grau de Física} \\
+	\horrule{0.5pt} \\ [0.4cm]
+	\huge \mytitle \\
+	% \Large \scshape{\mysubtitle} \\
+	\horrule{2pt} \\ [0.5cm]
+}
+\author{\myauthor
+\\ \footnotesize Supervised by: \mysupervisora \& \mysupervisorb}
+\date{\mydate}
+
+\begin{document}
+
+\counterwithin{lstlisting}{section}
+
+% \includepdf{cover-master.pdf}
+% \newpage
+
+\clearpage\maketitle
+\thispagestyle{empty}
+\addtocounter{page}{-1}
+
+%-----------------------------------------------------------------
+%	DEDICATION
+%-----------------------------------------------------------------
+\begin{mydedication}
+	% Dedicated to Pere Puig \& the Brotherhood
+	``\emph{All models are wrong, but some are useful.}'' \\
+	--- George Box
+\end{mydedication}
+
+%-----------------------------------------------------------------
+%	DOCUMENT BODY
+%-----------------------------------------------------------------
+% \cleardoubleevenemptypage
+\include{./contents/0-abstract}
+
+\pdfbookmark[1]{\contentsname}{toc}
+\tableofcontents
+\listoffigures
+\listoftables
+
+% \include{./contents/1-intro}
+\include{./contents/body}
+% \include{./contents/6-conclusions}
+
+% \begin{appendices}
+% \include{./contents/A-code}
+% \end{appendices}
+
+%-----------------------------------------------------------------
+%	BIBLIOGRAPHY
+%-----------------------------------------------------------------
+% \nocite{Domingo2012}
+
+\printbibliography[heading=bibintoc]
+% \setcounter{secnumdepth}{0}
+% \section{References}
+% \printbibliography[title={Articles}, type=article, heading=subbibliography]
+% \printbibliography[title={Books}, type=book, heading=subbibliography]
+% \printbibliography[title={Websites}, type=online , heading=subbibliography]
+% \printbibliography[title={Other}, type=misc , heading=subbibliography]
+
+\end{document}

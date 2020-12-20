@@ -1,0 +1,79 @@
+%-----------------------------------------------------------------
+%	BACKGROUND: RESAMPLING THEORY
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\subsection{Resampling methods}\label{sec:resampling}
+Resampling methods are an indispensable tool in modern statistics. They involve repeatedly drawing samples from a data set and refitting a model of interest on each sample in order to obtain additional information about the fitted model. The term \emph{resampling} is used for any variety of methods for doing one of the following:
+\begin{itemize}
+	\item Estimating the precision of sample statistics (medians, variances, percentiles) by using subsets of available data (jackknifing) or drawing randomly with replacement from a set of data points (bootstrapping).
+	\item Exchanging labels on data points when performing significance tests (permutation tests, also called exact tests, randomisation tests, or re-randomisation tests).
+	\item Validating models by using random subsets (bootstrapping, cross validation).
+\end{itemize}
+
+Resampling approaches can be computationally expensive, because they involve fitting the same statistical method multiple times using different subsets of the studied data set. However, due to recent advances in computing power, the computational requirements of resampling methods generally are not prohibitive.
+
+%-----------------------------------------------------------------
+\subsubsection{The bootstrap in linear regression}\label{ssec:boot-theory}
+The bootstrap is a method to derive properties (standard errors, confidence intervals and critical values) of the sampling distribution of estimators.
+
+In the case of linear regression, when the assumptions on the residual error do not hold, there two quite different resampling methods: (a) resampling of the errors, and (b) resampling of the cases; being the second one more robust to failure of the model assumptions~\cite{Hinkley1997}.
+
+For resampling the cases (or observations), one assumes the data is the sample from some bivariate distribution $f(X, Y)$. This will sometimes, but not often, mimic reality. Model \eqref{eq:lm-model} still applies, but with no assumption on the random errors $\epsilon_{i}$ other than independence.
+
+With $f$ being the bivariate distribution of $(X, Y)$, it is appropriate to take $f$ to be the empirical distribution function (EDF) of the data pairs, and resampling will be from this EDF. The resampling simulation therefore involves sampling pairs with replacement from $(x_{i} , y_{i}), \dots , (x_{n} , y_{n})$. This is equivalent to taking
+\begin{align}
+	(x^{\ast}_{i} , y^{\ast}_{i}) = (x_{I} , y_{I}),
+\end{align}
+where $I$ is uniformly distributed on $\qty{1, 2, \dots, n}$. Then, simulated values $\hat{\beta}_{0}^{\ast}$, $\hat{\beta}_{1}^{\ast}$ the coefficient estimates are computed from $(x_{i}^{\ast} , y_{i}^{\ast}), \dots , (x_{n}^{\ast} , y_{n}^{\ast})$ using the OLS method which was applied to obtain the original estimates. This resampling algorithm can be summarised in \Cref{alg:bootstrap-theory}.
+
+\IncMargin{1em}
+\begin{algorithm}[H]
+	\caption{Resampling the cases using bootstrap}
+	\label{alg:bootstrap-theory}
+	\DontPrintSemicolon
+	\For{$r \gets 1$ \textbf{to} $R$}{
+		$\text{(i)}$ Sample $i^{\ast}_{1}, \dots, i^{\ast}_{n}$ randomly with replacement from $\qty{1, 2, \dots, n}$.\;
+		\For{$j \gets 1$ \textbf{to} $n$}{
+			$\text{(ii)}$ Set $x_{j}^{\ast} = x_{i^{\ast}_{j}}$, $y_{j}^{\ast} = y_{i^{\ast}_{j}}$ \;
+		}
+		$\text{(iii)}$ Fit OLS regression to $(x_{i}^{\ast} , y_{i}^{\ast}), \dots , (x_{n}^{\ast} , y_{n}^{\ast})$.\;
+		$\text{(iv)}$ Calculate estimates of $\hat{\beta}_{0,r}^{\ast}$ and $\hat{\beta}_{1,r}^{\ast}$.
+	}
+\end{algorithm}
+\DecMargin{1em}
+
+A great advantage of bootstrap is its simplicity. It is a straightforward way to derive estimates of standard errors and confidence intervals for complex estimators of complex parameters of the distribution, such as percentile points, proportions, and correlation coefficients. %Bootstrap is also an appropriate way to control and check the stability of the results.
+Although for most problems it is impossible to know the true confidence interval, bootstrap is asymptotically more accurate than the standard intervals obtained using sample variance and assumptions of normality~\cite{Efron1993}.
+
+%-----------------------------------------------------------------
+\subsubsection{Permutation tests for comparing two populations}\label{ssec:perm-test-theory}
+\nocite{Good2005}
+\emph{Permutation tests} or randomisation tests are widely used in nonparametric statistics where a parametric form of the underlying distribution is not specified (or known).
+
+Permutation tests for comparing two populations can be widely used in practice because of flexibility of the test statistic and minimal assumptions~\cite{Butar2008}. Consider sample of $m$ observations from population $A$ and $n$ observations from population $B$. Assume that under the null hypothesis $H_{0}$ there is no difference between a certain property of both populations; this could be the mean, the median, etc. Then any permutation of the observations between the two populations has the same chance to occur as any other permutation.
+
+One could also perform parametric tests to test $H_{0}$, but they require the assumptions about the distribution of the characteristic in the population to be fulfilled. Permutation tests do not need fulfil the assumption about conformity with normal distribution and are as robust as parametric tests~\cite{Polko-Zajac2016}.
+
+The essence of permutation tests is to determine a test statistic and then to evaluate the sample distribution of this statistic for all permutations of the populations. When calculations affect large number of permutations, a Monte Carlo method is applied (i.e., the permutations are random).
+
+The steps for performing this kind of permutation test can be summarised in \Cref{alg:perm-test-theory}.
+
+\newpage
+\IncMargin{1em}
+\begin{algorithm}[H]
+	\caption{Permutation test for comparing two populations}
+	\label{alg:perm-test-theory}
+	\DontPrintSemicolon
+	$\text{(i)}$ Define the null hypothesis, $H_{0}$, and the alternative.\;
+	$\text{(ii)}$ Consider a test statistic that compares the populations which is large (small) if the null hypothesis is not true, and small (large) if it is true.\;
+	$\text{(iii)}$ Calculate the true statistic of the data, $T$.\;
+	\For{$r \gets 1$ \textbf{to} $R$}{
+		$\text{(iv)}$ Create a new data set consisting of the data, randomly rearranged. Exactly how it is rearranged depends on the null hypothesis.\;
+		$\text{(v)}$ Calculate the statistic for this new data set, $T^{\ast}$.\;
+		$\text{(vi)}$ Compare the statistic $T^{\ast}$ to the true value, $T$.\;
+	}
+	$\text{(vii)}$ If the true statistic is greater (lower) than 95\% of the random values, then one can reject the null hypothesis at $p<0.05$.\;
+\end{algorithm}
+\DecMargin{1em}
+
+A great advantage of the permutation tests exist for any test statistic, regardless of whether or not its distribution is known. Thus one is always free to choose the statistic which best discriminates between hypothesis and alternative and which minimises losses.

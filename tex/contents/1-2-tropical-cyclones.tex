@@ -1,0 +1,89 @@
+%-----------------------------------------------------------------
+%	INTRODUCTION: TROPICAL-CYCLONES
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\subsection{Tropical-cyclones}\label{sec:intro-hurricanes}
+To characterise a tropical-cyclone one needs to define a physically relevant measure of released energy. In \cite{Emanuel1986-bis} \citeauthor{Emanuel1986-bis} showed that in a tropical-cyclone energy dissipation occurs mostly in the atmospheric surface layer, and that the corresponding dissipation rate per unit area, $D$, is
+\begin{align}
+	D \equiv C_{D} \rho \norm{\va{v}}^{3}
+	,
+\end{align}
+where $C_{D}$ is the surface drag coefficient, $\rho$ is the surface air density, $\norm{\va{v}}$ is the magnitude of the surface wind velocity.
+
+Thus, integrated over the surface area covered by a circularly symmetric tropical-cyclone of radius $r_{0}$ of lifetime $\tau$, the total power dissipated by the storm, $PD$, is given by
+\begin{align}
+	PD \equiv 2 \pi \int_{0}^{\tau} \int_{0}^{r_{0}} C_{D} \rho \norm{\va{v}}^{3} r \dd{r} \dd{t}
+	.
+\end{align}
+
+However, as stated in \cite{Emanuel2005}, since the integral in the expression \eqref{eq:pdi} will in practice be dominated by high wind speeds, one can approximate the product $C_{D} \rho$ as a constant and define a simplified power dissipation index ($PDI$) as
+\begin{subequations}
+\begin{align}\label{eq:pdi}
+	PDI \equiv \int_{0}^{\tau} v_{max}^{3} \dd{t}
+	.
+\end{align}
+
+However, the wind data (as we discuss in~\cref{ssec:hurdat}) is recorded every $\Delta t = \SI{6}{\hour}$. Therefore, we discretise the expression for the $PDI$ using the rectangle method:
+\begin{align}\label{eq:pdi-bis}
+	PDI = \sum_{t} v_{t}^{3} \Delta t
+	,
+\end{align}
+\end{subequations}
+where $v_{t}$ is the maximum sustained surface wind speed at time $t$.
+
+\medskip
+Although the $PDI$ is enough to characterise the released energy by a tropical-cyclone, we are interested in the causal relationship between increasing tropical-cyclone $PDI$ and increasing sea surface temperature (SST) proposed by \textcite{Trenberth2005}, as well as the relationship with the lifetime associated to each tropical-cyclone.
+
+\citeauthor{Trenberth2005} states that higher SSTs are associated with increased water vapour in the lower troposphere; both higher SSTs and increased water vapour tend to increase the energy available for atmospheric convection and the energy available to tropical-cyclones as a consequence.
+
+By separating the $PDI$ data by low-SST and high-SST years, we get two similar $PDI$ distributions with one major difference: high-SST years should have a longer right tail on account of having more available energy from the sea (this is explored with more detail in \Cref{ssec:univariate}). For this separation (or classification) process we follow the methodology used by \citeauthor{Corral2010} in~\cite{Corral2010}, which is a variation of the methodology proposed by \citeauthor{Webster2005} in~\cite{Webster2005}.
+
+\sk
+To perform this classification we need to calculate first the mean SST of each year $\ev{\text{SST}}$:
+\begin{align}
+	\ev{\text{SST}} = \sum_{y} \frac{\text{SST}(y)}{Y},
+\end{align}
+where $\text{SST}(y)$ is the mean SST of the year $y$, and $Y$ is the total number of years studied; as usual, the standard error of this mean, is defined as
+\begin{align}\label{eq:sst-sem}
+	\se{\text{SST}} = \frac{1}{\sqrt{Y}} \sqrt{ \frac{1}{Y-1} \sum_{y} \qty(\text{SST}(y) - \ev{\text{SST}})^{2} } .
+\end{align}
+
+The classification of each year in low-SST and high-SST years is performed depending on whether they are lower or greater than $\ev{\text{SST}}$.
+
+\medskip
+If one wishes to consult a thorough technical review article on tropical-cyclone as a thermodynamic system,~\cite{Emanuel2003} by \citeauthor{Emanuel2003} would probably be the best source available.
+
+% To characterise a tropical-cyclone (TC) one needs to define a physically relevant measure of released energy. The released energy of each TC is summarised as
+% \begin{equation}\label{eq:pdi}
+% 	PDI = \sum_{t} v_{t}^{3} \Delta t .
+% \end{equation}
+% The raw hurricane best track data (HURDAT2) is provided by the National Hurricane Center. We intentionally limit this study to the satellite era (1966--2016), as it is the most reliable.
+
+% \bigskip
+% Then, the hurricane observational data is classified into occurrences in low-SST and high-SST years depending on whether they are lower or greater than
+% \begin{equation}
+% 	\ev{\text{SST}} = \sum_{y \in Y} \frac{\text{SST}(y)}{Y} ,
+% \end{equation}
+% where $\text{SST}(y)$ is the mean SST of the year $y$, and $Y$ is the total number of years studied. The SST data (HadISST1) is provided by the Met Office Hadley Centre.
+
+\bigskip
+Tropical cyclones are classified into three main groups, based on wind intensity: tropical depressions, tropical storms, and a third group of more intense storms, whose name depends on the region. In particular, in the Northeast Pacific or in the North Atlantic, it is called a hurricane. In \Cref{tab:hurr-class} we can see a detailed classification of the tropical-cyclones studied in this text.
+\begin{table}[H]
+	\centering
+	\begin{tabular}{l c c}
+		\toprule
+		\toprule
+		\multicolumn{1}{c}{Category} & \multicolumn{2}{c}{1--minute sustained winds} \\
+		\midrule
+		Tropical depression  & $\le \SI{33}{\knot}$      & ($\le \SI{61}{\km/\hour}$) \\
+		Tropical storm       & $\SIrange{34}{63}{\knot}$ & ($\SIrange{63}{118}{\km/\hour}$) \\
+		Category 1 hurricane & $\SIrange{64}{82}{\knot}$ & ($\SIrange{119}{153}{\km/\hour}$) \\
+		Category 2 hurricane & $\SIrange{83}{95}{\knot}$ & ($\SIrange{154}{177}{\km/\hour}$) \\
+		Category 3 major hurricane & $\SIrange{96}{112}{\knot}$  & ($\SIrange{178}{208}{\km/\hour}$) \\
+		Category 4 major hurricane & $\SIrange{113}{136}{\knot}$ & ($\SIrange{209}{253}{\km/\hour}$) \\
+		Category 5 major hurricane & $\ge \SI{137}{\knot}$       & ($\ge \SI{254}{\km/\hour}$) \\
+		\bottomrule
+	\end{tabular}
+	\caption{Tropical-cyclone classification used by the NHC}
+	\label{tab:hurr-class}
+\end{table}

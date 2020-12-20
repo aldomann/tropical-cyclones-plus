@@ -1,0 +1,145 @@
+%-----------------------------------------------------------------
+%	STATISTICAL HYPOTHESIS TESTING
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\subsection{Analysis using permutation tests}\label{sec:perm-test}
+
+In \Cref{sec:reg-analysis-data} and \Cref{sec:bootstrap} we noticed that the value of some of the $T^{(i)}$ statistics seem a bit high, both when performing a standard (OLS) regression analysis or a bootstrap-powered regression analysis. The problem is there is no way to quantify how big these statistics can be from theory.
+
+It is for this reason that we should perform a permutation test on the data following the methodology explained in \Cref{ssec:perm-test-theory}. This would allow us to properly quantify the statistical significance of evidence against the hypothesis that storms of equal lifetime should, in theory, have the same wind speed and $PDI$, and have the same joint distribution, regardless of the SST.
+
+
+\bigskip
+The particular implementation of \Cref{alg:perm-test-theory} for our data can be seen in \Cref{alg:perm-test}. The number of simulations performed in the permutation test algorithm is $R = 1000$.
+
+In the algorithm, $\text{fit}_{low/high}$ is an object that contains the coefficient estimates of the linear model. For the sake of robustness in the coefficient estimates calculated on each permutation, \texttt{LinearModel()} allows, as an option, to perform the estimations using bootstrap; the number of bootstrap simulations in these cases is $R' = 500$.
+
+\IncMargin{1em}
+\begin{algorithm}[H]
+	\caption{Permutation test to compare two populations using linear regression}
+	\label{alg:perm-test}
+	\DontPrintSemicolon
+	\SetKwFunction{LinearModel}{LinearModel}
+	\SetKwFunction{GetStatistic}{GetStatistic}
+	\SetKwFunction{Filter}{Filter}
+	\SetKwFunction{SubSet}{SubSet}
+	\SetKwFunction{Permute}{Permute}
+		\KwData{Hurricane observational data $O$, with paired variables $X$, $Y$; classified by SST class ($C : \qty{low ,high}$), with $n$ and $m$ observations respectively}
+		\KwResult{$p$-values defined under the null hypothesis}
+		% initialization\;
+		$O_{low}$ $\gets$ \SubSet($(x,y) \in O \mid c \equiv low$)\;
+		$O_{high}$ $\gets$ \SubSet($(x,y) \in O \mid c \equiv high$)
+		\tcp*{Notice that $O_{low} \cap O_{high} = O$}
+		fit$_{low}$ $\gets$ \LinearModel($Y_{low} \sim X_{low}$) \;
+		fit$_{high}$ $\gets$ \LinearModel($Y_{high} \sim X_{high}$)\;
+		$T$ $\gets$ \GetStatistic(fit$_{low}$, fit$_{high}$) \;
+		count = 0 \;
+		\For{$i \gets 1$ \textbf{to} $R$}{
+			$O'$ $\gets$ \Permute($O$) \;
+			$O_{low}^{\ast}$ $\gets$ \SubSet($(x,y)_{i} \in O', \forall i \in [1, n]$ )\;
+			$O_{high}^{\ast}$ $\gets$ \SubSet($(x,y)_{i} \in O', \forall i \in [n+1, n+m]$ )
+			\tcp*{$O_{low}^{\ast} \cap O_{high}^{\ast} = O'$}
+			fit$_{low}^{\ast}$ $\gets$ \LinearModel($Y_{low}^{\ast} \sim X_{low}^{\ast}$)\;
+		fit$_{high}^{\ast}$ $\gets$ \LinearModel($Y_{high}^{\ast} \sim X_{high}^{\ast}$)\;
+			$T^{\ast}$ $\gets$ \GetStatistic(fit$_{low}^{\ast}$, fit$_{high}^{\ast}$) \;
+			\If{$T^{\ast} > T$}{
+				count $\gets$ count + 1
+			}
+		}
+		\Return{$p$-value $\gets$ count / $R$} \;
+\end{algorithm}
+\DecMargin{1em}
+
+% The associated standard error to the $p$-value is defined as
+% \begin{align}
+% 	\se{p} = 1.96 \sqrt{\frac{p - p^{2}}{R}} ,
+% \end{align}
+% where $R$ is the number of simulations performed in the permutation test (\num{1000} in our case).
+
+Notice that we only illustrate one test statistic in \Cref{alg:perm-test}; this is just to avoid overcomplicating the basic concept behind the permutation test. Naturally, in our case, we calculate all the test statistics proposed in section \Cref{sec:statistics-intro}:
+\begin{align}
+	T^{(1)} = \abs{\hat{\beta}_{0,h} - \hat{\beta}_{0,l}}
+	\qc
+	T^{(2)} = \abs{\hat{\beta}_{1,h} - \hat{\beta}_{1,l}}
+	\qc
+	T^{(3)} = \abs{ R^{2}_{h} - R^{2}_{l} }, \tag{\ref{eq:h0-stat-simple} bis}
+\end{align}
+\begin{align}
+	T^{(4)} = \frac{\abs{\hat{\beta}_{0,h} - \hat{\beta}_{0,l}}}{\se{\hat{\beta}_{0,h} - \hat{\beta}_{0,l}}}
+	\qc
+	T^{(5)} = \frac{\abs{\hat{\beta}_{1,h} - \hat{\beta}_{1,l}}}{\se{\hat{\beta}_{1,h} - \hat{\beta}_{1,l}}}
+	\qc
+	T^{(6)} = T^{(4)} + T^{(5)} .
+	\tag{\ref{eq:h0-stat-polko} bis}
+\end{align}
+
+%-----------------------------------------------------------------
+In \Cref{tab:perm-natl-ols-p-vals} and \Cref{tab:perm-natl-boot-p-vals} we can see the $p$-values associated to each test statistic under the null hypothesis, using the standard OLS method and the bootstrap method, respectively, to calculate the coefficient estimates of the regression models for the North Atlantic basin data.
+
+As we can see, neither of the tests rejects the null hypothesis, both using OLS and bootstrap as the underlying calculation for the model coefficient estimates. This indicates a strong evidence in favour of the null hypothesis being true.
+\begin{table}[H]
+	\centering
+	\begin{tabular}{cccccccc}
+	\toprule
+	\toprule
+	$X$  & $Y$       & $T^{(1)}$ & $T^{(2)}$ & $T^{(3)}$ & $T^{(4)}$ & $T^{(5)}$ & $T^{(6)}$ \\
+	\midrule
+	lifetime & $PDI$ & $0.164$ & $0.184$ & $0.749$ & $0.160$ & $0.187$ & $0.173$ \\
+	% lifetime & $PDI$ & $0.176$   & $0.154$   & $0.740$   & $0.174$   & $0.148$   & $0.162$   \\
+	$PDI$ & lifetime & $0.901$ & $0.991$ & $0.750$ & $0.900$ & $0.992$ & $0.968$ \\
+	% $PDI$ & lifetime & $0.990$   & $0.930$   & $0.766$   & $0.990$   & $0.926$   & $0.972$   \\
+	\bottomrule
+	\end{tabular}
+	\caption{List of $p$-values of the standard (OLS) permutation test for the North Atlantic basin data}
+	\label{tab:perm-natl-ols-p-vals}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{cccccccc}
+	\toprule
+	\toprule
+	$X$  & $Y$       & $T^{(1)}$ & $T^{(2)}$ & $T^{(3)}$ & $T^{(4)}$ & $T^{(5)}$ & $T^{(6)}$ \\
+	\midrule
+	lifetime & $PDI$ & $0.160$ & $0.187$ & $0.778$ & $0.132$ & $0.162$ & $0.142$ \\
+	% lifetime & $PDI$ & $0.146$   & $0.121$   & $0.711$   & $0.137$   & $0.117$   & $0.128$   \\
+	$PDI$ & lifetime & $0.925$ & $0.987$ & $0.757$ & $0.922$ & $0.995$ & $0.977$ \\
+	% $PDI$ & lifetime & $0.870$   & $0.806$   & $0.705$   & $0.864$   & $0.795$   & $0.830$   \\
+	\bottomrule
+	\end{tabular}
+	\caption{List of $p$-values of the bootstrap-powered permutation test for the North Atlantic basin data}
+	\label{tab:perm-natl-boot-p-vals}
+\end{table}
+
+
+%-----------------------------------------------------------------
+Similarly, for the Northeast Pacific basin, neither of the tests rejects the null hypothesis, both using OLS (\Cref{tab:perm-natl-ols-p-vals}) and bootstrap (\Cref{tab:perm-natl-boot-p-vals}) as the underlying calculation for the model coefficient estimates. This indicates a strong evidence in favour of the null hypothesis being true.
+\begin{table}[H]
+	\centering
+	\begin{tabular}{cccccccc}
+	\toprule
+	\toprule
+	$X$  & $Y$       & $T^{(1)}$ & $T^{(2)}$ & $T^{(3)}$ & $T^{(4)}$ & $T^{(5)}$ & $T^{(6)}$ \\
+	\midrule
+	lifetime & $PDI$ & $0.233$ & $0.232$ & $0.354$ & $0.243$ & $0.245$ & $0.247$ \\
+	$PDI$ & lifetime & $0.629$ & $0.480$ & $0.329$ & $0.622$ & $0.475$ & $0.549$ \\
+	\bottomrule
+	\end{tabular}
+	\caption{List of $p$-values of the standard (OLS) permutation test for the Northeast Pacific basin data}
+	\label{tab:perm-epac-ols-p-vals}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{cccccccc}
+	\toprule
+	\toprule
+	$X$  & $Y$       & $T^{(1)}$ & $T^{(2)}$ & $T^{(3)}$ & $T^{(4)}$ & $T^{(5)}$ & $T^{(6)}$ \\
+	\midrule
+	lifetime & $PDI$ & $0.250$ & $0.238$ & $0.365$ & $0.230$ & $0.231$ & $0.229$ \\
+	$PDI$ & lifetime & $0.717$ & $0.533$ & $0.376$ & $0.721$ & $0.551$ & $0.632$ \\
+	\bottomrule
+	\end{tabular}
+	\caption{List of $p$-values of the bootstrap-powered permutation test for the Northeast Pacific basin data}
+	\label{tab:perm-epac-boot-p-vals}
+\end{table}

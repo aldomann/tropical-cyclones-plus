@@ -1,0 +1,34 @@
+%-----------------------------------------------------------------
+%	POWER DISSIPATION INDEX (PDI)
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\subsection{Power dissipation index (PDI)}\label{sec:pdi}
+To characterise the intensity of a tropical-cyclone one needs to define a physically relevant measure of released energy. In \cite{Emanuel1986-bis} \citeauthor{Emanuel1986-bis} showed that in a tropical-cyclone energy dissipation occurs mostly in the atmospheric surface layer, and that the corresponding dissipation rate per unit area, $D$, is
+\begin{align}
+	D \equiv C_{D} \rho \norm{\va{v}}^{3}
+\end{align}
+where $C_{D}$ is the surface drag coefficient, $\rho$ is the surface air density, $\norm{\va{v}}$ is the magnitude of the surface wind velocity.
+
+Thus, integrated over the surface area covered by a circularly symmetric tropical-cyclone of radius $r_{0}$ of lifetime $\tau$, the total power dissipated by the storm, $PD$, is given by
+\begin{align}
+	PD \equiv 2 \pi \int_{0}^{\tau} \int_{0}^{r_{0}} C_{D} \rho \norm{\va{v}}^{3} r \dd{r} \dd{t}
+\end{align}
+
+However, as stated in \cite{Emanuel2005}, since the integral in the expression \eqref{eq:pdi} will in practice be dominated by high wind speeds, one can approximate the product $C_{D} \rho$ as a constant and define a simplified power dissipation index ($PDI$) as
+\begin{subequations}
+\begin{align}\label{eq:pdi}
+	PDI \equiv \int_{0}^{\tau} v_{max}^{3} \dd{t}
+\end{align}
+
+However, the wind data (as we will discuss in~\cref{ssec:hurdat-import}) is recorded every $\Delta t = \SI{6}{\hour}$. Therefore, we will discretise the expression for the $PDI$ using the rectangle method:
+\begin{align}\label{eq:pdi-bis}
+	PDI = \sum_{t} v_{t}^{3} \Delta t
+\end{align}
+\end{subequations}
+where $v_{t}$ is the maximum sustained surface wind speed at time $t$.
+
+\sk
+Using the expression \eqref{eq:pdi-bis} we can easily calculate the $PDI$ value associated to any tropical-cyclone, which is exactly what we will do in~\cref{ssec:pdi-calc}.
+
+\sk
+If one wishes to consult a thorough technical review article on tropical-cyclone as a thermodynamic system,~\cite{Emanuel2003} by \citeauthor{Emanuel2003} would probably be the best source available.

@@ -1,0 +1,50 @@
+%-----------------------------------------------------------------
+%	DATA BACKGROUND
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\subsection{Hurricane tracks}\label{ssec:hurdat}
+\subsubsection{Description of the database}\label{ssec:hurdat-intro}
+Although \citeauthor{Corral2010} analyse several ocean basins, we focus only on the North Atlantic (N.~Atl.) and the Northeast Pacific (E.~Pac.) Oceans. The reason to do this is the abundance of research on these two basins and the precision of the database provided by the National Hurricane Center (NHC)~\cite{o:NHC}: the HURDAT~\cite{o:hurdat2}.
+
+Since both basins directly concern USA territories (especially the N.~Atl.), the government's efforts on improving the tracking and prediction technologies, routine satellite imagery has been used since as early as the late 1960s.
+
+A major change between our data sets and the ones used by \textcite{Corral2010} is that the second-generation hurricane database (HURDAT2), has been developed this decade~\cite{Landsea2013}. The improvements of the revised version are mainly:
+\begin{enumerate}[(i)]
+	\item Inclusion of non-developing tropical depressions.
+	\item Inclusion of systems that were added to the database after the end of each season.
+\end{enumerate}
+Also, the ongoing post-storm analysis reviews of the tropical-cyclones have revised several storms~\cite{o:hurdat-comparison}, particularly important in the 1851--1960 era.
+
+\medskip
+Recently, in June 2018, \textcite{Delgado2018} have revised and updated the HURDAT2 data set. This revision includes storms from 2017, as well as a revision of the 1954--63 era for the North Atlantic data. Nonetheless, the analysis is done using the 2016 data sets, as it would require a lot of effort to clean the new data and make sure no major change has been done introduced into historical data.
+
+These raw data sets used can be downloaded from \url{http://www.aoml.noaa.gov/hrd/hurdat/hurdat2-1851-2016-apr2017.txt} (N.~Atl.) and \url{http://www.aoml.noaa.gov/hrd/hurdat/hurdat2-nepac-1949-2016-apr2017.txt} (E.~Pac.).
+
+%-----------------------------------------------------------------
+\subsubsection{Data structure}
+The format of the HURDAT2 data sets is documented at~\cite{Landsea2014,Landsea2016}. A record of data is recorded once every 6 hours for each storm (although there are additional records for certain storms, specially those marking the landfall of a storm). The record is comprised of the date and time, storm identifier, system status (cf. tropical-cyclone category), latitude and longitude of the centre of the storm, the sustained surface wind speed (in knots) observed in the storm, and several other properties that are not relevant in this study.
+
+In \Cref{hd:hurdat-head} one can see the structure of the cleaned data illustrate the variables we use in the study directly available in the raw data sets, as well as the format (data type\footnote{In computer science and computer programming, a data type or simply type is a classification of data which tells the compiler or interpreter how the programmer intends to use the data. }) of the observational record data.
+\begin{table}[H]
+	\centering
+	\ttfamily
+	\resizebox{\textwidth}{!}{%
+	\begin{tabular}{r r r r  r r r r r}
+		\toprule
+		\toprule
+		storm.id & storm.name & n.obs &           date.time &         status &   lat &  long &  wind & storm.year \\
+		   <chr> &      <chr> & <int> &              <dttm> &         <fctr> & <dbl> & <dbl> & <dbl> &      <dbl> \\
+		\midrule
+		AL011851 &    UNNAMED &    13 & 1851-06-25 00:00:00 &      Hurricane &  28.0 & -94.8 &    80 &       1851 \\
+		AL011851 &    UNNAMED &    13 & 1851-06-25 06:00:00 &      Hurricane &  28.0 & -95.4 &    80 &       1851 \\
+		AL011851 &    UNNAMED &    13 & 1851-06-25 12:00:00 &      Hurricane &  28.0 & -96.0 &    80 &       1851 \\
+		AL011851 &    UNNAMED &    13 & 1851-06-25 18:00:00 &      Hurricane &  28.1 & -96.5 &    80 &       1851 \\
+		AL011851 &    UNNAMED &    13 & 1851-06-26 00:00:00 &      Hurricane &  28.2 & -97.0 &    70 &       1851 \\
+		AL011851 &    UNNAMED &    13 & 1851-06-26 06:00:00 & Tropical storm &  28.3 & -97.6 &    60 &       1851 \\
+		\bottomrule
+	\end{tabular}}
+	\caption{Excerpt of the North Atlantic data set}
+	\label{hd:hurdat-head}
+\end{table}
+
+A map displaying the studied hurricane tracks for the North Atlantic and Northeast Pacific basins can be seen in \Cref{fig:full-map}.

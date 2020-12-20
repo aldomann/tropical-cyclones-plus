@@ -1,0 +1,22 @@
+%-----------------------------------------------------------------
+%	INTRODUCTION: OUTLINE
+%	!TEX root = ./../main.tex
+%-----------------------------------------------------------------
+\subsection{Outline}
+In essence, our methodology consists in comparing the low-SST and high-SST hurricane occurrences distributions to discern any statistical difference between both.
+
+Firstly, in \Cref{sec:distribution-analysis}, for each basin we explore the joint distributions of $PDI$ and storm lifetime and compare low-SST and high-SST years by studying the expected value of the marginal distributions.
+
+For comparing the two populations obtained after separating the hurricane occurrences by low-SST and high-SST years, in \Cref{sec:statistics-intro} we propose a null hypothesis and test statistics, which are evaluated in \Cref{sec:reg-analysis-data}.
+
+\medskip
+To be able to fit a linear regression model using ordinary least squares, some critical assumptions on the residual errors need to hold. These are tested in \Cref{ssec:testing-assumptions} using diagnostic plots and specific statistical tests designed to test each assumption.
+
+After finding that some of these assumptions do not actually hold, in \Cref{sec:bootstrap} we perform a resampling of the observations using a bootstrap method to provide a more accurate and robust regression analysis than the one provided by the ordinary least squares method. Then the same test statistics are evaluated using the bootstrapped coefficient estimates.
+
+\medskip
+The only issue with these test statistics, is that it is hard to tell from theory if they are too big to reject the null hypothesis. It is for this reason that in \Cref{sec:perm-test} we propose a permutation test to assess the statistical significance of evidence against (or in favour of) the tested hypothesis that there is no difference in the evolution of a tropical-cyclone once it is activated, regardless of the SST.
+
+\medskip
+To answer why the increase of tropical-cyclone lifetime with SST triggers an increase in wind speed as a by-product, as a first approach in \Cref{sec:geographical-analysis} we perform an exploratory analysis of the geographical properties of the tropical-cyclones, such as genesis and death location of the storms, as well as their path length. Our results show that the longer lifetimes for high-SST are mainly due to a shift to South-East of the tropical-cyclones genesis point.
+
